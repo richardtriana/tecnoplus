@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Barcode+128+Text&display=swap');
+@font-face {
+	font-family: "bootstrap-icons";
+	src: url("../fonts/bootstrap-icons/bootstrap-icons.woff2") format("woff2"),
+		url("../fonts/bootstrap-icons/bootstrap-icons.woff") format("woff");
+}
+@font-face {
+	font-family: "Libre Barcode 128 Text";
+	src: url("../fonts/barcode_128/LibreBarcode128Text-Regular.ttf") format("ttf");
+}
+.barcode {
+	font-family: "Libre Barcode 128 Text";
+  font-size: 50px;
+}

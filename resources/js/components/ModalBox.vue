@@ -88,7 +88,7 @@ export default {
 			}
 		},
 		saveBox() {
-			localStorage.setItem("box_worker", this.$root.boxUser.id);
+			localStorage.setItem("box_worker", this.boxUser.id);
 			$("#staticBackdrop").modal("hide");
 
 			let data = {

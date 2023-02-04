@@ -73,33 +73,21 @@
           </div>
         </div>
         <div class="input-group col-12 col-md-6">
-          <input
-            type="text"
-            class="form-control"
-            :placeholder="order.client"
-            aria-label=" with two button addons"
-            aria-describedby="button-addon4"
-            v-model="filters.client"
-            @keypress.enter="searchClient()"
-          />
+          <v-select :options="tableList" placeholder="Seleccionar mesa" class="w-100" label="table" :reduce="(table) => table.id" v-model="order.table_id" />
+        </div>
+        <div class="input-group col-12 col-md-6 offset-md-6">
+          <input type="text" class="form-control" :placeholder="order.client" aria-label=" with two button addons"
+            aria-describedby="button-addon4" v-model="filters.client" @keypress.enter="searchClient()" />
           <div class="input-group-append" id="button-addon4">
-            <button
-              class="btn btn-outline-secondary"
-              type="button"
-              @click="searchClient()"
-            >
+            <button class="btn btn-outline-secondary" type="button" @click="searchClient()">
               Añadir Cliente
             </button>
-            <button
-              class="btn btn-outline-secondary"
-              type="button"
-              data-toggle="modal"
-              data-target="#addClientModal"
-            >
+            <button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#addClientModal">
               <i class="bi bi-person-lines-fill"></i>
             </button>
           </div>
         </div>
+        
       </div>
 
       <section>
@@ -279,7 +267,7 @@
       </div>
     </div>
 
-    <add-product-mobile @add-product="addProduct($event)" />
+    <add-product @add-product="addProduct($event)" />
     <add-client @add-client="addClient($event)" />
     <modal-box ref="ModalBox"></modal-box>
   </div>
@@ -303,6 +291,7 @@ export default {
         client: "",
       },
       productsOrderList: [],
+      tableList: [],
       disabled: false,
       order: {
         id_client: 1,
@@ -398,6 +387,14 @@ export default {
           me.order.id_client = response.data.order_information.client_id;
           me.order.client = response.data.order_information.client.name;
           me.productsOrderList = response.data.order_details;
+        });
+    },
+    listTables() {
+      let me = this;
+      axios
+        .get("api/tables/table-list?page=1", me.$root.config)
+        .then(function (response) {
+          me.tableList = response.data.tables;
         });
     },
     searchProduct() {
@@ -506,7 +503,7 @@ export default {
           console.log("roder", this.order);
           axios
             .put(`api/orders/${this.order_id}`, this.order, this.$root.config)
-            .then(() =>
+            .then((response) =>
               Swal.fire({
                 icon: "success",
                 title: "Excelente",
@@ -524,7 +521,11 @@ export default {
                 });
               }
             })
-            .finally(this.$router.go(0), (this.disabled = false));
+            .finally(
+                setTimeout(() => {
+                  this.$router.go(0), (this.disabled = false)
+                }, 3000)
+              );
         } else {
           if (this.order.box_id > 0) {
             axios
@@ -546,7 +547,11 @@ export default {
                   });
                 }
               })
-              .finally(this.$router.go(0), (this.disabled = false));
+              .finally(
+                setTimeout(() => {
+                  this.$router.go(0), (this.disabled = false)
+                }, 3000)
+              );
           } else {
             alert("Selecciona una caja");
           }
@@ -588,6 +593,7 @@ export default {
     if (this.order_id != null || this.order_id != 0) {
       this.listItemsOrder();
     }
+    this.listTables()
     this.commands();
     this.$refs.ModalBox.selectedBox();
   },

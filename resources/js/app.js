@@ -60,6 +60,7 @@ import Roles from './components/Rol/Roles.vue';
 import Users from './components/User/Users.vue';
 import Configuration from './components/Configuration.vue';
 import Profile from './components/Profile.vue';
+import Tables from './components/Table/Tables.vue'
 import Zones from './components/Zone/Zones.vue'
 
 //Services
@@ -129,7 +130,8 @@ const routes = [
   { path: '/users', name: 'Users', component: Users, alias: "user.index" },
   { path: '/configuration', name: 'Configuration', component: Configuration, alias: "configuration" },
   { path: '/profile', name: 'Profile', component: Profile },
-  { path: '/zones', component: Zones, name: 'Zone', alias: 'category.index' },
+  { path: '/zones', component: Zones, name: 'Zone', alias: 'zone.index' },
+  { path: '/tables', component: Tables, name: 'Table', alias: 'table.index' },
 
   { path: '**', name: 'NoFound', component: NoFound },
 

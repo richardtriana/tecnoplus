@@ -18,14 +18,24 @@ class PrintOrderController extends Controller
 	{
 		$configuration = new Configuration();
 		$company =  $configuration->select()->first();
-		if (!$company->printer || $company->printer == '') {
-			throw new Exception("Error, no hay impresoras configuradas", 400);
-		}
-		$connector = new WindowsPrintConnector($company->printer);
-		$printer = new Printer($connector);
-		$printer->initialize();
-		$printer->pulse();
-		$printer->close();
+		try {
+			if ($company->printer) {
+				try {
+					$connector = new WindowsPrintConnector($company->printer);
+					$printer = new Printer($connector);
+					$printer->initialize();
+					$printer->pulse();
+					$printer->close();
+				} catch (\Throwable $th) {
+					return $th;
+				}
+			}
+		} catch (\Throwable $th) {
+			if (!$company->printer || $company->printer == '') {
+				// throw new Exception("Error, no hay impresoras configuradas", 200);
+				return $th;
+			}
+		}		
 	}
 
 	public function printTicket($order_id, $cash = null, $change = null)
@@ -224,7 +234,7 @@ class PrintOrderController extends Controller
 		$order = Order::find($order_id);
 		$order_details = $order->detailOrders()->get();
 
-		$printers =$order_details->distinct('zone_id')->get();
+		$printers = $order_details->distinct('zone_id')->get();
 
 		// $tempArray = array_unique(array_column($order_details, 'printer_id'));
 		// $moreUniqueArray = array_values(array_intersect_key($order_details, $tempArray));

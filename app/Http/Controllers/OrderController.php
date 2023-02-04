@@ -8,6 +8,7 @@ use App\Models\DetailOrder;
 use App\Models\Order;
 use App\Models\PaymentCredit;
 use App\Models\Product;
+use App\Models\Table;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class OrderController extends Controller
 
 	public function __construct()
 	{
-		$this->middleware('can:order.index')->only('index', 'generatePdf','generatePaymentPdf');
+		$this->middleware('can:order.index')->only('index', 'generatePdf', 'generatePaymentPdf');
 		$this->middleware('can:order.store')->only('store', 'creditByClient', 'payCreditByClient');
 		$this->middleware('can:order.update')->only('update');
 		$this->middleware('can:order.delete')->only('destroy');
@@ -115,6 +116,7 @@ class OrderController extends Controller
 		$order = new Order;
 		$order->client_id = $request->id_client;
 		$order->user_id = $user_id;
+		$order->table_id = $request->table_id ?? NULL;
 		$order->no_invoice = $bill_number;
 		$order->total_paid = $request->total_tax_inc;
 		$order->total_iva_inc = $request->total_tax_inc;
@@ -128,6 +130,7 @@ class OrderController extends Controller
 
 		if ($request->state == 4) {
 			$order->state = 2;
+			$order->invoiced_by = $user_id;
 			$order->payment_date = $request->payment_date ? $request->payment_date : date('Y-m-d h:i:s');
 		}
 		if ($request->state == 6 || $request->state == 5) {
@@ -136,6 +139,7 @@ class OrderController extends Controller
 		if ($request->state != 4 && $request->state != 6) {
 			$order->state = $request->state;
 			if ($request->state == 2) {
+				$order->invoiced_by = $user_id;
 				$order->payment_date = $request->payment_date  ? $request->payment_date :  date('Y-m-d h:i:s');
 			}
 		}
@@ -164,15 +168,26 @@ class OrderController extends Controller
 				}
 			}
 		}
+
 		$print = new PrintOrderController();
 		if ($request->state == 4 || $request->state == 6) {
 			$print->printTicket($order->id, $request->cash, $request->change);
-		} else if($request->state == 6 ){
+		} else if ($request->state == 6) {
 			$print->printTicketRecently($order->id);
-
-		} else{
+		} else {
 			$print->openBox();
 		}
+
+		if ($request->table_id) {
+			$table = Table::find($request->table_id);
+			if ($request->state == 1) {
+				$table->state = 'occupied';
+			} else {
+				$table->state = 'free';
+			}
+			$table->save();
+		}
+
 
 		return $order->id;
 	}
@@ -215,6 +230,7 @@ class OrderController extends Controller
 
 		$order = Order::find($id);
 		$order->client_id = $request->id_client;
+		$order->table_id = $request->table_id ?? NULL;
 		$order->total_paid = $request->total_tax_inc;
 		$order->total_iva_inc = $request->total_tax_inc;
 		$order->total_iva_exc = $request->total_tax_exc;
@@ -228,6 +244,7 @@ class OrderController extends Controller
 
 		if ($request->state == 4) {
 			$order->state = 2;
+			$order->invoiced_by = $user_id;
 			$order->payment_date = $request->payment_date  ? $request->payment_date : date('Y-m-d h:i:s');
 		}
 		if ($request->state == 6) {
@@ -283,6 +300,16 @@ class OrderController extends Controller
 			$print = $print->printTicket($order->id, $request->cash, $request->change);
 		} else {
 			$print->openBox();
+		}
+		
+		if ($request->table_id) {
+			$table = Table::find($request->table_id);
+			if ($request->state == 1) {
+				$table->state = 'occupied';
+			} else {
+				$table->state = 'free';
+			}
+			$table->save();
 		}
 	}
 

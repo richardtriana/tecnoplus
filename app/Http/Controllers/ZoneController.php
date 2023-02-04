@@ -176,5 +176,27 @@ class ZoneController extends Controller
 			];
 		}
 
-		return response()->json($data, $data['code']);    }
+		return response()->json($data, $data['code']);    
+    }
+
+    public function zoneList()
+    {
+        $zones = Zone::get();
+
+        if ($zones) {
+            $data = [
+                'status' => 'success',
+                'code' => 200,
+                'zones' => $zones
+            ];
+        } else {
+            $data = [
+                'status' => 'error',
+                'code' => 400,
+                'message' => 'Registro no encontrado'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
 }

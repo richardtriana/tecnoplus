@@ -19,6 +19,7 @@ use App\Http\Controllers\BoxController;
 use App\Http\Controllers\DetailBillingController;
 use App\Http\Controllers\PrintOrderController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\TableController;
 use App\Http\Controllers\ZoneController;
 use App\Models\Configuration;
 use Illuminate\Support\Facades\Route;
@@ -44,7 +45,7 @@ Route::middleware('auth:api')->group(function () {
 	Route::post('/users/{user}/activate',  [UserController::class, 'activate']);
 	Route::post('/register', [UserController::class, 'register']);
 
-	Route::post('/categories/{category}/activate',  [CategoryController::class, 'activate']);
+	Route::post('/zones/{category}/activate',  [CategoryController::class, 'activate']);
 	Route::get('/categories/category-list', [CategoryController::class, 'categoryList']);
 	Route::resource('/categories', CategoryController::class);
 
@@ -119,5 +120,10 @@ Route::middleware('auth:api')->group(function () {
 	Route::get('/boxes/{box}/getAssignUserByBox', [BoxController::class, 'getAssignUserByBox'])->middleware('can:box.index');
 	Route::post('/boxes/{box}/toAssignUserByBox', [BoxController::class, 'toAssignUserByBox'])->middleware('can:box.store');
 
+	Route::get('/zones/zone-list', [ZoneController::class, 'zoneList']);
 	Route::resource('/zones', ZoneController::class);
+
+	Route::get('/tables/table-list', [TableController::class, 'tableList']);
+	Route::resource('/tables', TableController::class);
+
 });

@@ -222,7 +222,7 @@
                   </button>
                   <v-select
                     :options="zoneList"
-                    label="name"
+                    label="zone"
                     :reduce="(zone) => zone.id"
                     v-model="formProduct.zone_id"
                   />

@@ -654,8 +654,12 @@ export default {
                 });
               }
             })
-            .finally(this.$router.go(0), (this.disabled = false));
-        } else {
+            .finally(
+              
+              setTimeout(() => {
+                  this.$router.go(0), (this.disabled = false)
+                }, 3000)
+              );        } else {
           if (this.order.box_id > 0) {
             axios
               .post(`api/orders`, this.order, this.$root.config)
@@ -676,7 +680,12 @@ export default {
                   });
                 }
               })
-              .finally(this.$router.go(0), (this.disabled = false));
+              .finally(
+              
+              setTimeout(() => {
+                  this.$router.go(0), (this.disabled = false)
+                }, 3000)
+              );
           } else {
             alert("Selecciona una caja");
           }

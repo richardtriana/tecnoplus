@@ -172,8 +172,8 @@ class OrderController extends Controller
 		$print = new PrintOrderController();
 		if ($request->state == 4 || $request->state == 6) {
 			$print->printTicket($order->id, $request->cash, $request->change);
-		} else if ($request->state == 6) {
-			$print->printTicketRecently($order->id);
+		} else if ($request->state == 1) {
+			return	$print->printTicketRecently($order->id);
 		} else {
 			$print->openBox();
 		}

@@ -69,7 +69,7 @@ class Order extends Model
             ->orderBy('from_nro')
             ->first();
 
-        return $consecutiveBox;    
+        return $consecutiveBox;
     }
 
     public function paymentCredits()
@@ -80,5 +80,14 @@ class Order extends Model
     public function getPaidPaymentAttribute()
     {
         return $this->paymentCredits->sum('pay');
+    }
+
+    public function products()
+    {
+        return $this->hasManyThrough(Product::class, DetailOrder::class, 'order_id', 'id', 'id', 'product_id');
+    }
+
+    public function printers(){
+        return $this->products()->with('zone')->get()->pluck('zone');
     }
 }

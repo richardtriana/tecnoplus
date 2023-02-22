@@ -87,7 +87,8 @@ class Order extends Model
         return $this->hasManyThrough(Product::class, DetailOrder::class, 'order_id', 'id', 'id', 'product_id');
     }
 
-    public function printers(){
+    public function printers()
+    {
         return $this->products()->with('zone')->get()->pluck('zone');
     }
 }

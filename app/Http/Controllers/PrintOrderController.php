@@ -239,23 +239,24 @@ class PrintOrderController extends Controller
 		$company =  $configuration->select()->first();
 		$printers =  $order->printers()->unique();
 
-		foreach ($printers as $key => $printer) {
+		foreach ($printers as $key => $zone) {
 			$keyPrinter[$key] = [];
 			foreach ($order->products as $product) {
-				if ($product->zone_id == $printer->id) {
+				if ($product->zone_id == $zone->id) {
+					$p = $order->detailOrders()->where('product_id', $product->id)->first();
+					$product->quantity = $p->quantity;
 					array_push($keyPrinter[$key], $product);
 				}
 			}
 			$order_details = $keyPrinter[$key];
 
-			if ($printer->printer) {
-				$pos_printer=$printer->printer;
+			if ($zone->printer) {
+				$pos_printer = $zone->printer;
 
 				// Config de impresora
 				$connector = new WindowsPrintConnector($pos_printer);
 
-				// try {
-
+				try {
 					$printer = new Printer($connector);
 					$printer->initialize();
 					$printer->setJustification(Printer::JUSTIFY_CENTER);
@@ -267,7 +268,7 @@ class PrintOrderController extends Controller
 						//$printer->text($e->getMessage() . "\n");
 					}
 					$printer->setTextSize(2, 2);
-					$printer->text($pos_printer. "\n");
+					$printer->text($zone->zone . "\n");
 
 					$printer->setTextSize(1, 2);
 					$printer->setEmphasis(true);
@@ -275,10 +276,6 @@ class PrintOrderController extends Controller
 					$printer->setJustification(Printer::JUSTIFY_LEFT);
 					$printer->setTextSize(1, 1);
 					$printer->setEmphasis(false);
-					$printer->text("NIT: ");
-					$printer->text($company->nit . "\n");
-					$printer->text("Dirección: ");
-					$printer->text($company->address . "\n");
 
 					$printer->setEmphasis(true);
 					$printer->text("Cajero(a): ");
@@ -286,7 +283,6 @@ class PrintOrderController extends Controller
 					$printer->setEmphasis(false);
 					$printer->text("Fecha: ");
 					$printer->text(date('Y-m-d h:i:s A') .  "\n");
-					$printer->text("N° Factura: ");
 
 					if (isset($order->bill_number)) {
 						$printer->text($order->bill_number . "\n");        // 
@@ -300,53 +296,26 @@ class PrintOrderController extends Controller
 					$printer->text("\n-----------------------------------------" . "\n\n");
 					$printer->setLineSpacing(1);
 					$printer->setEmphasis(true);
-					$printer->text(sprintf('%-22s %+8s %+10.7s', 'ARTICULO', 'CANT', 'PRECIO'));
+					$printer->text(sprintf('%-30s %+8s', 'ARTICULO', 'CANT'));
 					$printer->text("\n-----------------------------------------" . "\n\n");
 					$printer->setEmphasis(false);
 					$printer->text("\n");
-					$total = 0;
 					foreach ($order_details as $df) {
-						$line = sprintf('%-22s %8.2f %10.2f ', '-' . mb_strimwidth($df->product, 0, 21, ''), $df->quantity, $df->price_tax_inc_total);
-						$total +=  $df->price_tax_inc_total;
+						$line = sprintf('%-30s %8.2f ', '- ' . mb_strimwidth($df->product, 0, 21, ''), $df->quantity);
 						$printer->text($line);
+						$printer->text("\n-----------------------------------------" . "\n\n");
 						$printer->text("\n");
 					}
-
-					$printer->text("\n");
-
-					if (isset($order->bill_number)) {
-
-						$consecutiveBox = $order->consecutiveBox();
-						if ($consecutiveBox) {
-							$from_date = Carbon::createFromFormat('Y-m-d', $consecutiveBox->from_date);
-							$until_date = Carbon::createFromFormat('Y-m-d', $consecutiveBox->until_date);
-
-							$printer->setJustification(Printer::JUSTIFY_CENTER);
-							$printer->text("VENCE: " . $until_date->toDateString() . " MESES VIG. :  " . ($until_date->month - $from_date->month) . "\n");
-							$printer->text("PREFIJO: " . $order->box->prefix);
-
-							$printer->text(" del No. " . $consecutiveBox->from_nro . " AL " . $consecutiveBox->until_nro . " AUTORIZA\n");
-						}
-					}
-					$printer->text("\n");
-					$printer->setJustification(Printer::JUSTIFY_CENTER);
-					$printer->setLineSpacing(2);
-					$printer->setEmphasis(false);
-					$printer->setFont(Printer::MODE_FONT_B);
-					$printer->text($company->condition_order . "\n");
-					$printer->text("Tecnoplus");
-					$printer->text("\nwww.tecnoplus.com\n");
 					$printer->cut();
 					$printer->pulse();
 					$printer->close();
 
-					return redirect()->back()->with("mensaje", "Ticket impreso");
-				// } catch (\Throwable $th) {
-				// 	throw new Exception("Error, no se pudo completar el proceso", 400);
-				// 	return [
-				// 		'code' => $th->getCode()
-				// 	];
-				// }
+				} catch (\Throwable $th) {
+					throw new Exception("Error, no se pudo completar el proceso", 400);
+					return [
+						'code' => $th->getCode()
+					];
+				}
 			}
 		}
 	}

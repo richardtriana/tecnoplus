@@ -31,8 +31,7 @@
       <div class="row position-sticky sticky-top mb-2 bg-light p-1" style="top: 0.5rem">
         <div class="input-group col-6">
           <input type="text" class="form-control" placeholder="Código de barras" aria-label=" with two button addons"
-            aria-describedby="button-add-product" v-model="filters.product" autofocus
-            @keypress.enter="searchProduct()" />
+            aria-describedby="button-add-product" v-model="filters.product" autofocus @keypress.enter="searchProduct()" />
           <div class="input-group-append" id="button-add-product">
             <button class="btn btn-outline-secondary" type="button" @click="searchProduct()">
               Añadir Producto
@@ -59,8 +58,8 @@
       <section>
         <div>
           <table class="
-              table table-sm table-responsive-sm table-bordered table-hover
-            ">
+                    table table-sm table-responsive-sm table-bordered table-hover
+                  ">
             <thead class="bg-secondary text-white position-sticky sticky-top" style="top: 4rem">
               <tr>
                 <th></th>
@@ -88,14 +87,14 @@
                     class="form-control form-control-sm" v-model="p.quantity" style="max-width: 60px" />
                   <span class="hidden d-none">
                     {{
-                        (p.cost_price_tax_inc_total =
-                          p.cost_price_tax_inc * p.quantity)
+                      (p.cost_price_tax_inc_total =
+                        p.cost_price_tax_inc * p.quantity)
                     }}
                   </span>
                 </td>
                 <td>
-                  <input type="number" name="price" id="price" step="any" placeholder="Cantidad"
-                    v-model="p.price_tax_inc" class="form-control form-control-sm" style="max-width: 100px" />
+                  <input type="number" name="price" id="price" step="any" placeholder="Cantidad" v-model="p.price_tax_inc"
+                    class="form-control form-control-sm" style="max-width: 100px" />
                 </td>
                 <td>
                   <input type="number" name="discount_percentage" id="discount_percentage" step="any"
@@ -118,19 +117,19 @@
                   <span v-if="p.discount_percentage != 0">
                     $
                     {{
-                        (p.price_tax_inc_total =
-                          p.quantity * p.price_tax_inc -
-                          p.quantity *
-                          p.price_tax_inc *
-                          (p.discount_percentage / 100))
+                      (p.price_tax_inc_total =
+                        p.quantity * p.price_tax_inc -
+                        p.quantity *
+                        p.price_tax_inc *
+                        (p.discount_percentage / 100))
                     }}
                   </span>
                   <span v-else>
                     $
                     {{
-                        (p.price_tax_inc_total =
-                          p.quantity * p.price_tax_inc -
-                          p.discount_price).toFixed(2)
+                      (p.price_tax_inc_total =
+                        p.quantity * p.price_tax_inc -
+                        p.discount_price).toFixed(2)
                     }}
                   </span>
                 </td>
@@ -440,12 +439,59 @@ export default {
         if (this.order_id != 0 && this.order_id != null) {
           axios
             .put(`api/orders/${this.order_id}`, this.credit, this.$root.config)
-            .then(() => this.$router.push("/credits"));
+            .then((response) => {
+              Swal.fire({
+                icon: "success",
+                title: "Excelente",
+                text: "Los datos se han guardado correctamente",
+              });
+            })
+            .catch(function (error) {
+              // handle error
+              if (error) {
+                Swal.fire({
+                  icon: "error",
+                  title: "Oops...",
+                  text: "Hubo un error al guardar los datos",
+                });
+              }
+            })
+            .finally(
+              setTimeout(() => {
+                this.$router.push({
+                  name: 'credits',
+                }),
+                  this.$router.go(0),
+                  (this.disabled = false)
+              }, 1000)
+            );
         } else {
           if (this.credit.box_id > 0) {
             axios
               .post(`api/orders`, this.credit, this.$root.config)
-              .then(() => this.$router.go(0));
+              .then((response) => {
+                Swal.fire({
+                  icon: "success",
+                  title: "Excelente",
+                  text: "Los datos se han guardado correctamente",
+                });
+              })
+              .catch(function (error) {
+                // handle error
+                if (error) {
+                  Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Hubo un error al guardar los datos",
+                  });
+                }
+              })
+              .finally(
+                setTimeout(() => {
+                  this.$router.go(0),
+                    (this.disabled = false)
+                }, 1000)
+              );
           } else {
             alert("Selecciona una caja");
           }

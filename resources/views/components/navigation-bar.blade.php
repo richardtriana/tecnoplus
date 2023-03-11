@@ -66,7 +66,7 @@
 		<router-link class="nav-link " active-class="active" to="/orders"><i class="bi bi-receipt"></i><span>Ordenes</span>
 		</router-link>
 	</li>
-	<li class="nav-item" v-if="validatePermission('order.index')">
+	<li class="nav-item d-none" v-if="validatePermission('order.index')">
 		<router-link class="nav-link " active-class="active" to="/create-edit-order-mobile/0"><i class="bi bi-receipt"></i><span>Crear orden </span>
 		</router-link>
 	</li>

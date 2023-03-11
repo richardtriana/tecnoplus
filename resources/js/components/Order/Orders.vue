@@ -46,91 +46,93 @@
 						</button>
 					</div>
 				</div>
-				<table class="table table-sm table-bordered table-responsive-sm">
-					<thead>
-						<tr>
-							<th>#</th>
-							<th>Total Pago</th>
-							<th>Total Sin Iva</th>
-							<th>Total Descuento</th>
-							<th>Cliente</th>
-							<th>Estado</th>
-							<th>Ver</th>
-							<th>Ticket</th>
-							<th>Imprimir</th>
-							<th>Responsable</th>
-							<th>Fecha</th>
-							<th v-if="$root.validatePermission('order.update')">Editar</th>
-							<th v-if="$root.validatePermission('order.delete')">Eliminar</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr v-for="o in OrderList.data" :key="o.id">
-							<th scope="row">{{  o.id  }} - {{  o.bill_number  }}</th>
-							<td>{{  o.total_paid | currency  }}</td>
-							<td>{{  o.total_iva_exc | currency  }}</td>
-							<td>{{  o.total_discount | currency  }}</td>
-							<td>{{  o.client.name  }}</td>
-							<td>
-								{{  statusOrders[o.state]["status"]  }}
-							</td>
-							<td>
-								<router-link class="btn" :to="{ name: 'details-order', params: { order_id: o.id } }">
-									<i class="bi bi-eye"></i>
-								</router-link>
-							</td>
-							<td>
-								<button class="btn" v-if="o.state == 5 || o.state == 2 || o.state == 3" @click="printTicket(o.id)">
-									<i class="bi bi-receipt"></i>
-								</button>
-								<button class="btn" v-else disabled>
-									<i class="bi bi-receipt"></i>
-								</button>
-							</td>
-							<td>
-								<button class="btn text-danger" @click="generatePdf(o.id)">
-									<i class="bi bi-file-earmark-pdf-fill"></i>
-								</button>
-							</td>
-
-							<td>
-								{{  o.user.name  }}
-							</td>
-							<td>
-								<span>
-									<b>Creación:</b>
-									{{  o.created_at | moment("DD-MM-YYYY h:mm:ss a")  }}
-								</span>
-								<br />
-								<span v-if="o.payment_date">
-									<b>Facturación:</b>
-									{{  o.payment_date | moment("DD-MM-YYYY h:mm:ss a")  }}
-								</span>
-							</td>
-							<td v-if="$root.validatePermission('order.update')">
-								<router-link class="btn" :to="{
-									name: 'create-edit-order',
-									params: { order_id: o.id },
-								}">
-									<i class="bi bi-pencil-square"></i>
-								</router-link>
-							</td>
-							<td v-if="$root.validatePermission('order.delete')">
-								<button class="btn text-danger" @click="deleteOrder(o.id)">
-									<i class="bi bi-trash"></i>
-								</button>
-							</td>
-						</tr>
-					</tbody>
-					<tfoot>
-						<tr class="text-bold">
-							<th class="border-0"></th>
-							<th>{{  TotalOrderList.total_paid | currency  }}</th>
-							<th>{{  TotalOrderList.total_iva_exc | currency  }}</th>
-							<th>{{  TotalOrderList.total_discount | currency  }}</th>
-						</tr>
-					</tfoot>
-				</table>
+				<div class="table-responsive w-100">
+					<table class="table table-sm table-bordered">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Total Pago</th>
+								<th>Total Sin Iva</th>
+								<th>Total Descuento</th>
+								<th>Cliente</th>
+								<th>Estado</th>
+								<th>Ver</th>
+								<th>Ticket</th>
+								<th>Imprimir</th>
+								<th>Responsable</th>
+								<th>Fecha</th>
+								<th v-if="$root.validatePermission('order.update')">Editar</th>
+								<th v-if="$root.validatePermission('order.delete')">Eliminar</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="o in OrderList.data" :key="o.id">
+								<th scope="row">{{  o.id  }} - {{  o.bill_number  }}</th>
+								<td>{{  o.total_paid | currency  }}</td>
+								<td>{{  o.total_iva_exc | currency  }}</td>
+								<td>{{  o.total_discount | currency  }}</td>
+								<td>{{  o.client.name  }}</td>
+								<td>
+									{{  statusOrders[o.state]["status"]  }}
+								</td>
+								<td>
+									<router-link class="btn" :to="{ name: 'details-order', params: { order_id: o.id } }">
+										<i class="bi bi-eye"></i>
+									</router-link>
+								</td>
+								<td>
+									<button class="btn" v-if="o.state == 5 || o.state == 2 || o.state == 3" @click="printTicket(o.id)">
+										<i class="bi bi-receipt"></i>
+									</button>
+									<button class="btn" v-else disabled>
+										<i class="bi bi-receipt"></i>
+									</button>
+								</td>
+								<td>
+									<button class="btn text-danger" @click="generatePdf(o.id)">
+										<i class="bi bi-file-earmark-pdf-fill"></i>
+									</button>
+								</td>
+	
+								<td>
+									{{  o.user.name  }}
+								</td>
+								<td>
+									<span>
+										<b>Creación:</b>
+										{{  o.created_at | moment("DD-MM-YYYY h:mm:ss a")  }}
+									</span>
+									<br />
+									<span v-if="o.payment_date">
+										<b>Facturación:</b>
+										{{  o.payment_date | moment("DD-MM-YYYY h:mm:ss a")  }}
+									</span>
+								</td>
+								<td v-if="$root.validatePermission('order.update')">
+									<router-link class="btn" :to="{
+										name: 'create-edit-order',
+										params: { order_id: o.id },
+									}">
+										<i class="bi bi-pencil-square"></i>
+									</router-link>
+								</td>
+								<td v-if="$root.validatePermission('order.delete')">
+									<button class="btn text-danger" @click="deleteOrder(o.id)">
+										<i class="bi bi-trash"></i>
+									</button>
+								</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr class="text-bold">
+								<th class="border-0"></th>
+								<th>{{  TotalOrderList.total_paid | currency  }}</th>
+								<th>{{  TotalOrderList.total_iva_exc | currency  }}</th>
+								<th>{{  TotalOrderList.total_discount | currency  }}</th>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
 			</div>
 			<pagination :align="'center'" :data="OrderList" :limit="8" @pagination-change-page="getOrders">
 				<span slot="prev-nav"><i class="bi bi-chevron-double-left"></i></span>

@@ -23,7 +23,7 @@ class ReportController extends Controller
 			DB::raw('SUM(total_cost_price_tax_inc) as total_cost_price_tax_inc'),
 			DB::raw('SUM(total_iva_inc) as total_iva_inc'),
 			DB::raw('SUM(total_iva_exc) as total_iva_exc'),
-			DB::raw("DATE_FORMAT(created_at,'%Y-%m-%d') as date_paid")
+			DB::raw("(DATE_FORMAT(created_at,'%Y-%m-%d')) as date_paid")
 		)
 			->selectRaw('count(id) as number_of_orders')
 			->selectRaw("count(case when state = '1' then 1 end) as suspended")
@@ -34,7 +34,7 @@ class ReportController extends Controller
 			->selectRaw("SUM(JSON_EXTRACT(`payment_methods`,'$.card')) as card")
 			->selectRaw("SUM(JSON_EXTRACT(`payment_methods`,'$.cash')) as cash")
 			->selectRaw("SUM(JSON_EXTRACT(`payment_methods`,'$.others')) as others")
-			->orderBy('created_at', 'desc')
+			->orderBy('date_paid', 'desc')
 			->where(function ($query) use ($from, $to) {
 				if ($from != '' && $from != 'undefined' && $from != null) {
 					$query->whereDate('payment_date', '>=', $from);
@@ -53,9 +53,12 @@ class ReportController extends Controller
 					$query->where('state', $status);
 				}
 			})
-			->groupBy('date_paid')->get();
+			->groupBy('date_paid')
+			->get();
+
 		return $orders;
 	}
+
 
 	public function reportGeneralSales(Request $request)
 	{

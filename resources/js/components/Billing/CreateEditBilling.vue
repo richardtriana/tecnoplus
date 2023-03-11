@@ -15,8 +15,8 @@
 				<!-- </div> -->
 			</div>
 			<div class="position-fixed top-0 right-0 w-50" style="z-index: 3000">
-				<div class="toast fade hide border border-danger w-100 m-3" style="max-width: 90%" role="alert" id="no-results"
-					aria-live="assertive" aria-atomic="true" data-delay="3000">
+				<div class="toast fade hide border border-danger w-100 m-3" style="max-width: 90%" role="alert"
+					id="no-results" aria-live="assertive" aria-atomic="true" data-delay="3000">
 					<div class="toast-header">
 						<strong class="mr-auto h3 text-danger">Advertencia</strong>
 						<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
@@ -30,26 +30,29 @@
 			</div>
 			<div class="row position-sticky sticky-top mb-2 bg-light p-1" style="top: 0.5rem">
 				<div class="input-group col-6">
-					<input type="text" class="form-control" placeholder="Código de barras" aria-label=" with two button addons"
-						aria-describedby="button-add-product" v-model="filters.product" autofocus
-						@keypress.enter="searchProduct()" />
+					<input type="text" class="form-control" placeholder="Código de barras"
+						aria-label=" with two button addons" aria-describedby="button-add-product" v-model="filters.product"
+						autofocus @keypress.enter="searchProduct()" />
 					<div class="input-group-append" id="button-add-product">
 						<button class="btn btn-outline-secondary" type="button" @click="searchProduct()">
 							Añadir Producto
 						</button>
-						<button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#addProductModal">
+						<button class="btn btn-outline-secondary" type="button" data-toggle="modal"
+							data-target="#addProductModal">
 							<i class="bi bi-card-checklist"></i>
 						</button>
 					</div>
 				</div>
 				<div class="input-group col-6">
-					<input type="text" class="form-control" :placeholder="billing.supplier" aria-label=" with two button addons"
-						aria-describedby="button-addon4" v-model="filters.supplier" @keypress.enter="searchSupplier()" />
+					<input type="text" class="form-control" :placeholder="billing.supplier"
+						aria-label=" with two button addons" aria-describedby="button-addon4" v-model="filters.supplier"
+						@keypress.enter="searchSupplier()" />
 					<div class="input-group-append" id="button-addon4">
 						<button class="btn btn-outline-secondary" type="button" @click="searchSupplier()">
 							Añadir Proveedor
 						</button>
-						<button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#addSupplierModal">
+						<button class="btn btn-outline-secondary" type="button" data-toggle="modal"
+							data-target="#addSupplierModal">
 							<i class="bi bi-person-lines-fill"></i>
 						</button>
 					</div>
@@ -59,8 +62,8 @@
 			<section>
 				<div>
 					<table class="
-              table table-sm table-responsive-sm table-bordered table-hover
-            ">
+		              table table-sm table-responsive-sm table-bordered table-hover
+		            ">
 						<thead class="bg-secondary text-white position-sticky sticky-top" style="top: 4rem">
 							<tr>
 								<th></th>
@@ -91,16 +94,18 @@
 								</td>
 								<td>
 									<input type="number" name="price" id="price" step="any" placeholder="Precio"
-										v-model="p.cost_price_tax_inc" class="form-control form-control-sm" style="max-width: 100px" />
+										v-model="p.cost_price_tax_inc" class="form-control form-control-sm"
+										style="max-width: 100px" />
 								</td>
 								<td>
 									<input type="number" name="discount_percentage" id="discount_percentage" step="any"
-										placeholder="Descuento" class="form-control form-control-sm" v-model="p.discount_percentage"
-										style="max-width: 60px" />
+										placeholder="Descuento" class="form-control form-control-sm"
+										v-model="p.discount_percentage" style="max-width: 60px" />
 								</td>
 								<td>
-									<input v-if="p.discount_percentage != 0" type="number" class="form-control form-control-sm"
-										name="discount_price" id="discount_price" step="2" placeholder="Descuento" :value="
+									<input v-if="p.discount_percentage != 0" type="number"
+										class="form-control form-control-sm" name="discount_price" id="discount_price"
+										step="2" placeholder="Descuento" :value="
 											(p.discount_price = (
 												p.quantity *
 												p.cost_price_tax_inc *
@@ -112,25 +117,25 @@
 								</td>
 								<td>
 									<input type="number" name="sale_price_tax_inc" id="sale_price_tax_inc" step="any"
-										placeholder="Precio de venta" v-model="p.sale_price_tax_inc" class="form-control form-control-sm"
-										style="max-width: 100px" />
+										placeholder="Precio de venta" v-model="p.sale_price_tax_inc"
+										class="form-control form-control-sm" style="max-width: 100px" />
 								</td>
 								<td>
 									<span v-if="p.discount_percentage != 0">
 										$
 										{{
-												(p.cost_price_tax_inc_total =
-													p.quantity * p.cost_price_tax_inc -
-													p.quantity *
-													p.cost_price_tax_inc *
-													(p.discount_percentage / 100))
+											(p.cost_price_tax_inc_total =
+												p.quantity * p.cost_price_tax_inc -
+												p.quantity *
+												p.cost_price_tax_inc *
+												(p.discount_percentage / 100))
 										}}
 									</span>
 									<span v-else>
 										$
 										{{
-												(p.cost_price_tax_inc_total =
-													p.quantity * p.cost_price_tax_inc - p.discount_price).toFixed(2)
+											(p.cost_price_tax_inc_total =
+												p.quantity * p.cost_price_tax_inc - p.discount_price).toFixed(2)
 										}}
 									</span>
 								</td>
@@ -199,7 +204,8 @@
 
 						<i class="bi bi-receipt"></i> <b>F1</b> Guardar
 					</button>
-					<router-link to="/billings" type="button" class="btn btn-outline-secondary btn-block" v-if="billing_id != 0">
+					<router-link to="/billings" type="button" class="btn btn-outline-secondary btn-block"
+						v-if="billing_id != 0">
 						<i class="bi bi-receipt"></i> Cancelar
 					</router-link>
 				</div>
@@ -401,7 +407,7 @@ export default {
 						)
 						.catch(function (error) {
 							// handle error
-							console.log('error',error)
+							console.log('error', error)
 							if (error) {
 								Swal.fire({
 									icon: 'error',
@@ -416,7 +422,28 @@ export default {
 				} else {
 					axios
 						.post(`api/billings`, this.billing, this.$root.config)
-						.then(() => this.$router.go(0));
+						.then((response) => {
+							Swal.fire({
+								icon: "success",
+								title: "Excelente",
+								text: "Los datos se han guardado correctamente",
+							});
+						})
+						.catch(function (error) {
+							// handle error
+							if (error) {
+								Swal.fire({
+									icon: "error",
+									title: "Oops...",
+									text: "Hubo un error al guardar los datos",
+								});
+							}
+						})
+						.finally(() =>
+							setTimeout(() => {
+								this.$router.go(0)
+							}, 3000)
+						);
 				}
 			} else {
 				alert("No hay productos en la orden");

@@ -23,6 +23,7 @@
                 <th scope="col">#</th>
                 <th scope="col">Nombre</th>
                 <th scope="col">Prefijo</th>
+                <th scope="col">Impresora POS</th>
                 <td scope="col" v-if="$root.validatePermission('box.store')">Asignar usuarios</td>
                 <th scope="col" v-if="$root.validatePermission('box.active')">Estado</th>
                 <th>Base</th>
@@ -35,6 +36,7 @@
                 <th scope="row">{{ box.id }}</th>
                 <td>{{ box.name }}</td>
                 <td>{{ box.prefix }}</td>
+                <td>{{ box.printer }}</td>
                 <th v-if="$root.validatePermission('box.store')">
                   <button class="btn btn-outline-primary" @click="$refs.AssignUser.OpenAssignUser(box)">
                     <i class="bi bi-person-plus-fill"></i>

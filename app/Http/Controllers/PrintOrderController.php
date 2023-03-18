@@ -45,17 +45,20 @@ class PrintOrderController extends Controller
 		$order_details = $order->detailOrders()->get();
 		$system_user = $order->user()->first();
 		$payment_methods = (object) ($order->payment_methods);
+		$box = $order->box()->first();
 
 		// Información empresarial
 		$configuration = new Configuration();
 		$company =  $configuration->select()->first();
+		$POS_printer = $box ? $box->printer : $company->printer;
 
-		if (!$company->printer || $company->printer == '') {
+
+		if (!$POS_printer || $POS_printer == '') {
 			throw new Exception("Error, no hay impresoras configuradas", 400);
 		}
 
 		// Config de impresora
-		$connector = new WindowsPrintConnector($company->printer);
+		$connector = new WindowsPrintConnector($POS_printer);
 
 		try {
 
@@ -328,17 +331,20 @@ class PrintOrderController extends Controller
 		$order = Order::find($order->id);
 		$paymentCredits = $order->paymentCredits;
 		$system_user = $order->user()->first();
+		$box = $order->box()->first();
+
 
 		// Información empresarial
 		$configuration = new Configuration();
 		$company =  $configuration->select()->first();
+		$POS_printer = $box ? $box->printer : $company->printer;
 
-		if (!$company->printer || $company->printer == '') {
+		if (!$POS_printer || $POS_printer == '') {
 			throw new Exception("Error, no hay impresoras configuradas", 400);
 		}
 
 		// Config de impresora
-		$connector = new WindowsPrintConnector($company->printer);
+		$connector = new WindowsPrintConnector($POS_printer);
 
 		try {
 

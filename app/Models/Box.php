@@ -11,7 +11,8 @@ class Box extends Model
 
     protected $fillable = [
         'name',
-        'prefix'
+        'prefix',
+        'printer'
     ];
 
     protected $hidden = [

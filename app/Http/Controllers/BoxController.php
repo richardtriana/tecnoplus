@@ -71,6 +71,7 @@ class BoxController extends Controller
         $validate = Validator::make($request->all(), [
             'name' => 'required|alpha_num|min:1|max:10',
             'prefix' => 'required|alpha_num|min:1|max:10',
+            'printer' => 'required|string',
             'consecutive_box' => 'nullable|array',
             'consecutive_box.*.from_nro' => 'integer',
             'consecutive_box.*.until_nro' => 'integer',
@@ -89,7 +90,8 @@ class BoxController extends Controller
 
         $box = Box::create([
             'name' => $request->name,
-            'prefix' => $request->prefix
+            'prefix' => $request->prefix,
+            'printer' => $request->printer
         ]);
 
         foreach ($request->consecutive_box as $item) {
@@ -165,6 +167,7 @@ class BoxController extends Controller
         $validate = Validator::make($request->all(), [
             'name' => 'required|alpha_num|min:1|max:10',
             'prefix' => 'required|alpha_num|min:1|max:10',
+            'printer' => 'required|string',
             'consecutive_box' => 'nullable|array',
             'consecutive_box.*.from_nro' => 'integer',
             'consecutive_box.*.until_nro' => 'integer',
@@ -194,6 +197,7 @@ class BoxController extends Controller
                 $box->prefix =  $request->prefix;
             }
             $box->name = $request->name;
+            $box->printer = $request->printer;
             $box->update();
 
             $used = [];
@@ -239,7 +243,7 @@ class BoxController extends Controller
         $box = Box::find($id);
 
         if ($box && ($box->base != $request->base)) {
-            
+
             $data = ([
                 'user' => "$user->name $user->last_name",
                 'date' => date('Y-m-d'),

@@ -49,7 +49,19 @@
                 <small id="nameHelp" class="form-text text-danger">{{
                   formErrors.prefix
                 }}</small>
-              </div>  
+                </div> <div class="form-group">
+                  <label for="printer">Impresora POS</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="printer"
+                    placeholder="Ingresar nombre impresora POS"
+                    v-model="formBox.printer"
+                  />
+                  <small id="printerHelp" class="form-text text-danger">{{
+                    formErrors.printer
+                  }}</small>
+              </div>
               <div class="form-row py-3">
                 <div class="col">
                   <h5>
@@ -144,6 +156,7 @@ export default {
       formBox: {
         name: "",
         prefix: "",
+        printer:"",
         process: null,
         consecutive_box: [],
         consecutive_load: []
@@ -153,6 +166,7 @@ export default {
       formErrors: {
         name: "",
         prefix: "",
+        printer:""
       },
       
     };
@@ -248,6 +262,7 @@ export default {
       } else {
         this.formErrors.name = "";
         this.formErrors.prefix = "";
+        this.formErrors.printer = "";
         this.consecutive_boxErrors = {};      
       }
     },

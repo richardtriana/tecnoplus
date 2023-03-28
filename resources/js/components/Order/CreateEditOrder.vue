@@ -487,7 +487,6 @@ export default {
         axios.delete(`api/order-details/${detail_id}`, this.$root.config);
       }
     },
-
     searchClient() {
       let me = this;
       if (me.filters.client == "") {

@@ -355,7 +355,7 @@
           </div>
           <button
             type="button"
-            :disabled="disabled"
+            :disabled="paid_value < total_tax_inc"
             class="btn btn-outline-primary btn-block"
             @click="createOrUpdateOrder(2)"
           >
@@ -364,7 +364,7 @@
           </button>
           <button
             type="button"
-            :disabled="disabled"
+            :disabled="paid_value < total_tax_inc"
             class="btn btn-outline-primary btn-block"
             @click="createOrUpdateOrder(4)"
           >
@@ -391,12 +391,20 @@
 
           <button
             type="button"
-            :disabled="disabled"
             class="btn btn-outline-primary btn-block"
             @click="createOrUpdateOrder(3)"
           >
             <i class="bi bi-list-check"></i> Cotizar
           </button>
+
+          <router-link
+            to="/orders"
+            type="button"
+            class="btn btn-secondary btn-block"
+          >
+            <i class="bi bi-cart-x"></i> Pagar
+          </router-link>
+
           <router-link
             to="/orders"
             type="button"
@@ -497,7 +505,9 @@ export default {
       });
       return total;
     },
-    payment_return: function () {
+    
+    paid_value:function(){
+
       var cash = this.order.payment_methods.cash
         ? Number(this.order.payment_methods.cash)
         : 0;
@@ -511,9 +521,15 @@ export default {
         ? Number(this.order.payment_methods.others)
         : 0;
 
-      var value = cash + nequi + card + others - this.total_tax_inc;
-      return value;
+      var paid = cash + nequi + card + others;
+      return paid;
+
     },
+
+    payment_return: function () {     
+      var value = this.paid_value - this.total_tax_inc;
+      return value;
+    }
   },
   methods: {
     listItemsOrder() {
@@ -586,12 +602,14 @@ export default {
         });
       }
     },
+
     removeProduct(index, detail_id = null) {
       this.productsOrderList.splice(index, 1);
       if (detail_id != null || detail_id != 0) {
         axios.delete(`api/order-details/${detail_id}`, this.$root.config);
       }
     },
+    
     searchClient() {
       let me = this;
       if (me.filters.client == "") {
@@ -716,11 +734,27 @@ export default {
       let me = this;
 
       shortcut.add("F1", function () {
-        me.createOrUpdateOrder(2);
+        if (me.paid_value < me.total_tax_inc) {
+          Swal.fire({
+            icon: "error",
+            title: "Debe completar su pago ",
+            text: "Puede añadir varias formas de pago",
+          });
+        } else {
+          me.createOrUpdateOrder(2);
+        }
       });
 
       shortcut.add("F2", function () {
-        me.createOrUpdateOrder(4);
+        if (me.paid_value < me.total_tax_inc) {
+          Swal.fire({
+            icon: "error",
+            title: "Debe completar su pago ",
+            text: "Puede añadir varias formas de pago",
+          });
+        } else {
+          me.createOrUpdateOrder(4);
+        }
       });
 
       shortcut.add("F10", function () {

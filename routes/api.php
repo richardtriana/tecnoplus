@@ -109,6 +109,7 @@ Route::middleware('auth:api')->group(function () {
 	Route::get('/reports/general-sales-report', [ReportController::class, 'reportGeneralSales']);
 	Route::get('/reports/product-sales-report', [ReportController::class, 'reportProductSales']);
 	Route::get('/reports/total-products-report', [ReportController::class, 'reportTotalProducts']);
+	Route::get('/reports/closing', [ReportController::class, 'reportClosing']);
 
 	Route::get('/boxes/box-list', [BoxController::class, 'boxList']);
 	Route::get('/boxes/byUser', [BoxController::class, 'getBoxesByUser']);

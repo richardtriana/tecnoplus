@@ -14,14 +14,26 @@ use Mike42\Escpos\Printer;
 
 class PrintOrderController extends Controller
 {
-	public function openBox()
+	public function openBox($order_id)
 	{
+
+		// Orden
+		$order = Order::find($order_id);
+		$box = $order->box()->first();
+
 		$configuration = new Configuration();
 		$company =  $configuration->select()->first();
+
+		$POS_printer = $box ? $box->printer : $company->printer;
+
 		try {
-			if ($company->printer) {
+			if (!$POS_printer || $POS_printer == '') {
+				throw new Exception("Error, no hay impresoras configuradas", 400);
+			}
+
+			if ($POS_printer) {
 				try {
-					$connector = new WindowsPrintConnector($company->printer);
+					$connector = new WindowsPrintConnector($POS_printer);
 					$printer = new Printer($connector);
 					$printer->initialize();
 					$printer->pulse();
@@ -31,7 +43,7 @@ class PrintOrderController extends Controller
 				}
 			}
 		} catch (\Throwable $th) {
-			if (!$company->printer || $company->printer == '') {
+			if (!$POS_printer || $POS_printer == '') {
 				// throw new Exception("Error, no hay impresoras configuradas", 200);
 				return $th;
 			}

@@ -53,6 +53,7 @@ import CreateEditCredit from './components/Credit/CreateEditCredit.vue'
 import ReportSale from './components/Report/ReportSale'
 import ReportProductSales from './components/Report/ReportProductSales'
 import ReportGeneralSales from './components/Report/ReportGeneralSales'
+import ReportClosing from './components/Report/ReportClosing'
 
 import Boxes from './components/Box/Boxes.vue'
 
@@ -106,7 +107,7 @@ const routes = [
 
   { path: '/brands', component: Brands, alias: "brand.index" },
 
-  { path: '/orders', component: Orders, alias: "order.index" },
+  { path: '/orders', component: Orders, alias: "order.index" , props:{ status:1}},
   { path: '/orders/:order_id/details-order', component: DetailsOrder, props: true, name: 'details-order', alias: "order.index" },
   { path: '/create-edit-order/:order_id', component: CreateEditOrder, props: true, name: 'create-edit-order', alias: "order.store" },
   { path: '/create-edit-order-mobile/:order_id', component: CreateEditOrderMobile, props: true, name: 'create-edit-order-mobile', alias: "order.store" },
@@ -118,6 +119,7 @@ const routes = [
   { path: '/reports/report-sale', component: ReportSale, props: true, name: 'report-sale' },
   { path: '/reports/report-general-sales', component: ReportGeneralSales, props: true, name: 'report-general-sales' },
   { path: '/reports/report-product-sales', component: ReportProductSales, props: true, name: 'report-product-sales' },
+  { path: '/reports/closing', component: ReportClosing, props: true, name: 'report-closing' },
 
   { path: '/boxes', component: Boxes, alias: 'box.index' },
 

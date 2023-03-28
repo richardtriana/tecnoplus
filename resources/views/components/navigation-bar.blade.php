@@ -110,6 +110,9 @@
 		<div id="collapseReport" class="collapse" aria-labelledby="headingReport" data-parent="#accordionSidebar">
 			<div class="bg-white py-2 collapse-inner rounded">
 				<h6 class="collapse-header">Informe:</h6>
+				<router-link class="collapse-item " to="/reports/closing" v-if="validatePermission('product.index')">
+					Informe cierre
+				</router-link>
 				<router-link class="collapse-item " to="/reports/report-sale" v-if="validatePermission('product.index')">Informe
 					de ventas diarias
 				</router-link>

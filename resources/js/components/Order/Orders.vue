@@ -146,6 +146,12 @@
 import LoadPdf from "./LoadPdf.vue";
 export default {
 	components: { LoadPdf },
+	props: {
+		status: {
+			type: Number,
+			default: null
+		}
+	},
 	data() {
 		return {
 			load_pdf: false,
@@ -187,7 +193,7 @@ export default {
 				from: me.filter.from,
 				to: me.filter.to,
 				user_id: me.filter.user_id,
-				status: me.filter.status,
+				status: me.status? me.status : me.filter.status,
 			};
 
 			axios

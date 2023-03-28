@@ -59,7 +59,6 @@ class ReportController extends Controller
 		return $orders;
 	}
 
-
 	public function reportGeneralSales(Request $request)
 	{
 		$from = $request->from;
@@ -133,8 +132,8 @@ class ReportController extends Controller
 						->orWhere('product', 'LIKE', "%$product%");
 				}
 			})
-			->whereHas('product', function($query) use ($category, $request){
-				if($request->filled('category') && $category != 'undefined'){
+			->whereHas('product', function ($query) use ($category, $request) {
+				if ($request->filled('category') && $category != 'undefined') {
 					$query->where('category_id', $category);
 				}
 			})
@@ -169,5 +168,68 @@ class ReportController extends Controller
 		$total_products = $total_products->first();
 
 		return $total_products;
+	}
+
+	public function reportClosing(Request $request)
+	{
+		$from = $request->from;
+		$to = $request->to;
+		$box_id = $request->box_id;
+		$user_id = $request->user_id;
+		$status = $request->status ?? $request->status;
+
+		$orders = Order::select(
+			// DB::raw('count(pay) as pay'),
+			DB::raw('SUM(total_paid) as total_paid'),
+			DB::raw('SUM(total_discount) as total_discount'),
+			DB::raw('SUM(total_cost_price_tax_inc) as total_cost_price_tax_inc'),
+			DB::raw('SUM(total_iva_inc) as total_iva_inc'),
+			DB::raw('SUM(total_iva_exc) as total_iva_exc'),
+			DB::raw("(DATE_FORMAT(orders.created_at,'%Y-%m-%d')) as date_paid")
+		)
+		
+			->selectRaw("count(orders.id) as number_of_orders")
+			->selectRaw("count(case when state = '2' then 1 end) as registered")
+			->selectRaw("count(case when state = '3' then 1 end) as quoted")
+			->selectRaw("count(case when state = '5' then 1 end) as credit")
+			->selectRaw("SUM(case when state = '3' then total_iva_inc ELSE 0 END) as paid_quoted")
+			->selectRaw("SUM(case when state = '5' then total_iva_inc ELSE 0 END) as paid_credit")
+			->selectRaw("SUM(case when state = '2' or state ='5' then total_iva_inc ELSE 0 END) as total_sale")
+			->selectRaw("SUM(case when state = '2' or state ='5' then total_iva_exc ELSE 0 END) as total_sale_iva_exc")
+			->selectRaw("SUM(JSON_EXTRACT(`payment_methods`,'$.nequi')) as nequi")
+			->selectRaw("SUM(JSON_EXTRACT(`payment_methods`,'$.card')) as card")
+			->selectRaw("SUM(JSON_EXTRACT(`payment_methods`,'$.cash') + JSON_EXTRACT(`payment_methods`,'$.pay_payment')) as cash")
+			->selectRaw("SUM(JSON_EXTRACT(`payment_methods`,'$.others')) as others")
+			->orderBy('date_paid', 'desc')
+			->where(function ($query) use ($from, $to) {
+				if ($from != '' && $from != 'undefined' && $from != null) {
+					$query->whereDate('orders.created_at', '>=', $from);
+				}
+				if ($to != '' && $to != 'undefined' && $to != null) {
+					$query->whereDate('orders.created_at', '<=', $to);
+				}
+			})
+			->where(function ($query) use ($box_id) {
+				if ($box_id != '' && $box_id != 'undefined' && $box_id != null) {
+					$query->where('box_id', $box_id);
+				}
+			})
+			->where(function ($query) use ($status) {
+				$query->where('state', '<>', '1');
+				$query->where('state', '<>', '0');
+				if ($status != '' && $status != 0 && $status != null) {
+					$query->where('state', $status);
+				}
+			})
+
+			->where(function ($query) use ($user_id) {
+				if ($user_id != '' && $user_id != 0 && $user_id != null) {
+					$query->where('orders.user_id', $user_id);
+				}
+			})
+			->groupBy('date_paid')
+			->get();
+
+		return $orders;
 	}
 }

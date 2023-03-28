@@ -180,13 +180,13 @@
               <tr class="">
                 <th colspan="7">Efectivo:</th>
                 <th>
-                  <input type="number" value="0" step="any" v-model="credit.cash" />
+                  <input type="number" value="0" step="any" v-model="credit.payment_methods.cash" />
                 </th>
               </tr>
               <tr class="">
                 <th colspan="7">Abono</th>
                 <th>
-                  <input type="number" value="0" step="any" v-model="credit.pay_payment" />
+                  <input type="number" value="0" step="any" v-model="credit.payment_methods.pay_payment" />
                 </th>
               </tr>
               <tr class="">
@@ -198,7 +198,7 @@
               <tr class="">
                 <th colspan="7">Fecha de pago:</th>
                 <th>
-                  <input type="datetime-local" v-model="credit.payment_date" autocomplete="" />
+                  <input type="datetime-local" v-model="credit.payment_date" />
                 </th>
               </tr>
             </table>
@@ -262,10 +262,12 @@ export default {
         total_discount: 0.0,
         total_cost_price_tax_inc: 0.0,
         productsOrder: [],
-        cash: 0,
-        change: 0,
-        pay_payment: 0,
         payment_date: "",
+        payment_methods: {
+          cash: 0,
+          change: 0,
+          pay_payment: 0,
+        }
       },
     };
   },
@@ -306,14 +308,14 @@ export default {
     },
     payment_return: function () {
       var value = 0.0;
-      if (this.credit.cash > 0) {
-        if (this.credit.pay_payment > this.credit.total_tax_inc) {
-          this.credit.pay_payment = 0;
+      if (this.credit.payment_methods.cash > 0) {
+        if (this.credit.payment_methods.pay_payment > this.credit.total_tax_inc) {
+          this.credit.payment_methods.pay_payment = 0;
           alert(
             "No puedes abonar una cantidad superior al valor de la factura"
           );
         } else {
-          value = (this.credit.cash - this.credit.pay_payment).toFixed(0);
+          value = (this.credit.payment_methods.cash - this.credit.payment_methods.pay_payment).toFixed(0);
         }
       }
       return value;
@@ -426,6 +428,7 @@ export default {
     createOrUpdateCredit(state_credit) {
       this.credit.state = state_credit;
       this.credit.box_id = this.$root.box;
+      this.credit.payment_methods.change = this.payment_return;
 
       if (this.credit.id_client == 1) {
         alert("Debe seleccionar un cliente válido");

@@ -102,8 +102,12 @@ class PrintOrderController extends Controller
 			$printer->setEmphasis(false);
 			$printer->text("Fecha: ");
 			$printer->text(date('Y-m-d h:i:s A') .  "\n");
-			$printer->text("N° Factura: ");
+			if ($order->table) {
+				$printer->text("Mesa: ");
+				$printer->text($order->table->table . "\n");
+			}
 
+			$printer->text("N° Factura: ");			
 			if (isset($order->bill_number)) {
 				$printer->text($order->bill_number . "\n");        // 
 			} else {
@@ -302,6 +306,11 @@ class PrintOrderController extends Controller
 					$printer->text("Fecha: ");
 					$printer->text(date('Y-m-d h:i:s A') .  "\n");
 
+					if ($order->table) {
+						$printer->text("Mesa: ");
+						$printer->text($order->table->table . "\n");
+					}
+
 					if (isset($order->bill_number)) {
 						$printer->text($order->bill_number . "\n");        // 
 					} else {
@@ -327,7 +336,6 @@ class PrintOrderController extends Controller
 					$printer->cut();
 					$printer->pulse();
 					$printer->close();
-
 				} catch (\Throwable $th) {
 					throw new Exception("Error, no se pudo completar el proceso", 400);
 					return [
@@ -390,6 +398,10 @@ class PrintOrderController extends Controller
 			$printer->setEmphasis(false);
 			$printer->text("Fecha: ");
 			$printer->text(date('Y-m-d h:i:s A') .  "\n");
+			if ($order->table) {
+				$printer->text("Mesa: ");
+				$printer->text($order->table->table . "\n");
+			}
 			$printer->text("N° Factura: ");
 
 			if (isset($order->bill_number)) {

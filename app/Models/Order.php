@@ -56,6 +56,11 @@ class Order extends Model
         return $this->belongsTo(Box::class);
     }
 
+    public function table()
+    {
+        return $this->belongsTo(Table::class);
+    }
+
     public function consecutiveBox()
     {
 

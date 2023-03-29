@@ -125,6 +125,13 @@
                         <td>{{ $orderInformation->observations }}</td>
                     </tr>
                     @endif
+                    @if ( ($orderInformation->table) )
+                    <tr>
+                        <td>Mesa</td>
+                        <td>{{ $orderInformation->table->table }}</td>
+                    </tr>
+                    @endif
+                    
 
                 </tbody>
             </table>

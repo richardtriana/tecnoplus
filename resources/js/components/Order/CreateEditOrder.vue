@@ -49,6 +49,11 @@
             </button>
           </div>
         </div>
+        <div class="input-group col-6"></div>
+        <div class="input-group inline-flex col-6">
+          <v-select :options="tableList"  placeholder="Seleccionar mesa" class="w-full form-input p-0 w-100" label="table"
+            :reduce="(table) => table.id" v-model="order.table_id" />
+        </div>
       </div>
 
       <section>
@@ -56,7 +61,7 @@
           <table class="
                 table table-sm table-responsive-sm table-bordered table-hover
               ">
-            <thead class="bg-secondary text-white position-sticky sticky-top" style="top: 4rem">
+            <thead class="bg-secondary text-white position-stickyx sticky-topx" style="top: 4rem">
               <tr>
                 <th></th>
                 <th>Código</th>
@@ -319,6 +324,7 @@ export default {
         client: "",
       },
       productsOrderList: [],
+      tableList: [],
       disabled: false,
       order: {
         id_client: 1,
@@ -422,6 +428,14 @@ export default {
           me.order.id_client = response.data.order_information.client_id;
           me.order.client = response.data.order_information.client.name;
           me.productsOrderList = response.data.order_details;
+        });
+    },
+    listTables() {
+      let me = this;
+      axios
+        .get("api/tables/table-list?page=1", me.$root.config)
+        .then(function (response) {
+          me.tableList = response.data.tables;
         });
     },
     searchProduct() {
@@ -655,6 +669,7 @@ export default {
     if (this.order_id != null || this.order_id != 0) {
       this.listItemsOrder();
     }
+    this.listTables()
     this.commands();
     this.$refs.ModalBox.selectedBox();
   },

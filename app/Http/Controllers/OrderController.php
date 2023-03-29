@@ -77,7 +77,7 @@ class OrderController extends Controller
 
 		$orders = $orders
 			->where('user_id', $sign_user_id, $user_id)
-			->with('user:id,name')
+			->with('user:id,name','table:id,table')
 			->orderByDesc('id')
 			->paginate(10);
 

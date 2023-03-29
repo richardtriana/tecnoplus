@@ -55,6 +55,7 @@
 								<th>Total Sin Iva</th>
 								<th>Total Descuento</th>
 								<th>Cliente</th>
+								<th>Mesa</th>
 								<th>Estado</th>
 								<th>Ver</th>
 								<th>Ticket</th>
@@ -73,9 +74,14 @@
 								<td>{{  o.total_discount | currency  }}</td>
 								<td>{{  o.client.name  }}</td>
 								<td>
-									{{  statusOrders[o.state]["status"]  }}
+									<template v-if="o.table">
+										{{ o.table.table }}
+									</template>
 								</td>
-								<td>
+									<td>
+										{{ statusOrders[o.state]["status"] }}
+									</td>
+									<td>
 									<router-link class="btn" :to="{ name: 'details-order', params: { order_id: o.id } }">
 										<i class="bi bi-eye"></i>
 									</router-link>

@@ -1,35 +1,20 @@
 <template>
   <div class="row px-2" id="create-edit-order">
     <div class="col-9 justify-content-center p-2">
-      <div
-        class="sticky-top mb-2 text-uppercase w-50"
-        style="z-index: 1022; left: 100%"
-      >
+      <div class="sticky-top mb-2 text-uppercase w-50" style="z-index: 1022; left: 100%">
         <table class="table table-borderless">
           <tr class="h1 text-white bg-success">
             <td class="text-right">Total</td>
-            <td>$ {{ (order.total_tax_inc = total_tax_inc).toFixed(0) }}</td>
+            <td>$ {{ order.total_tax_inc = total_tax_inc | currency }}</td>
           </tr>
         </table>
       </div>
       <div class="position-fixed top-0 right-0 w-50" style="z-index: 3000">
-        <div
-          class="toast fade hide border border-danger w-100 m-3"
-          style="max-width: 90%"
-          role="alert"
-          id="no-results"
-          aria-live="assertive"
-          aria-atomic="true"
-          data-delay="3000"
-        >
+        <div class="toast fade hide border border-danger w-100 m-3" style="max-width: 90%" role="alert" id="no-results"
+          aria-live="assertive" aria-atomic="true" data-delay="3000">
           <div class="toast-header">
             <strong class="mr-auto h3 text-danger">Advertencia</strong>
-            <button
-              type="button"
-              class="ml-2 mb-1 close"
-              data-dismiss="toast"
-              aria-label="Close"
-            >
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
@@ -38,64 +23,28 @@
           </div>
         </div>
       </div>
-      <div
-        class="row position-sticky sticky-top mb-2 bg-light p-1"
-        style="top: 0.5rem"
-      >
+      <div class="row position-sticky sticky-top mb-2 bg-light p-1" style="top: 0.5rem">
         <div class="input-group col-6">
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Código de barras"
-            aria-label=" with two button addons"
-            aria-describedby="button-add-product"
-            v-model="filters.product"
-            autofocus
-            @keypress.enter="searchProduct()"
-          />
+          <input type="text" class="form-control" placeholder="Código de barras" aria-label=" with two button addons"
+            aria-describedby="button-add-product" v-model="filters.product" autofocus @keypress.enter="searchProduct()" />
           <div class="input-group-append" id="button-add-product">
-            <button
-              class="btn btn-outline-secondary"
-              type="button"
-              @click="searchProduct()"
-            >
+            <button class="btn btn-outline-secondary" type="button" @click="searchProduct()">
               <b>F10</b>
               Añadir Producto
             </button>
-            <button
-              class="btn btn-outline-secondary"
-              type="button"
-              data-toggle="modal"
-              data-target="#addProductModal"
-            >
+            <button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#addProductModal">
               <i class="bi bi-card-checklist"></i>
             </button>
           </div>
         </div>
         <div class="input-group col-6">
-          <input
-            type="text"
-            class="form-control"
-            :placeholder="order.client"
-            aria-label=" with two button addons"
-            aria-describedby="button-addon4"
-            v-model="filters.client"
-            @keypress.enter="searchClient()"
-          />
+          <input type="text" class="form-control" :placeholder="order.client" aria-label=" with two button addons"
+            aria-describedby="button-addon4" v-model="filters.client" @keypress.enter="searchClient()" />
           <div class="input-group-append" id="button-addon4">
-            <button
-              class="btn btn-outline-secondary"
-              type="button"
-              @click="searchClient()"
-            >
+            <button class="btn btn-outline-secondary" type="button" @click="searchClient()">
               Añadir Cliente
             </button>
-            <button
-              class="btn btn-outline-secondary"
-              type="button"
-              data-toggle="modal"
-              data-target="#addClientModal"
-            >
+            <button class="btn btn-outline-secondary" type="button" data-toggle="modal" data-target="#addClientModal">
               <i class="bi bi-person-lines-fill"></i>
             </button>
           </div>
@@ -104,15 +53,10 @@
 
       <section>
         <div>
-          <table
-            class="
-              table table-sm table-responsive-sm table-bordered table-hover
-            "
-          >
-            <thead
-              class="bg-secondary text-white position-sticky sticky-top"
-              style="top: 4rem"
-            >
+          <table class="
+                table table-sm table-responsive-sm table-bordered table-hover
+              ">
+            <thead class="bg-secondary text-white position-sticky sticky-top" style="top: 4rem">
               <tr>
                 <th></th>
                 <th>Código</th>
@@ -127,10 +71,7 @@
             <tbody v-if="productsOrderList.length > 0">
               <tr v-for="(p, index) in productsOrderList" :key="p.id">
                 <td>
-                  <button
-                    class="btn text-danger"
-                    @click="removeProduct(index, p.id)"
-                  >
+                  <button class="btn text-danger" @click="removeProduct(index, p.id)">
                     <i class="bi bi-trash"></i>
                   </button>
                 </td>
@@ -138,16 +79,8 @@
                 <td>{{ p.barcode }}</td>
                 <td>{{ p.product }}</td>
                 <td>
-                  <input
-                    type="number"
-                    name="quantity"
-                    id="quantity"
-                    step="any"
-                    placeholder="Cantidad"
-                    class="form-control form-control-sm"
-                    v-model="p.quantity"
-                    style="max-width: 60px"
-                  />
+                  <input type="number" name="quantity" id="quantity" step="any" placeholder="Cantidad"
+                    class="form-control form-control-sm" v-model="p.quantity" style="max-width: 60px" />
                   <span class="hidden d-none">
                     {{
                       (p.cost_price_tax_inc_total =
@@ -156,48 +89,23 @@
                   </span>
                 </td>
                 <td>
-                  <input
-                    type="number"
-                    name="price"
-                    id="price"
-                    step="any"
-                    placeholder="Precio"
-                    v-model="p.price_tax_inc"
-                    class="form-control form-control-sm"
-                    style="max-width: 100px"
-                  />
+                  <input type="number" name="price" id="price" step="any" placeholder="Precio" v-model="p.price_tax_inc"
+                    class="form-control form-control-sm" style="max-width: 100px" />
                 </td>
                 <td>
-                  <input
-                    type="number"
-                    name="discount_percentage"
-                    id="discount_percentage"
-                    step="any"
-                    placeholder="Porcentaje descuento"
-                    class="form-control form-control-sm"
-                    v-model="p.discount_percentage"
-                    style="max-width: 60px"
-                  />
+                  <input type="number" name="discount_percentage" id="discount_percentage" step="any"
+                    placeholder="Porcentaje descuento" class="form-control form-control-sm"
+                    v-model="p.discount_percentage" style="max-width: 60px" />
                 </td>
                 <td>
-                  <input
-                    type="number"
-                    class="form-control form-control-sm"
-                    name="discount_price"
-                    id="discount_price"
-                    step="2"
-                    placeholder="Descuento"
-                    disabled
-                    :value="
+                  <input type="number" class="form-control form-control-sm" name="discount_price" id="discount_price"
+                    step="2" placeholder="Descuento" disabled :value="
                       (p.discount_price = (
                         p.quantity *
                         p.price_tax_inc *
                         (p.discount_percentage / 100)
                       ).toFixed(0))
-                    "
-                    readonly
-                    style="max-width: 100px"
-                  />
+                    " readonly style="max-width: 100px" />
                 </td>
                 <td>
                   $
@@ -205,8 +113,8 @@
                     (p.price_tax_inc_total =
                       p.quantity * p.price_tax_inc -
                       p.quantity *
-                        p.price_tax_inc *
-                        (p.discount_percentage / 100))
+                      p.price_tax_inc *
+                      (p.discount_percentage / 100))
                   }}
                 </td>
               </tr>
@@ -222,6 +130,46 @@
     </div>
     <div class="col-md-3">
       <div class="">
+
+        <section>
+
+          <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header  text-white bg-success">
+                  <h5 class="modal-title">Terminar venta</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <form>
+                  <div class="modal-body">
+                    <h4 class="w-100 font-weight-bold text-center"> Total
+                      {{ total_tax_inc | currency }}
+                    </h4>
+
+                    <div class="form-group">
+                      <label class="h6" for="cashPayment">El cliente paga: {{order.payment_methods.cash|currency}}</label>
+                      <input type="number" autofocus class="form-control form-control-lg" id="cashPayment" aria-describedby="cashHelp"
+                        v-model="order.payment_methods.cash">
+                    </div>
+
+                    <h4 class="font-weight-bold"> Cambio
+                      {{ order.payment_methods.cash - total_tax_inc | currency }}
+                    </h4>
+
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" @click="createOrUpdateOrder(2)">Terminar venta</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
         <section class="card">
           <div>
             <table class="table table-sm table-primary text-right">
@@ -256,57 +204,31 @@
               <tr class="">
                 <th colspan="7">Efectivo:</th>
                 <th>
-                  <input
-                    type="number"
-                    value="0"
-                    step="any"
-                    v-model="order.payment_methods.cash"
-                    required
-                  />
+                  <input type="number" value="0" step="any" v-model="order.payment_methods.cash" required />
                 </th>
               </tr>
               <tr class="">
                 <th colspan="7">Nequi:</th>
                 <th>
-                  <input
-                    type="number"
-                    value="0"
-                    step="any"
-                    v-model="order.payment_methods.nequi"
-                  />
+                  <input type="number" value="0" step="any" v-model="order.payment_methods.nequi" />
                 </th>
               </tr>
               <tr class="">
                 <th colspan="7">Tarjeta:</th>
                 <th>
-                  <input
-                    type="number"
-                    value="0"
-                    step="any"
-                    v-model="order.payment_methods.card"
-                  />
+                  <input type="number" value="0" step="any" v-model="order.payment_methods.card" />
                 </th>
               </tr>
               <tr class="">
                 <th colspan="7">Otros:</th>
                 <th>
-                  <input
-                    type="number"
-                    value="0"
-                    step="any"
-                    v-model="order.payment_methods.others"
-                  />
+                  <input type="number" value="0" step="any" v-model="order.payment_methods.others" />
                 </th>
               </tr>
               <tr class="">
                 <th colspan="7">Cambio:</th>
                 <th>
-                  <input
-                    type="text"
-                    :value="payment_return"
-                    readonly
-                    disabled
-                  />
+                  <input type="text" :value="payment_return" readonly disabled />
                 </th>
               </tr>
               <!-- <tr class="">
@@ -319,14 +241,10 @@
                   />
                 </th>
               </tr> -->
-               <tr class="">
+              <tr class="">
                 <th colspan="7">Observaciones:</th>
                 <th>
-                  <input
-                    type="text"
-                    v-model="order.observations"
-                    autocomplete="on"
-                  />
+                  <input type="text" v-model="order.observations" autocomplete="on" />
                 </th>
               </tr>
             </table>
@@ -334,83 +252,43 @@
         </section>
         <div class="">
           <div class="my-2">
-            <label for="selected_box_user" class="font-weight-bold"
-              >Caja <i class="bi bi-box"></i
-            ></label>
-            <select
-              name="selected_box_user"
-              id="selected_box_user"
-              class="form-control"
-              v-model="$root.box"
-            >
+            <label for="selected_box_user" class="font-weight-bold-bold">Caja <i class="bi bi-box"></i></label>
+            <select name="selected_box_user" id="selected_box_user" class="form-control" v-model="$root.box">
               <option value="" disabled>Seleccione una caja</option>
-              <option
-                v-for="item in $root.listBoxes"
-                :value="item.id"
-                :key="item.id"
-              >
+              <option v-for="item in $root.listBoxes" :value="item.id" :key="item.id">
                 {{ item.name + " " + item.prefix }}
               </option>
             </select>
           </div>
-          <button
-            type="button"
-            :disabled="paid_value < total_tax_inc"
-            class="btn btn-outline-primary btn-block"
-            @click="createOrUpdateOrder(2)"
-          >
+          <button type="button" :disabled="paid_value < total_tax_inc" class="btn btn-outline-primary btn-block"
+            @click="createOrUpdateOrder(2)">
             <!-- Facturar -->
             <i class="bi bi-receipt"></i> <b>F1</b> Facturar
           </button>
-          <button
-            type="button"
-            :disabled="paid_value < total_tax_inc"
-            class="btn btn-outline-primary btn-block"
-            @click="createOrUpdateOrder(4)"
-          >
+          <button type="button" :disabled="paid_value < total_tax_inc" class="btn btn-outline-primary btn-block"
+            @click="createOrUpdateOrder(4)">
             <!-- Facturar -->
             <i class="bi bi-receipt"></i> <b>F2</b> Facturar e imprimir
           </button>
-          <button
-            type="button"
-            :disabled="disabled"
-            class="btn btn-outline-primary btn-block"
-            @click="createOrUpdateOrder(5)"
-          >
+          <button type="button" :disabled="disabled" class="btn btn-outline-primary btn-block"
+            @click="createOrUpdateOrder(5)">
             <!-- Credito -->
             <i class="bi bi-wallet2"></i> Pasar a crédito
           </button>
-          <button
-            type="button"
-            :disabled="disabled"
-            class="btn btn-outline-primary btn-block"
-            @click="createOrUpdateOrder(1)"
-          >
+          <button type="button" :disabled="disabled" class="btn btn-outline-primary btn-block"
+            @click="createOrUpdateOrder(1)">
             <i class="bi bi-clock-fill"></i> Suspender
           </button>
 
-          <button
-            type="button"
-            class="btn btn-outline-primary btn-block"
-            @click="createOrUpdateOrder(3)"
-          >
+          <button type="button" class="btn btn-outline-primary btn-block" @click="createOrUpdateOrder(3)">
             <i class="bi bi-list-check"></i> Cotizar
           </button>
 
-          <router-link
-            to="/orders"
-            type="button"
-            class="btn btn-secondary btn-block"
-          >
+          <router-link to="/orders" type="button" class="btn btn-secondary btn-block">
             <i class="bi bi-cart-x"></i> Pagar
           </router-link>
 
-          <router-link
-            to="/orders"
-            type="button"
-            class="btn btn-outline-secondary btn-block"
-            v-if="order_id != 0"
-          >
+          <router-link to="/orders" type="button" class="btn btn-outline-secondary btn-block" v-if="order_id != 0">
             <i class="bi bi-cart-x"></i> Cancelar
           </router-link>
         </div>
@@ -491,9 +369,9 @@ export default {
       this.productsOrderList.forEach((product) => {
         total += parseFloat(
           product.quantity * product.price_tax_inc -
-            product.quantity *
-              product.price_tax_inc *
-              (product.discount_percentage / 100)
+          product.quantity *
+          product.price_tax_inc *
+          (product.discount_percentage / 100)
         );
       });
       return total;
@@ -505,8 +383,8 @@ export default {
       });
       return total;
     },
-    
-    paid_value:function(){
+
+    paid_value: function () {
 
       var cash = this.order.payment_methods.cash
         ? Number(this.order.payment_methods.cash)
@@ -526,7 +404,7 @@ export default {
 
     },
 
-    payment_return: function () {     
+    payment_return: function () {
       var value = this.paid_value - this.total_tax_inc;
       return value;
     }
@@ -609,7 +487,7 @@ export default {
         axios.delete(`api/order-details/${detail_id}`, this.$root.config);
       }
     },
-    
+
     searchClient() {
       let me = this;
       if (me.filters.client == "") {
@@ -651,7 +529,7 @@ export default {
       if (this.productsOrderList.length) {
         this.order.productsOrder = this.productsOrderList;
         if (this.order_id != 0 && this.order_id != null) {
-          console.log("roder", this.order);
+
           axios
             .put(`api/orders/${this.order_id}`, this.order, this.$root.config)
             .then(() =>
@@ -675,13 +553,13 @@ export default {
             .finally(
               setTimeout(() => {
                 this.$router.push({
-                  name:'create-edit-order',
-                  params:{
-                    order_id:0
+                  name: 'create-edit-order',
+                  params: {
+                    order_id: 0
                   }
                 }),
-                this.$router.go(0),
-                (this.disabled = false)
+                  this.$router.go(0),
+                  (this.disabled = false)
               }, 1000)
             );
         } else {
@@ -739,6 +617,8 @@ export default {
             icon: "error",
             title: "Debe completar su pago ",
             text: "Puede añadir varias formas de pago",
+          }).then(() => {
+            me.openModalPayment()
           });
         } else {
           me.createOrUpdateOrder(2);
@@ -751,6 +631,8 @@ export default {
             icon: "error",
             title: "Debe completar su pago ",
             text: "Puede añadir varias formas de pago",
+          }).then(() => {
+            me.openModalPayment()
           });
         } else {
           me.createOrUpdateOrder(4);
@@ -761,6 +643,13 @@ export default {
         $("#addProductModal").modal("show");
       });
     },
+
+    openModalPayment() {
+      $('#paymentModal').modal('show')
+      $('#paymentModal').on('shown.bs.modal', function () {
+        $('#cashPayment').trigger('focus')
+      })
+    }
   },
   mounted() {
     $("#no-results").toast("hide");

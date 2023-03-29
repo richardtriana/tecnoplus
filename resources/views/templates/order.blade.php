@@ -119,6 +119,13 @@
                         <td>Celular / Teléfono</td>
                         <td>{{ $orderInformation->client->mobile }}</td>
                     </tr>
+                    @if ( ($orderInformation->observations) )
+                    <tr>
+                        <td>Observaciones</td>
+                        <td>{{ $orderInformation->observations }}</td>
+                    </tr>
+                    @endif
+
                 </tbody>
             </table>
         </div>

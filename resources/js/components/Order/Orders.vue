@@ -164,7 +164,7 @@ export default {
 				from: "",
 				to: "",
 				user_id: "",
-				status: `1,2`,
+				status: `1`,
 			},
 			statusOrders: [
 				{ id: 0, status: "Desechada" },
@@ -193,7 +193,7 @@ export default {
 				from: me.filter.from,
 				to: me.filter.to,
 				user_id: me.filter.user_id,
-				status: me.status? me.status : me.filter.status,
+				status: me.filter.status? me.filter.status : me.status,
 			};
 
 			axios

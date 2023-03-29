@@ -19,37 +19,39 @@
               </button>
             </div>
           </div>
-          <table class="table table-sm table-bordered table-responsive-sm">
-            <thead class="thead-primary">
-              <tr>
-                <th scope="col">#</th>
-                <th>Código de barras</th>
-                <th scope="col">Producto</th>
-                <th>Categoria</th>
-                <th scope="col">Precio Venta</th>
-                <th scope="col">Cantidad</th>
-                <th>Añadir</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="product in ProductList.data" v-bind:key="product.id">
-                <td>{{ product.id }}</td>
-                <td>{{ product.barcode }}</td>
-                <td>{{ product.product }}</td>
-                <td>
-                  {{ product.category.name ? product.category.name : "" }}
-                </td>
-                <td class="text-right">$ {{ product.sale_price_tax_inc }}</td>
-                <td>{{ product.quantity }}</td>
-
-                <td>
-                  <button class="btn btn-success" @click="$emit('add-product', product)">
-                    <i class="bi bi-plus-circle"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <section class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <thead class="thead-primary">
+                <tr>
+                  <th scope="col">#</th>
+                  <th>Código de barras</th>
+                  <th scope="col">Producto</th>
+                  <th>Categoria</th>
+                  <th scope="col">Precio Venta</th>
+                  <th scope="col">Cantidad</th>
+                  <th>Añadir</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="product in ProductList.data" v-bind:key="product.id">
+                  <td>{{ product.id }}</td>
+                  <td>{{ product.barcode }}</td>
+                  <td>{{ product.product }}</td>
+                  <td>
+                    {{ product.category.name ? product.category.name : "" }}
+                  </td>
+                  <td class="text-right">$ {{ product.sale_price_tax_inc }}</td>
+                  <td>{{ product.quantity }}</td>
+  
+                  <td>
+                    <button class="btn btn-success" @click="$emit('add-product', product)">
+                      <i class="bi bi-plus-circle"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">

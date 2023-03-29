@@ -158,6 +158,9 @@ class PrintOrderController extends Controller
 			if ($order->client->contact) {
 				$printer->text(sprintf('%-16s %-25s', 'Contacto:', $order->client->contact) . "\n");
 			}
+			if ($order->observations) {
+				$printer->text(sprintf('%-16s %-25s', 'Observaciones:', $order->observations) . "\n");
+			}
 
 			$printer->text("\n");
 			$printer->setLineSpacing(2);
@@ -345,7 +348,6 @@ class PrintOrderController extends Controller
 		$system_user = $order->user()->first();
 		$box = $order->box()->first();
 
-
 		// Información empresarial
 		$configuration = new Configuration();
 		$company =  $configuration->select()->first();
@@ -443,6 +445,9 @@ class PrintOrderController extends Controller
 			}
 			if ($order->client->contact) {
 				$printer->text(sprintf('%-16s %-25s', 'Contacto:', $order->client->contact) . "\n");
+			}
+			if ($order->observations) {
+				$printer->text(sprintf('%-16s %-25s', 'Observaciones:', $order->observations) . "\n");
 			}
 
 			$printer->text("\n");

@@ -116,7 +116,7 @@ class OrderController extends Controller
 		$order = new Order;
 		$order->client_id = $request->id_client;
 		$order->user_id = $user_id;
-		$order->table_id = $request->table_id ?? NULL;
+		$order->table_id = $request->table_id ?? $request->table_id;
 		$order->no_invoice = $bill_number;
 		$order->total_paid = $request->total_tax_inc;
 		$order->total_iva_inc = $request->total_tax_inc;
@@ -201,7 +201,10 @@ class OrderController extends Controller
 	public function show(Order $order)
 	{
 		$details  = Order::find($order->id);
-		return ['order_information' => $details, 'order_details' => $details->detailOrders()->get(), 'user' => $details->user()->first()];
+		return [
+			'order_information' => $details, 
+			'order_details' => $details->detailOrders()->get(), 
+			'user' => $details->user()->first()];
 	}
 
 	/**
@@ -227,8 +230,9 @@ class OrderController extends Controller
 		$user_id =  Auth::user()->id;
 		$box = Box::find($request->box_id);
 		$bill_number = $this->generateBillNumber($request);
-
 		$order = Order::find($id);
+		$table = $order->table();
+
 		$order->client_id = $request->id_client;
 		$order->table_id = $request->table_id ?? NULL;
 		$order->total_paid = $request->total_tax_inc;
@@ -302,15 +306,19 @@ class OrderController extends Controller
 			$print->openBox($order->id);
 		}
 		
-		if ($request->table_id) {
-			$table = Table::find($request->table_id);
+		if ($order->table_id) {
+			$table = Table::find($order->table_id);
 			if ($request->state == 1) {
 				$table->state = 'occupied';
 			} else {
 				$table->state = 'free';
 			}
 			$table->save();
+
+			return $table;
 		}
+		
+		return $order;
 	}
 
 	/**

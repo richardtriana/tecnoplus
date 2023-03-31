@@ -156,7 +156,7 @@
                     <div class="form-group">
                       <label class="h6" for="cashPayment">El cliente paga: {{order.payment_methods.cash|currency}}</label>
                       <input type="number" autofocus class="form-control form-control-lg" id="cashPayment" aria-describedby="cashHelp"
-                        v-model="order.payment_methods.cash">
+                        v-model="order.payment_methods.cash" @keypress.enter="createOrUpdateOrder(2)">
                     </div>
 
                     <h4 class="font-weight-bold"> Cambio
@@ -425,6 +425,7 @@ export default {
       axios
         .get(`api/orders/${me.order_id}`, this.$root.config)
         .then(function (response) {
+          me.order = response.data.order_information;
           me.order.id_client = response.data.order_information.client_id;
           me.order.client = response.data.order_information.client.name;
           me.productsOrderList = response.data.order_details;

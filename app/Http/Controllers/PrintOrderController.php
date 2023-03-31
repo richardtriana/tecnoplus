@@ -107,7 +107,7 @@ class PrintOrderController extends Controller
 				$printer->text($order->table->table . "\n");
 			}
 
-			$printer->text("N° Factura: ");			
+			$printer->text("N° Factura: ");
 			if (isset($order->bill_number)) {
 				$printer->text($order->bill_number . "\n");        // 
 			} else {
@@ -306,17 +306,17 @@ class PrintOrderController extends Controller
 					$printer->text("Fecha: ");
 					$printer->text(date('Y-m-d h:i:s A') .  "\n");
 
-					if ($order->table) {
-						$printer->text("Mesa: ");
-						$printer->text($order->table->table . "\n");
-					}
+
 
 					if (isset($order->bill_number)) {
 						$printer->text($order->bill_number . "\n");        // 
 					} else {
 						$printer->text($order->id . "\n");        // 
 					}
-
+					if ($order->table) {
+						$printer->text("Mesa: ");
+						$printer->text($order->table->table . "\n");
+					}
 					$printer->text("\n");
 					$printer->setLineSpacing(2);
 					$printer->setJustification(Printer::JUSTIFY_CENTER);
@@ -332,6 +332,10 @@ class PrintOrderController extends Controller
 						$printer->text($line);
 						$printer->text("\n-----------------------------------------" . "\n\n");
 						$printer->text("\n");
+					}
+
+					if ($order->observations) {
+						$printer->text(sprintf('%-16s %-25s', 'Observaciones:', $order->observations) . "\n");
 					}
 					$printer->cut();
 					$printer->pulse();

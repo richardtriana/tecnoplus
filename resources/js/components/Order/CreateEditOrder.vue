@@ -166,7 +166,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success" @click="createOrUpdateOrder(2)">Terminar venta</button>
+                    <button type="button" class="btn btn-success" @click="createOrUpdateOrder(4)">Terminar venta</button>
                   </div>
                 </form>
               </div>

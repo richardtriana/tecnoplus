@@ -249,7 +249,7 @@ class PrintOrderController extends Controller
 	}
 
 
-	public function printTicketRecently($order_id)
+	public function printTicketRecently($order_id, $listProducts=null)
 	{
 		// Orden
 		$order = Order::find($order_id);
@@ -261,13 +261,24 @@ class PrintOrderController extends Controller
 		$company =  $configuration->select()->first();
 		$printers =  $order->printers()->unique();
 
-		foreach ($printers as $key => $zone) {
+		foreach ($printers as
+		$key => $zone) {
 			$keyPrinter[$key] = [];
 			foreach ($order->products as $product) {
 				if ($product->zone_id == $zone->id) {
-					$p = $order->detailOrders()->where('product_id', $product->id)->first();
-					$product->quantity = $p->quantity;
-					array_push($keyPrinter[$key], $product);
+					if ($listProducts) {
+						foreach ($listProducts as $newProduct) {
+							$p = $order->detailOrders()->where('product_id', $product->id)->first();
+							if ($product->id == $newProduct['product_id']) {
+								$product->quantity = $newProduct['quantity'];
+							}
+							array_push($keyPrinter[$key], $product);
+						}
+					} else {
+						$p = $order->detailOrders()->where('product_id', $product->id)->first();
+						$product->quantity = $p->quantity;
+						array_push($keyPrinter[$key], $product);
+					}
 				}
 			}
 			$order_details = $keyPrinter[$key];
@@ -305,8 +316,6 @@ class PrintOrderController extends Controller
 					$printer->setEmphasis(false);
 					$printer->text("Fecha: ");
 					$printer->text(date('Y-m-d h:i:s A') .  "\n");
-
-
 
 					if (isset($order->bill_number)) {
 						$printer->text($order->bill_number . "\n");        // 

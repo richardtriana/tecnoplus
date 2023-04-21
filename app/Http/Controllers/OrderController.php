@@ -233,6 +233,17 @@ class OrderController extends Controller
 		$order = Order::find($id);
 		$table = $order->table();
 
+		$array1 = $order->detailOrders()->select('product_id', 'quantity')->get();
+		$updatedProducts = collect($request->productsOrder);
+
+		foreach ($array1 as $op) {
+			foreach ($updatedProducts as $np) {
+				if ($op['product_id'] == $np['product_id']) {
+					$np['quantity'] =  $np['quantity'] - $op['quantity'] ;
+				}
+			}
+		}
+
 		$order->client_id = $request->id_client;
 		$order->table_id = $request->table_id ?? NULL;
 		$order->total_paid = $request->total_tax_inc;
@@ -302,10 +313,12 @@ class OrderController extends Controller
 		$print = new PrintOrderController();
 		if ($request->state == 4 || $request->state == 6) {
 			$print = $print->printTicket($order->id, $request->cash, $request->change);
+		} else if ($request->state == 1) {
+			$print->printTicketRecently($order->id, $updatedProducts);
 		} else {
 			$print->openBox($order->id);
 		}
-		
+
 		if ($order->table_id) {
 			$table = Table::find($order->table_id);
 			if ($request->state == 1) {

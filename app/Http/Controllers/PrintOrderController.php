@@ -261,8 +261,7 @@ class PrintOrderController extends Controller
 		$company =  $configuration->select()->first();
 		$printers =  $order->printers()->unique();
 
-		foreach ($printers as
-		$key => $zone) {
+		foreach ($printers as $key => $zone) {
 			$keyPrinter[$key] = [];
 			foreach ($order->products as $product) {
 				if ($product->zone_id == $zone->id) {
@@ -271,8 +270,10 @@ class PrintOrderController extends Controller
 							$p = $order->detailOrders()->where('product_id', $product->id)->first();
 							if ($product->id == $newProduct['product_id']) {
 								$product->quantity = $newProduct['quantity'];
+								if($product->quantity ){
+									array_push($keyPrinter[$key], $product);
+								}
 							}
-							array_push($keyPrinter[$key], $product);
 						}
 					} else {
 						$p = $order->detailOrders()->where('product_id', $product->id)->first();

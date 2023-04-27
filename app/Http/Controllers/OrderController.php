@@ -236,14 +236,15 @@ class OrderController extends Controller
 		$array1 = $order->detailOrders()->select('product_id', 'quantity')->get();
 		$updatedProducts = collect($request->productsOrder);
 
-		foreach ($array1 as $op) {
-			foreach ($updatedProducts as $np) {
-				if ($op['product_id'] == $np['product_id']) {
-					$np['quantity'] =  $np['quantity'] - $op['quantity'] ;
+		$newProducts = $updatedProducts->map(function ($item) use ($array1) {
+			foreach ($array1 as $op) {
+				if ($op['product_id'] == $item['product_id']) {
+					$item['quantity'] = $item['quantity'] - $op['quantity'] ;
 				}
 			}
-		}
-
+			return $item;
+		});
+		
 		$order->client_id = $request->id_client;
 		$order->table_id = $request->table_id ?? NULL;
 		$order->total_paid = $request->total_tax_inc;
@@ -314,7 +315,7 @@ class OrderController extends Controller
 		if ($request->state == 4 || $request->state == 6) {
 			$print = $print->printTicket($order->id, $request->cash, $request->change);
 		} else if ($request->state == 1) {
-			$print->printTicketRecently($order->id, $updatedProducts);
+			$print->printTicketRecently($order->id, $newProducts);
 		} else {
 			$print->openBox($order->id);
 		}

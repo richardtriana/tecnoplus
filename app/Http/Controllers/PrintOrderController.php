@@ -284,7 +284,7 @@ class PrintOrderController extends Controller
 			}
 			$order_details = $keyPrinter[$key];
 
-			if ($zone->printer) {
+			if ($zone->printer && $order_details) {
 				$pos_printer = $zone->printer;
 
 				// Config de impresora

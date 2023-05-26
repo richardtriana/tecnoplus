@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DetailOrder;
 use App\Models\Order;
 use App\Models\Product;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -203,10 +204,12 @@ class ReportController extends Controller
 			->orderBy('date_paid', 'desc')
 			->where(function ($query) use ($from, $to) {
 				if ($from != '' && $from != 'undefined' && $from != null) {
-					$query->whereDate('orders.created_at', '>=', $from);
+					$from = Carbon::parse($from)->toDateTimeString();
+					$query->where('orders.created_at', '>=', $from);
 				}
 				if ($to != '' && $to != 'undefined' && $to != null) {
-					$query->whereDate('orders.created_at', '<=', $to);
+					$to = Carbon::parse($to)->addSeconds(59)->toDateTimeString();
+					$query->where('orders.created_at', '<=', $to);
 				}
 			})
 			->where(function ($query) use ($box_id) {

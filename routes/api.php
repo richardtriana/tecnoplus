@@ -41,9 +41,12 @@ Route::middleware('auth:api')->group(function () {
 
 	Route::put('/users/changePassword',  [UserController::class, 'changePassword']);
 	Route::get('/users/user-list', [UserController::class, 'listUsers'])->middleware('can:user.index');
+	Route::get('/user/wairte', [UserController::class, 'listWaiter']);
 	Route::resource('/users', UserController::class);
 	Route::post('/users/{user}/activate',  [UserController::class, 'activate']);
 	Route::post('/register', [UserController::class, 'register']);
+
+	
 
 	Route::post('/zones/{category}/activate',  [CategoryController::class, 'activate']);
 	Route::get('/categories/category-list', [CategoryController::class, 'categoryList']);

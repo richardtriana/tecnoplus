@@ -1,4 +1,4 @@
-const api = 'http://tecnoplus.test/api';
+const api = 'http://restaurant-core.test/api';
 
 
 export default {

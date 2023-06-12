@@ -349,4 +349,20 @@ class UserController extends Controller
             'users' => $users
         ]);
     }
+
+    public function listWaiter(Request $request) 
+    {
+        $users = User::without('roles')->where('state', 1)->where(function($query) use ($request){
+            if ($request->filled('search')) {
+                $query->where('name', 'LIKE', '%'.$request->search.'%')
+                ->orWhere('email', 'LIKE', '%'.$request->search.'%');
+            }
+        })->get();
+
+        return response()->json([
+            'status' => 'success',
+            'code' => 200,
+            'data' => $users
+        ]);
+    }
 }

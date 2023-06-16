@@ -109,7 +109,7 @@ class OrderController extends Controller
 	 */
 	public function store(Request $request)
 	{
-		$user_id =  Auth::user()->id;
+		$user_id =  $request->filled('id_waiter') ? $request->id_waiter : Auth::user()->id;
 		$box = Box::find($request->box_id);
 		$bill_number = $this->generateBillNumber($request);
 
@@ -202,8 +202,8 @@ class OrderController extends Controller
 	{
 		$details  = Order::find($order->id);
 		return [
-			'order_information' => $details, 
-			'order_details' => $details->detailOrders()->get(), 
+			'order_information' => $details,
+			'order_details' => $details->detailOrders()->get(),
 			'user' => $details->user()->first()];
 	}
 
@@ -244,7 +244,7 @@ class OrderController extends Controller
 			}
 			return $item;
 		});
-		
+
 		$order->client_id = $request->id_client;
 		$order->table_id = $request->table_id ?? NULL;
 		$order->total_paid = $request->total_tax_inc;
@@ -331,7 +331,7 @@ class OrderController extends Controller
 
 			return $table;
 		}
-		
+
 		return $order;
 	}
 

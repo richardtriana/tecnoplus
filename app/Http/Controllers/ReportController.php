@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+	public function __construct()
+	{
+		$this->middleware('can:report.index');
+	}
+
 	public function reportSales(Request $request)
 	{
 		$from = $request->from;
@@ -188,7 +193,7 @@ class ReportController extends Controller
 			DB::raw('SUM(total_iva_exc) as total_iva_exc'),
 			DB::raw("(DATE_FORMAT(orders.created_at,'%Y-%m-%d')) as date_paid")
 		)
-		
+
 			->selectRaw("count(orders.id) as number_of_orders")
 			->selectRaw("count(case when state = '2' then 1 end) as registered")
 			->selectRaw("count(case when state = '3' then 1 end) as quoted")

@@ -101,7 +101,7 @@
 			</div>
 		</div>
 	</li>
-	<li class="nav-item">
+	<li class="nav-item"  v-if="validatePermission('report.index')">
 		<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReport" aria-expanded="true"
 			aria-controls="collapseReport">
 			<i class="bi bi-shop"></i>

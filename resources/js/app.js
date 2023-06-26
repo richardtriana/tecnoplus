@@ -116,10 +116,10 @@ const routes = [
   { path: '/billings/:billing_id/details-billing', component: DetailsBilling, props: true, name: 'details-billing', alias: "billing.index" },
   { path: '/create-edit-billing/:billing_id', component: CreateEditBilling, props: true, name: 'create-edit-billing', alias: "billing.store" },
 
-  { path: '/reports/report-sale', component: ReportSale, props: true, name: 'report-sale' },
-  { path: '/reports/report-general-sales', component: ReportGeneralSales, props: true, name: 'report-general-sales' },
-  { path: '/reports/report-product-sales', component: ReportProductSales, props: true, name: 'report-product-sales' },
-  { path: '/reports/closing', component: ReportClosing, props: true, name: 'report-closing' },
+  { path: '/reports/report-sale', component: ReportSale, props: true, name: 'report-sale', alias:'report.index' },
+  { path: '/reports/report-general-sales', component: ReportGeneralSales, props: true, name: 'report-general-sales', alias:'report.index' },
+  { path: '/reports/report-product-sales', component: ReportProductSales, props: true, name: 'report-product-sales', alias:'report.index' },
+  { path: '/reports/closing', component: ReportClosing, props: true, name: 'report-closing', alias:'report.index' },
 
   { path: '/boxes', component: Boxes, alias: 'box.index' },
 

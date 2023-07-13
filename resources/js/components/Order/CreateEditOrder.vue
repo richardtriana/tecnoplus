@@ -280,11 +280,10 @@
             <!-- Facturar -->
             <i class="bi bi-receipt"></i> <b>F1</b> Facturar
           </button>
-          <button type="button" :disabled="paid_value < total_tax_inc" class="btn btn-outline-primary btn-block"
+          <!-- <button type="button" :disabled="paid_value < total_tax_inc" class="btn btn-outline-primary btn-block"
             @click="createOrUpdateOrder(4)">
-            <!-- Facturar -->
             <i class="bi bi-receipt"></i> <b>F2</b> Facturar e imprimir
-          </button>
+          </button> -->
           <button type="button" :disabled="disabled" class="btn btn-outline-primary btn-block"
             @click="createOrUpdateOrder(5)">
             <!-- Credito -->

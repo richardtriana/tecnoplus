@@ -263,13 +263,13 @@ class OrderController extends Controller
 			$order->invoiced_by = $user_id;
 			$order->payment_date = $request->payment_date  ? $request->payment_date : date('Y-m-d h:i:s');
 		}
-		if ($request->state == 6) {
+		if ($request->state == 6 || $request->state == 5) {
 			$order->state = 5;
 		}
 		if ($request->state != 4 && $request->state != 6) {
 			$order->state = $request->state;
 			if ($request->state == 2) {
-				$order->payment_date = $request->payment_date  ? $request->payment_date : date('Y-m-d h:i:s');
+				$order->payment_date = $request->payment_date  ? $request->payment_date :  date('Y-m-d h:i:s');
 			}
 		}
 

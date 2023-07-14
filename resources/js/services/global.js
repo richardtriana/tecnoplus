@@ -1,4 +1,4 @@
-const api = 'http://restaurant-core.test/api';
+const api = 'http://192.168.1.80/restaurante/public/api';
 
 
 export default {

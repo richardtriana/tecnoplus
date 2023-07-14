@@ -12,22 +12,33 @@
         <div class="form-group col-md-3">
           <label for="filter_category">Categoria</label>
           <select id="filter_category" v-model="filter.category" class="form-control">
-              <option value="">Selecciona una categoria</option>
-              <option v-for=" (item, index) in categoriesList" :key="index" :value="item.id">{{ item.name }}</option>
+            <option value="">Selecciona una categoria</option>
+            <option v-for=" (item, index) in categoriesList" :key="index" :value="item.id">{{ item.name }}</option>
           </select>
         </div>
         <div class="form-group col-md-3">
           <label for="from_date">Desde</label>
-          <input type="date" class="form-control" id="from_date" v-model="filter.from" />
+          <input type="datetime-local" class="form-control" id="from_date" v-model="filter.from" />
         </div>
         <div class="form-group col-md-3">
           <label for="to_date">Hasta</label>
-          <input type="date" class="form-control" id="to_date" v-model="filter.to" />
+          <input type="datetime-local" class="form-control" id="to_date" v-model="filter.to" />
+        </div>
+        <div class="form-group col-3">
+          <label for="nro_results">Mostrar {{ filter.no_rresults }} resultados por página:</label>
+          <input type="number" step="any" class="form-control" id="nro_results" placeholder="Resultados"
+            v-model="filter.nro_results" />
         </div>
         <div class="col-md-3  my-4">
           <button class="btn btn-success btn-block" @click="getOrders(1)">
             Buscar <i class="bi bi-search"></i>
           </button>
+        </div>
+        <div class="col my-4 col-3">
+          <download-excel class="btn btn-outline-success mr-2 btn-block" :fields="json_fields" :data="List.data"
+            name="product-list.xls" type="xls">
+            <i class="bi bi-file-earmark-arrow-down-fill"></i> Exportar selección
+          </download-excel>
         </div>
       </div>
     </div>
@@ -41,8 +52,8 @@
               <th>Cantidad productos vendidos</th>
             </tr>
           </thead>
-          <tbody v-if="List.length > 0">
-            <tr v-for="(l, index) in List" :key="index">
+          <tbody v-if="List.data">
+            <tr v-for="(l, index) in List.data" :key="index">
               <td>
                 {{ l.product }}
               </td>
@@ -66,6 +77,10 @@
             </tr>
           </tbody>
         </table>
+        <pagination :align="'center'" :data="List" :limit="8" @pagination-change-page="getOrders">
+          <span slot="prev-nav"><i class="bi bi-chevron-double-left"></i></span>
+          <span slot="next-nav"><i class="bi bi-chevron-double-right"></i></span>
+        </pagination>
       </section>
     </div>
   </div>
@@ -75,19 +90,40 @@
 export default {
   data() {
     return {
-      List: [],
+      List: {},
       filter: {
         from: "",
         to: "",
         product: "",
-        category: ""
+        category: "",
+        nro_results: 15
       },
-      categoriesList: []
+      categoriesList: [],
+      json_fields: {
+        'Producto': {
+					field: 'product',
+					callback: (value) => {
+						return value;
+					}
+				},
+        'Código de barras': {
+					field: 'barcode',
+					callback: (value) => {
+						return value;
+					}
+				},
+        'Cantidad vendida': {
+					field: 'quantity_of_products',
+					callback: (value) => {
+						return value;
+					}
+				},
+      }
     };
   },
-  computed:{
-    total_products : function(){
-      return this.List.map(item => item.quantity_of_products).reduce((value1, value2) =>{
+  computed: {
+    total_products: function () {
+      return this.List.data.map(item => item.quantity_of_products).reduce((value1, value2) => {
         return value1 + value2;
       });
     }
@@ -105,9 +141,9 @@ export default {
           me.List = response.data;
         });
     },
-    getCategories(){
+    getCategories() {
       let me = this;
-      axios.get('api/categories?paginate=0', this.$root.config).then( response =>{
+      axios.get('api/categories?paginate=0', this.$root.config).then(response => {
         me.categoriesList = response.data.categories;
       });
     }

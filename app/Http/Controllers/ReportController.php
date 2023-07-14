@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+	Const NRO_RESULTS = 15;
+
 	public function __construct()
 	{
 		$this->middleware('can:report.index');
@@ -120,16 +122,19 @@ class ReportController extends Controller
 		$to = $request->to;
 		$product = $request->product;
 		$category = $request->category;
+		$nro_results = $request->nro_results ?: self::NRO_RESULTS;
 
 		$detail_order = DetailOrder::select('product', 'barcode')
 			->selectRaw('SUM(quantity) as quantity_of_products')
 			->groupBy('barcode', 'product')
 			->where(function ($query) use ($from, $to) {
 				if ($from != '' && $from != 'undefined' && $from != null) {
-					$query->whereDate('created_at', '>=', $from);
+					$from = Carbon::parse($from)->toDateTimeString();
+					$query->where('orders.created_at', '>=', $from);
 				}
 				if ($to != '' && $to != 'undefined' && $to != null) {
-					$query->whereDate('created_at', '<=', $to);
+					$to = Carbon::parse($to)->addSeconds(59)->toDateTimeString();
+					$query->where('orders.created_at', '<=', $to);
 				}
 			})
 			->where(function ($query) use ($product) {
@@ -143,7 +148,7 @@ class ReportController extends Controller
 					$query->where('category_id', $category);
 				}
 			})
-			->get();
+			->paginate($nro_results);
 
 		return $detail_order;
 	}
@@ -154,8 +159,6 @@ class ReportController extends Controller
 			->selectRaw('SUM(quantity) as quantity_of_products')
 			->selectRaw('SUM(quantity * cost_price_tax_inc ) as cost_stock')
 			->selectRaw('SUM(quantity * sale_price_tax_inc ) as cost_sale');
-
-
 
 		if ($request->category_id != '' && $request->category_id  != null && $request->category_id  != 0) {
 			$total_products = $total_products
@@ -183,6 +186,7 @@ class ReportController extends Controller
 		$box_id = $request->box_id;
 		$user_id = $request->user_id;
 		$status = $request->status ?? $request->status;
+		$nro_results = $request->nro_results ?: self::NRO_RESULTS;
 
 		$orders = Order::select(
 			// DB::raw('count(pay) as pay'),
@@ -236,8 +240,12 @@ class ReportController extends Controller
 				}
 			})
 			->groupBy('date_paid')
-			->get();
+			->paginate($nro_results);
+		
+		$totals = (object) [];
 
-		return $orders;
+		$totals->total_sale = $orders->sum('total_sale');
+
+		return ['orders'=>$orders, 'totals'=>$totals];
 	}
 }

@@ -30,11 +30,16 @@
 					</div>
 					<div class="form-group col-md-3">
 						<label for="from_date">Desde</label>
-						<input type="date" class="form-control" id="from_date" v-model="filter.from" />
+						<input type="datetime-local" class="form-control" id="from_date" v-model="filter.from" />
 					</div>
 					<div class="form-group col-md-3">
 						<label for="to_date">Hasta</label>
-						<input type="date" class="form-control" id="to_date" v-model="filter.to" />
+						<input type="datetime-local" class="form-control" id="to_date" v-model="filter.to" />
+					</div>
+					<div class="form-group col-3">
+						<label for="nro_results">Mostrar resultados por página:</label>
+						<input type="number" step="any" class="form-control" id="nro_results" placeholder="Resultados"
+									 v-model="filter.nro_results" />
 					</div>
 					<div class="form-group col-3" v-if="$root.validatePermission('order.update')">
 						<label for="category">Usuario</label>
@@ -99,7 +104,7 @@
 										<i class="bi bi-file-earmark-pdf-fill"></i>
 									</button>
 								</td>
-	
+
 								<td>
 									{{  o.user.name  }}
 								</td>
@@ -171,6 +176,7 @@ export default {
 				to: "",
 				user_id: "",
 				status: `1`,
+				nro_results: 15
 			},
 			statusOrders: [
 				{ id: 0, status: "Desechada" },

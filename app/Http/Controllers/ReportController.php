@@ -91,9 +91,11 @@ class ReportController extends Controller
 			->selectRaw("SUM(JSON_EXTRACT(`payment_methods`,'$.others')) as others")
 			->where(function ($query) use ($from, $to) {
 				if ($from != '' && $from != 'undefined' && $from != null) {
+					$from = Carbon::parse($from)->toDateString();
 					$query->whereDate('created_at', '>=', $from);
 				}
 				if ($to != '' && $to != 'undefined' && $to != null) {
+					$to = Carbon::parse($to)->addSeconds(59)->toDateString();
 					$query->whereDate('created_at', '<=', $to);
 				}
 			})
@@ -241,7 +243,7 @@ class ReportController extends Controller
 			})
 			->groupBy('date_paid')
 			->paginate($nro_results);
-		
+
 		$totals = (object) [];
 
 		$totals->total_sale = $orders->sum('total_sale');

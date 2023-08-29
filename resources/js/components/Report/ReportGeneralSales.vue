@@ -15,11 +15,11 @@
         </div>
         <div class="form-group col-md-3">
           <label for="from_date">Desde</label>
-          <input type="date" class="form-control" id="from_date" v-model="filter.from" />
+          <input type="datetime-local" class="form-control" id="from_date" v-model="filter.from" />
         </div>
         <div class="form-group col-md-3">
           <label for="to_date">Hasta</label>
-          <input type="date" class="form-control" id="to_date" v-model="filter.to" />
+          <input type="datetime-local" class="form-control" id="to_date" v-model="filter.to" />
         </div>
         <div class="form-group col-3">
           <label for="category">Usuario</label>

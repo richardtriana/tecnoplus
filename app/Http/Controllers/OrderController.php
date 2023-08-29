@@ -21,6 +21,7 @@ use PDF;
 
 class OrderController extends Controller
 {
+	const NRO_RESULTS = 15;
 
 	public function __construct()
 	{
@@ -39,6 +40,7 @@ class OrderController extends Controller
 	{
 		$user_id =  $request->user_id ? $request->user_id  :  Auth::user()->id;
 		$sign_user_id =  $user_id == '-1' ? '<>' : '=';
+		$perPage = $request->nro_results ?? self::NRO_RESULTS;
 
 		$today = date('Y-m-d');
 		$from = $request->from;
@@ -56,11 +58,13 @@ class OrderController extends Controller
 		}
 
 		if ($from != '') {
+			$from = Carbon::parse($from)->toDateString();
 			$orders = $orders
 				->where('created_at', '>=', $from);
 		}
 
 		if ($to != '') {
+			$to = Carbon::parse($to)->addSeconds(59)->toDateString();
 			$orders = $orders
 				->where('created_at', '<=', $to);
 		}
@@ -79,7 +83,7 @@ class OrderController extends Controller
 			->where('user_id', $sign_user_id, $user_id)
 			->with('user:id,name','table:id,table')
 			->orderByDesc('id')
-			->paginate(10);
+			->paginate($perPage);
 
 		$totalOrders = $this->getTotalOrders($request);
 

@@ -64,7 +64,7 @@
                             <th>Costo total de venta</th>
                             <th>Ganancia bruta</th>
                             <!-- <th>Valor dinero ingresado</th> -->
-                            <!--  <th>Total Pago</th>                           
+                            <!--  <th>Total Pago</th>
                             <th>Total Ganancia</th> -->
                             <th>Pagos recibidos</th>
                         </tr>
@@ -253,7 +253,8 @@ export default {
                 no_invoice: me.filter.no_invoice,
                 client: me.filter.client,
                 status: me.filter.status,
-                nro_results: me.filter.nro_results
+                nro_results: me.filter.nro_results,
+								user_id : me.filter.user_id
             };
 
             axios

@@ -45,10 +45,12 @@ class ReportController extends Controller
 			->orderBy('date_paid', 'desc')
 			->where(function ($query) use ($from, $to) {
 				if ($from != '' && $from != 'undefined' && $from != null) {
-					$query->whereDate('payment_date', '>=', $from);
+					$from = Carbon::parse($from)->toDateTimeString();
+					$query->where('payment_date', '>=', $from);
 				}
 				if ($to != '' && $to != 'undefined' && $to != null) {
-					$query->whereDate('payment_date', '<=', $to);
+					$to = Carbon::parse($to)->addSeconds(59)->toDateTimeString();
+					$query->where('payment_date', '<=', $to);
 				}
 			})
 			->where(function ($query) use ($box_id) {
@@ -92,11 +94,11 @@ class ReportController extends Controller
 			->where(function ($query) use ($from, $to) {
 				if ($from != '' && $from != 'undefined' && $from != null) {
 					$from = Carbon::parse($from)->toDateString();
-					$query->whereDate('created_at', '>=', $from);
+					$query->where('created_at', '>=', $from);
 				}
 				if ($to != '' && $to != 'undefined' && $to != null) {
 					$to = Carbon::parse($to)->addSeconds(59)->toDateString();
-					$query->whereDate('created_at', '<=', $to);
+					$query->where('created_at', '<=', $to);
 				}
 			})
 			->where(function ($query) use ($box_id) {

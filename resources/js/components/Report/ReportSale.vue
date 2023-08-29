@@ -9,6 +9,14 @@
 					<label for="category">Estado</label>
 					<v-select :options="statusOrders" label="status" :reduce="(status) => status.id" v-model="filter.status" />
 				</div>
+				<div class="form-group col-md-3">
+					<label for="from_date">Desde</label>
+					<input type="datetime-local" class="form-control" id="from_date" v-model="filter.from" />
+				</div>
+				<div class="form-group col-md-3">
+					<label for="to_date">Hasta</label>
+					<input type="datetime-local" class="form-control" id="to_date" v-model="filter.to" />
+				</div>
 				<div class="col my-4 col-4">
 					<button class="btn btn-success btn-block" @click="getOrders(1)">
 						Buscar <i class="bi bi-search"></i>

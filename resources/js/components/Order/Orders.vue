@@ -206,6 +206,7 @@ export default {
 				to: me.filter.to,
 				user_id: me.filter.user_id,
 				status: me.filter.status? me.filter.status : me.status,
+				nro_results: me.filter.nro_results
 			};
 
 			axios

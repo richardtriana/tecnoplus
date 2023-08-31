@@ -277,6 +277,7 @@ class OrderController extends Controller
 			}
 		}
 
+		$order->created_at = date('Y-m-d H:i:s');
 		$order->update();
 
 		if ($order->state == 5) {

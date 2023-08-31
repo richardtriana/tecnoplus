@@ -131,14 +131,14 @@ class ReportController extends Controller
 		$detail_order = DetailOrder::select('product', 'barcode')
 			->selectRaw('SUM(quantity) as quantity_of_products')
 			->groupBy('barcode', 'product')
-			->where(function ($query) use ($from, $to) {
+			->whereHas('order', function ($query) use ($from, $to) {
 				if ($from != '' && $from != 'undefined' && $from != null) {
 					$from = Carbon::parse($from)->toDateTimeString();
-					$query->where('orders.created_at', '>=', $from);
+					$query->where('created_at', '>=', $from);
 				}
 				if ($to != '' && $to != 'undefined' && $to != null) {
 					$to = Carbon::parse($to)->addSeconds(59)->toDateTimeString();
-					$query->where('orders.created_at', '<=', $to);
+					$query->where('created_at', '<=', $to);
 				}
 			})
 			->where(function ($query) use ($product) {

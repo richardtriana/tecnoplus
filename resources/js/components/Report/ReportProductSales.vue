@@ -123,6 +123,7 @@ export default {
   },
   computed: {
     total_products: function () {
+			if(this.List.data.length == 0) return 0;
       return this.List.data.map(item => item.quantity_of_products).reduce((value1, value2) => {
         return value1 + value2;
       });

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -173,13 +174,22 @@ class OrderController extends Controller
 			}
 		}
 
-		$print = new PrintOrderController();
-		if ($request->state == 4 || $request->state == 6) {
-			$print->printTicket($order->id, $request->cash, $request->change);
-		} else if ($request->state == 1) {
-			$print->printTicketRecently($order->id);
-		} else {
-			$print->openBox($order->id);
+		try{
+			$print = new PrintOrderController();
+			if ($request->state == 4 || $request->state == 6) {
+				$print->printTicket($order->id, $request->cash, $request->change);
+			} else if ($request->state == 1) {
+				$print->printTicketRecently($order->id);
+			} else {
+				$print->openBox($order->id);
+			}
+		}catch (\Throwable $th){
+				Log::error('error_print_ticket', [
+						'method' => __METHOD__,
+						'class' =>  $th->getFile(),
+						'line' => $th->getLine(),
+						'message' => $th->getMessage()
+				]);
 		}
 
 		if ($request->table_id) {

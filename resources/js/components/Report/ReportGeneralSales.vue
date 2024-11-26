@@ -114,7 +114,7 @@ export default {
       },
       statusOrders: [
         { id: 0, status: "Desechada" },
-        { id: 1, status: "Suspender" },
+        { id: 1, status: "Pedido" },
         { id: 2, status: "Facturado" },
         { id: 3, status: "Cotizado" },
         { id: 4, status: "Facturar e imprimir" },

@@ -63,6 +63,8 @@ Route::middleware('auth:api')->group(function () {
 	Route::get('/print-payment-ticket/{order}', [PrintOrderController::class, 'printPaymentTicket'])->middleware('can:order.index');
 	Route::get('/orders/generatePdf/{order}', [OrderController::class, 'generatePdf']);
 	Route::get('/orders/generatePaymentPdf/{order}', [OrderController::class, 'generatePaymentPdf']);
+	Route::get('/orders/kitchen', [OrderController::class, 'ordersForKitchen']);
+	Route::put('/orders/kitchen/{order}', [OrderController::class, 'prepareOrderKitchen']);
 	Route::resource('/orders',  OrderController::class);
 	Route::resource('/order-details', DetailOrderController::class);
 

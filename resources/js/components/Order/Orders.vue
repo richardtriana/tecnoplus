@@ -16,7 +16,17 @@
 					<h6 class="w-100">Buscar...</h6>
 					<div class="form-group col-3">
 						<label for="category">Estado</label>
-						<v-select :options="statusOrders" label="status" :reduce="(status) => status.id" v-model="filter.status" />
+						<v-select :options="statusOrders" label="status" :reduce="(s) => s.id" v-model="filter.status"  > 
+							<template #selected-option="{}" >
+								<div style="display: flex; align-items: baseline">
+								  <em style="margin-left: 0.5rem"
+									>{{statusOrders[filter.status].status}}</em
+								  >
+								</div>
+							  </template>
+							 </v-select>
+
+							 
 					</div>
 					<div class="form-group col-3">
 						<label for="nro_factura">Nro Factura</label>
@@ -160,7 +170,7 @@ export default {
 	props: {
 		status: {
 			type: Number,
-			default: null
+			default: 0
 		}
 	},
 	data() {
@@ -180,7 +190,7 @@ export default {
 			},
 			statusOrders: [
 				{ id: 0, status: "Desechada" },
-				{ id: 1, status: "Suspender" },
+				{ id: 1, status: "Pedido" },
 				{ id: 2, status: "Facturado" },
 				{ id: 3, status: "Cotizado" },
 				{ id: 4, status: "Facturar e imprimir" },
@@ -197,7 +207,6 @@ export default {
 	methods: {
 		getOrders(page = 1) {
 			let me = this;
-
 			let data = {
 				page: page,
 				client: me.filter.client,
@@ -205,7 +214,7 @@ export default {
 				from: me.filter.from,
 				to: me.filter.to,
 				user_id: me.filter.user_id,
-				status: me.filter.status? me.filter.status : me.status,
+				status: me.filter.status != undefined ? me.filter.status : me.status.default,
 				nro_results: me.filter.nro_results
 			};
 

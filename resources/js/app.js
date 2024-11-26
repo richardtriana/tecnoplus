@@ -70,6 +70,7 @@ import axios from 'axios';
 
 import CKEditor from '@ckeditor/ckeditor5-vue2';
 import Swal from "sweetalert2";
+import Kitchen from './components/kitchen/Kitchen.vue';
 
 
 Vue.use(VueRouter)
@@ -108,6 +109,7 @@ const routes = [
   { path: '/brands', component: Brands, alias: "brand.index" },
 
   { path: '/orders', component: Orders, alias: "order.index" , props:{ status:1}},
+  { path: '/Kitchen', component: Kitchen, alias: "order.index" , props:{ status:1}},
   { path: '/orders/:order_id/details-order', component: DetailsOrder, props: true, name: 'details-order', alias: "order.index" },
   { path: '/create-edit-order/:order_id', component: CreateEditOrder, props: true, name: 'create-edit-order', alias: "order.store" },
   { path: '/create-edit-order-mobile/:order_id', component: CreateEditOrderMobile, props: true, name: 'create-edit-order-mobile', alias: "order.store" },

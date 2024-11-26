@@ -141,13 +141,13 @@ class ProductController extends Controller
 			$product->wholesale_price_tax_exc = $new_product['wholesale_price_tax_exc'];
 			$product->wholesale_price_tax_inc = $new_product['wholesale_price_tax_inc'];
 			$product->stock = $new_product['stock'];
-			$product->quantity = $new_product['quantity'];
-			$product->minimum = $new_product['minimum'];
-			$product->maximum = $new_product['maximum'];
+			$product->quantity = $new_product['quantity'] ?? 0;
+			$product->minimum = $new_product['minimum'] ?? 0;
+			$product->maximum = $new_product['maximum'] ?? 0;
 			$product->category_id = $new_product['category_id'];
 			$product->tax_id = $new_product['tax_id'];
 			$product->brand_id = $new_product['brand_id'];
-
+			$product->zone_id = $new_product['zone_id'];
 			$product->expiration_date = $new_product['expiration_date'];
 			$product->save();
 
@@ -322,20 +322,24 @@ class ProductController extends Controller
 	public function updateStockByBarcode($type, $barcode, $quantity)
 	{
 		$product = Product::select('id', 'barcode', 'quantity')->where('barcode', $barcode)->first();
-		if ($type == 1) {
-			$product->quantity = $product->quantity - $quantity;
+		if ($product->stock) {
+			if ($type == 1) {
+				$product->quantity = $product->quantity - $quantity;
+			}
+			if ($type == 2) {
+				$product->quantity = $product->quantity + $quantity;
+			}
+			$product->save();
 		}
-		if ($type == 2) {
-			$product->quantity = $product->quantity + $quantity;
-		}
-		$product->save();
 	}
 
 	public function updateStockById(Request $request, $id)
 	{
 		$product = Product::findOrFail($id);
-		$product->quantity = $product->quantity + $request->quantity;
-		$product->save();
+		if ($product->stock) {
+			$product->quantity = $product->quantity + $request->quantity;
+			$product->save();
+		}
 	}
 
 	/**

@@ -21,7 +21,8 @@ class Order extends Model
         'payment_date',
         'state',
         'box_id',
-        'payment_methods'
+        'payment_methods',
+        'proccess'
     ];
 
     protected $casts = [

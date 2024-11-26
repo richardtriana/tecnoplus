@@ -1,5 +1,5 @@
 Estados de factura
-1) Suspender
+1) Pedido
 2) Facturar
 3) Cotizar
 4) Facturar e imprimir

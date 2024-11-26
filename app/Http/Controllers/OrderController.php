@@ -54,6 +54,10 @@ class OrderController extends Controller
 				$query->where('name', 'like', "%$request->client%");
 			}
 		});
+
+		if($request->table_id){
+			$orders = $orders ->where('table_id', $request->table_id);
+		}
 		if ($request->no_invoice != '') {
 			$orders = $orders->where('no_invoice', 'like', "%$request->no_invoice");
 		}
@@ -82,7 +86,7 @@ class OrderController extends Controller
 
 		$orders = $orders
 			->where('user_id', $sign_user_id, $user_id)
-			->with('user:id,name','table:id,table')
+			->with('user:id,name', 'table:id,table')
 			->orderByDesc('id')
 			->paginate($perPage);
 
@@ -132,6 +136,7 @@ class OrderController extends Controller
 		$order->payment_methods = ($request->payment_methods);
 		$order->box_id = $box->id;
 		$order->bill_number = $bill_number;
+		$order->proccess = $request->proccess;
 
 		if ($request->state == 4) {
 			$order->state = 2;
@@ -174,7 +179,7 @@ class OrderController extends Controller
 			}
 		}
 
-		try{
+		try {
 			$print = new PrintOrderController();
 			if ($request->state == 4 || $request->state == 6) {
 				$print->printTicket($order->id, $request->cash, $request->change);
@@ -183,13 +188,13 @@ class OrderController extends Controller
 			} else {
 				$print->openBox($order->id);
 			}
-		}catch (\Throwable $th){
-				Log::error('error_print_ticket', [
-						'method' => __METHOD__,
-						'class' =>  $th->getFile(),
-						'line' => $th->getLine(),
-						'message' => $th->getMessage()
-				]);
+		} catch (\Throwable $th) {
+			Log::error('error_print_ticket', [
+				'method' => __METHOD__,
+				'class' =>  $th->getFile(),
+				'line' => $th->getLine(),
+				'message' => $th->getMessage()
+			]);
 		}
 
 		if ($request->table_id) {
@@ -218,7 +223,8 @@ class OrderController extends Controller
 		return [
 			'order_information' => $details,
 			'order_details' => $details->detailOrders()->get(),
-			'user' => $details->user()->first()];
+			'user' => $details->user()->first()
+		];
 	}
 
 	/**
@@ -253,7 +259,7 @@ class OrderController extends Controller
 		$newProducts = $updatedProducts->map(function ($item) use ($array1) {
 			foreach ($array1 as $op) {
 				if ($op['product_id'] == $item['product_id']) {
-					$item['quantity'] = $item['quantity'] - $op['quantity'] ;
+					$item['quantity'] = $item['quantity'] - $op['quantity'];
 				}
 			}
 			return $item;
@@ -267,6 +273,8 @@ class OrderController extends Controller
 		$order->total_cost_price_tax_inc = $request->total_cost_price_tax_inc;
 		$order->total_discount = $request->total_discount;
 		$order->observations = $request->observations;
+		$order->proccess = $request->proccess;
+
 		$order->payment_methods = ($request->payment_methods);
 		if ($order->state == 3) {
 			$order->bill_number = $bill_number;
@@ -310,7 +318,9 @@ class OrderController extends Controller
 
 			DetailOrder::updateOrCreate(
 				[
-					'order_id' => $id, 'product_id' => $details_order['product_id'], 'barcode' => $details_order['barcode']
+					'order_id' => $id,
+					'product_id' => $details_order['product_id'],
+					'barcode' => $details_order['barcode']
 				],
 				[
 					'discount_percentage' => $details_order['discount_percentage'],
@@ -641,5 +651,34 @@ class OrderController extends Controller
 			'code' => 200,
 			'message' => 'Abonos realizados correctamente',
 		]);
+	}
+
+	public function ordersForKitchen(Request $request)
+	{
+		$perPage = $request->nro_results ?? self::NRO_RESULTS;
+
+		$orders = Order::where('state', 1)->where('proccess', false)
+			->with( 'table:id,table', 'detailOrders')
+			->orderBy('created_at')
+			->paginate($perPage);
+
+		$totalOrders = $this->getTotalOrders($request);
+
+		return response()->json([
+			'status' => 'success',
+			'code' => 200,
+			'orders' => $orders,
+			'totalOrders' => $totalOrders->orders
+		]);
+	}
+
+	public function prepareOrderKitchen(Order $order)
+	{
+		$order->proccess = true;
+		$order->save();
+
+		return [
+			'order_information' => $order
+		];
 	}
 }

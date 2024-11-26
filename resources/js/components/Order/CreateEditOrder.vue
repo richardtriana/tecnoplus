@@ -291,7 +291,7 @@
           </button>
           <button type="button" :disabled="disabled" class="btn btn-outline-primary btn-block"
             @click="createOrUpdateOrder(1)">
-            <i class="bi bi-clock-fill"></i> Suspender
+            <i class="bi bi-clock-fill"></i> Pedido
           </button>
 
           <button type="button" class="btn btn-outline-primary btn-block" @click="createOrUpdateOrder(3)">
@@ -353,6 +353,7 @@ export default {
           others: 0.0,
           change: 0.0,
         },
+        proccess: true
       },
     };
   },
@@ -545,6 +546,10 @@ export default {
       this.order.total_cost_price_tax_inc = this.total_cost_price_tax_inc;
       this.order.payment_methods.change = this.payment_return;
 
+      if(this.order.state == 1){
+        this.order.proccess = false;
+      }
+
       if (this.order.id_client == 1 && state_order == 5) {
         alert("Debe seleccionar un cliente válido");
         return false;
@@ -634,6 +639,7 @@ export default {
         this.$root.config
       );
     },
+
     commands() {
       let me = this;
 

@@ -13,12 +13,18 @@ class TableController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $tables = Table::select();
+        if ($request->table != '') {
+			$tables = $tables
+				->where('table', 'LIKE', "%$request->table%");
+		}
+
         return response()->json([
             'status' => 'success',
             'code' => 200,
-            'tables' => Table::paginate(10)
+            'tables' => $tables->paginate(10)
         ]);
     }
 
@@ -177,7 +183,7 @@ class TableController extends Controller
 		return response()->json($data, $data['code']);
     }
 
-    public function tableList()
+    public function tableList(Request $request)
     {
         $tables = Table::where('state', 'free')->get();
 

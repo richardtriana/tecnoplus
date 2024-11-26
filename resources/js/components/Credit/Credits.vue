@@ -139,7 +139,7 @@ export default {
 			},
 			statusOrders: {
 				0: "Desechada",
-				1: "Suspender",
+				1: "Pedido",
 				2: "Facturar",
 				3: "Cotizar",
 				4: "Facturar e imprimir",

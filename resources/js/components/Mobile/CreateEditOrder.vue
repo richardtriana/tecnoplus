@@ -253,7 +253,7 @@
             class="btn btn-outline-primary btn-block"
             @click="createOrUpdateOrder(1)"
           >
-            <i class="bi bi-clock-fill"></i> Suspender
+            <i class="bi bi-clock-fill"></i> Pedido
           </button>
           <router-link
             to="/orders"

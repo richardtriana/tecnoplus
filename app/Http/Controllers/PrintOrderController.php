@@ -249,7 +249,7 @@ class PrintOrderController extends Controller
 	}
 
 
-	public function printTicketRecently($order_id, $listProducts=null)
+	public function printTicketRecently($order_id, $listProducts = null)
 	{
 		// Orden
 		$order = Order::find($order_id);
@@ -270,7 +270,7 @@ class PrintOrderController extends Controller
 							$p = $order->detailOrders()->where('product_id', $product->id)->first();
 							if ($product->id == $newProduct['product_id']) {
 								$product->quantity = $newProduct['quantity'];
-								if($product->quantity ){
+								if ($product->quantity) {
 									array_push($keyPrinter[$key], $product);
 								}
 							}
@@ -329,7 +329,7 @@ class PrintOrderController extends Controller
 					}
 					$printer->text("\n");
 					$printer->setLineSpacing(2);
-					$printer->setJustification(Printer::JUSTIFY_CENTER);
+					$printer->setJustification(Printer::JUSTIFY_LEFT);
 					$printer->text("\n-----------------------------------------" . "\n\n");
 					$printer->setLineSpacing(1);
 					$printer->setEmphasis(true);
@@ -337,12 +337,24 @@ class PrintOrderController extends Controller
 					$printer->text("\n-----------------------------------------" . "\n\n");
 					$printer->setEmphasis(false);
 					$printer->text("\n");
+					$printer->setTextSize(2, 2);
 					foreach ($order_details as $df) {
-						$line = sprintf('%-30s %8.2f ', '- ' . mb_strimwidth($df->product, 0, 21, ''), $df->quantity);
-						$printer->text($line);
-						$printer->text("\n-----------------------------------------" . "\n\n");
-						$printer->text("\n");
+					
+						$maxWidthText = 15; 
+						$maxWidthQuantity = 5; 
+						$wrappedText = wordwrap($df->product, $maxWidthText); 
+						$textLines = explode("\n", $wrappedText); 
+						$printer->text("- ");
+						foreach ($textLines as $i => $line) {
+							$quantityDisplay = $i === 0 ? sprintf("%{$maxWidthQuantity}.2f", $df->quantity) : str_repeat(' ', $maxWidthQuantity);
+
+							$printer->text(sprintf("%-{$maxWidthText}s %s\n",  $line, $quantityDisplay));                                                                                     						
+						}
+						$printer->text("\n-----------------------");
+						$printer->feed(2);
 					}
+					
+					$printer->setTextSize(1, 1);
 
 					if ($order->observations) {
 						$printer->text(sprintf('%-16s %-25s', 'Observaciones:', $order->observations) . "\n");

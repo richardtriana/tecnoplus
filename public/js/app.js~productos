@@ -56905,7 +56905,7 @@ var render = function() {
                 },
                 [
                   _c("i", { staticClass: "bi bi-receipt" }),
-                  _vm._v(" Suspender\n        ")
+                  _vm._v(" Pedido\n        ")
                 ]
               ),
               _vm._v(" "),

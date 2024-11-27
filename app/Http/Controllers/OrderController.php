@@ -182,7 +182,7 @@ class OrderController extends Controller
 		try {
 			$print = new PrintOrderController();
 			if ($request->state == 4 || $request->state == 6) {
-				$print->printTicket($order->id, $request->cash, $request->change);
+				 $print->printTicket($order->id, $request->cash, $request->change);
 			} else if ($request->state == 1) {
 				$print->printTicketRecently($order->id);
 			} else {
@@ -208,7 +208,7 @@ class OrderController extends Controller
 		}
 
 
-		return $order->id;
+		return response()->json($order->id);
 	}
 
 	/**
@@ -357,7 +357,8 @@ class OrderController extends Controller
 			return $table;
 		}
 
-		return $order;
+		return response()->json($order);
+
 	}
 
 	/**

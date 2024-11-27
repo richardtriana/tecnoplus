@@ -8,6 +8,7 @@ use App\Models\Order;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Mike42\Escpos\EscposImage;
 use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
 use Mike42\Escpos\Printer;
@@ -248,9 +249,26 @@ class PrintOrderController extends Controller
 		}
 	}
 
+	public function printTicketRecentlyXXX($order_id, $listProducts = null)
+	{
+		$nombreImpresora = "POS-85";
+		$connector = new WindowsPrintConnector($nombreImpresora);
+		$impresora = new Printer($connector);
+		$impresora->setJustification(Printer::JUSTIFY_CENTER);
+		$impresora->setTextSize(2, 2);
+		$impresora->text("Imprimiendo\n");
+		$impresora->text("ticket\n");
+		$impresora->text("desde\n");
+		$impresora->text("Laravel\n");
+		$impresora->setTextSize(1, 1);
+		$impresora->text("https://parzibyte.me");
+		$impresora->feed(5);
+		$impresora->close();
+	}
 
 	public function printTicketRecently($order_id, $listProducts = null)
 	{
+
 		// Orden
 		$order = Order::find($order_id);
 		// $order_details = $order->detailOrders()->get();
@@ -259,115 +277,117 @@ class PrintOrderController extends Controller
 		// Información empresarial
 		$configuration = new Configuration();
 		$company =  $configuration->select()->first();
-		$printers =  $order->printers()->unique();
 
-		foreach ($printers as $key => $zone) {
-			$keyPrinter[$key] = [];
-			foreach ($order->products as $product) {
-				if ($product->zone_id == $zone->id) {
-					if ($listProducts) {
-						foreach ($listProducts as $newProduct) {
-							$p = $order->detailOrders()->where('product_id', $product->id)->first();
-							if ($product->id == $newProduct['product_id']) {
-								$product->quantity = $newProduct['quantity'];
-								if ($product->quantity) {
-									array_push($keyPrinter[$key], $product);
-								}
-							}
+		$productosPorZona = [];
+
+		foreach ($order->products as $product) {
+			foreach ($product->zones as $zone) {
+				$productosPorZona[$zone->id]['zone'] = $zone;
+
+				// Validar y reemplazar cantidad
+				if ($listProducts) {
+					foreach ($listProducts as $newProduct) {
+						if ($product->id == $newProduct['product_id']) {
+							$product->quantity = $newProduct['quantity'];
 						}
-					} else {
-						$p = $order->detailOrders()->where('product_id', $product->id)->first();
-						$product->quantity = $p->quantity;
-						array_push($keyPrinter[$key], $product);
 					}
+				} else {
+					// Si no hay lista de productos, obtener cantidad desde la relación
+					$p = $order->detailOrders()->where('product_id', $product->id)->first();
+					$product->quantity = $p->quantity;
+				}
+
+				// Solo agregar productos con cantidad válida
+				if ($product->quantity) {
+					$productosPorZona[$zone->id]['productos'][] = $product;
 				}
 			}
-			$order_details = $keyPrinter[$key];
+		}
+		foreach ($productosPorZona as $zonaData) {
+			$zone = $zonaData['zone'];
+			$pos_printer = $zone->printer;
 
-			if ($zone->printer && $order_details) {
-				$pos_printer = $zone->printer;
+			$productos = $zonaData['productos'];
 
-				// Config de impresora
+			try {
+				// Configurar la conexión con la impresora
 				$connector = new WindowsPrintConnector($pos_printer);
+				$printer = new Printer($connector);
+				$printer->setJustification(Printer::JUSTIFY_CENTER);
 
-				try {
-					$printer = new Printer($connector);
-					$printer->initialize();
-					$printer->setJustification(Printer::JUSTIFY_CENTER);
-					try {
-						$logo = EscposImage::load($company->logo, false);
-						$printer->bitImage($logo);
-					} catch (Exception $e) {
-						/* Images not supported on your PHP, or image file not found */
-						//$printer->text($e->getMessage() . "\n");
-					}
-					$printer->setTextSize(2, 2);
-					$printer->text($zone->zone . "\n");
+				// $printer->initialize();
+				$printer->setJustification(Printer::JUSTIFY_CENTER);
+				$printer->setTextSize(3, 3);
+				$printer->text($zone->zone . "\n");
+				$printer->feed(2);
 
-					$printer->setTextSize(1, 2);
-					$printer->setEmphasis(true);
-					$printer->text($company->name . "\n");
-					$printer->setJustification(Printer::JUSTIFY_LEFT);
-					$printer->setTextSize(1, 1);
-					$printer->setEmphasis(false);
+				$printer->setTextSize(2, 2);
+				$printer->setEmphasis(true);
+				$printer->text($company->name . "\n");
+				$printer->setJustification(Printer::JUSTIFY_LEFT);
+				$printer->setTextSize(1, 1);
+				$printer->setEmphasis(false);
 
-					$printer->setEmphasis(true);
-					$printer->text("Cajero(a): ");
-					$printer->text($system_user->name . "\n");
-					$printer->setEmphasis(false);
-					$printer->text("Fecha: ");
-					$printer->text(date('Y-m-d h:i:s A') .  "\n");
+				$printer->setEmphasis(true);
+				$printer->text("Cajero(a): ");
+				$printer->text($system_user->name . "\n");
+				$printer->setEmphasis(false);
+				$printer->text("Fecha: ");
+				$printer->text(date('Y-m-d h:i:s A') .  "\n");
 
-					if (isset($order->bill_number)) {
-						$printer->text($order->bill_number . "\n");        // 
-					} else {
-						$printer->text($order->id . "\n");        // 
-					}
-					if ($order->table) {
-						$printer->text("Mesa: ");
-						$printer->text($order->table->table . "\n");
-					}
-					$printer->text("\n");
-					$printer->setLineSpacing(2);
-					$printer->setJustification(Printer::JUSTIFY_LEFT);
-					$printer->text("\n-----------------------------------------" . "\n\n");
-					$printer->setLineSpacing(1);
-					$printer->setEmphasis(true);
-					$printer->text(sprintf('%-30s %+8s', 'ARTICULO', 'CANT'));
-					$printer->text("\n-----------------------------------------" . "\n\n");
-					$printer->setEmphasis(false);
-					$printer->text("\n");
-					$printer->setTextSize(2, 2);
-					foreach ($order_details as $df) {
-					
-						$maxWidthText = 15; 
-						$maxWidthQuantity = 5; 
-						$wrappedText = wordwrap($df->product, $maxWidthText); 
-						$textLines = explode("\n", $wrappedText); 
-						$printer->text("- ");
-						foreach ($textLines as $i => $line) {
-							$quantityDisplay = $i === 0 ? sprintf("%{$maxWidthQuantity}.2f", $df->quantity) : str_repeat(' ', $maxWidthQuantity);
-
-							$printer->text(sprintf("%-{$maxWidthText}s %s\n",  $line, $quantityDisplay));                                                                                     						
-						}
-						$printer->text("\n-----------------------");
-						$printer->feed(2);
-					}
-					
-					$printer->setTextSize(1, 1);
-
-					if ($order->observations) {
-						$printer->text(sprintf('%-16s %-25s', 'Observaciones:', $order->observations) . "\n");
-					}
-					$printer->cut();
-					$printer->pulse();
-					$printer->close();
-				} catch (\Throwable $th) {
-					throw new Exception("Error, no se pudo completar el proceso", 400);
-					return [
-						'code' => $th->getCode()
-					];
+				if (isset($order->bill_number)) {
+					$printer->text($order->bill_number . "\n");        // 
+				} else {
+					$printer->text($order->id . "\n");        // 
 				}
+				if ($order->table) {
+					$printer->text("Mesa: ");
+					$printer->text($order->table->table . "\n");
+				}
+				$printer->text("\n");
+				$printer->setLineSpacing(2);
+				$printer->setJustification(Printer::JUSTIFY_LEFT);
+				$printer->text("\n----------------------------------------------");
+				$printer->feed(1);
+				$printer->setLineSpacing(1);
+				$printer->setEmphasis(true);
+				$printer->text(sprintf('%-34s %+8s', 'ARTICULO', 'CANT'));
+				$printer->feed(1);
+				$printer->text("\n----------------------------------------------");
+				$printer->feed(1);
+				$printer->setEmphasis(false);
+				$printer->text("\n");
+				$printer->setTextSize(2, 2);
+				// Listar productos
+				foreach ($productos as $producto) {
+
+					$maxWidthText = 15;
+					$maxWidthQuantity = 5;
+					$wrappedText = wordwrap($producto->product, $maxWidthText);
+					$textLines = explode("\n", $wrappedText);
+					$printer->text("- ");
+					foreach ($textLines as $i => $line) {
+						$quantityDisplay = $i === 0 ? sprintf("%{$maxWidthQuantity}.2f", $producto->quantity) : str_repeat(' ', $maxWidthQuantity);
+
+						$printer->text(sprintf("%-{$maxWidthText}s %s\n",  $line, $quantityDisplay));
+					}
+					$printer->text("\n-----------------------");
+					$printer->feed(2);
+				}
+				$printer->setTextSize(1, 1);
+
+				if ($order->observations) {
+					$printer->text(sprintf('%-16s %-25s', 'Observaciones:', $order->observations) . "\n");
+				}
+				$printer->feed(2);
+
+				// // Cortar papel y cerrar conexión
+				$printer->cut();
+				$printer->pulse();
+				$printer->close();
+			} catch (Exception $e) {
+				// Manejar errores de impresión
+				Log::error("Error al imprimir en la impresora de la zone {$zone->zone}: {$e->getMessage()}");
 			}
 		}
 	}

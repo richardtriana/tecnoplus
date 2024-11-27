@@ -225,10 +225,16 @@
                     label="zone"
                     :reduce="(zone) => zone.id"
                     v-model="formProduct.zone_id"
+                    multiple
                   />
                   <small id="zone_idHelp" class="form-text text-danger">{{
                     formErrors.zone_id
                   }}</small>
+                  <div> <small>Zonas actuales:</small>
+                     <template v-if="formProduct.zones" v-for="z in formProduct.zones">
+                      <span class="badge badge-pill badge-info">{{z.zone}}</span>
+                  </template>
+                </div>
                 </div>
                 <div class="form-group col-6">
                   <label for="brand_id">Marca</label>

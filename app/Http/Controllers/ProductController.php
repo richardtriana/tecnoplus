@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\KitProduct;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Zone;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
@@ -48,10 +49,7 @@ class ProductController extends Controller
 			$products = $products
 				->where('brand_id', "$request->brand_id");
 		}
-		if ($request->zone_id != '' && $request->zone_id  != null && $request->zone_id  != 0) {
-			$products = $products
-				->where('zone_id', "$request->zone_id");
-		}
+		
 		if ($request->quantity_sign) {
 			$products = $products
 				->where('quantity', "$request->quantity_sign", "$request->quantity");
@@ -72,7 +70,7 @@ class ProductController extends Controller
 				->where('state', "$request->state");
 		}
 
-		$products = $products->orderBy('product', 'asc')->paginate($no_results);
+	$products = $products->orderBy('product', 'asc')->with('zones')->paginate($no_results);
 
 		$total_products = new ReportController();
 		$total_products = $total_products->reportTotalProducts($request);
@@ -110,7 +108,7 @@ class ProductController extends Controller
 			'category_id' => 'required|integer|exists:categories,id',
 			'tax_id' => 'required|integer|exists:taxes,id',
 			'brand_id' => 'nullable|integer|exists:brands,id',
-			'zone_id' => 'nullable|integer|exists:zones,id',
+			'zone_id' => 'nullable|array|exists:zones,id',
 			'product' => 'required|string|min:3|max:100',
 			'barcode' => 'required|string|unique:products',
 			'type' => 'required|integer',
@@ -147,9 +145,12 @@ class ProductController extends Controller
 			$product->category_id = $new_product['category_id'];
 			$product->tax_id = $new_product['tax_id'];
 			$product->brand_id = $new_product['brand_id'];
-			$product->zone_id = $new_product['zone_id'];
+			// $product->zone_id = $new_product['zone_id'];			
 			$product->expiration_date = $new_product['expiration_date'];
 			$product->save();
+
+			$zones = Zone::find($new_product['zone_id']);
+			$product->zones()->sync($zones);
 
 			if ($new_product['type'] == 3) {
 				if (count($request->itemListKit) > 0) {
@@ -221,7 +222,7 @@ class ProductController extends Controller
 			'category_id' => 'required|integer|exists:categories,id',
 			'tax_id' => 'required|integer|exists:taxes,id',
 			'brand_id' => 'nullable|integer|exists:brands,id',
-			'zone_id' => 'nullable|integer|exists:zones,id',
+			'zone_id' => 'nullable|array|exists:zones,id',
 			'product' => 'required|string|min:3|max:100',
 			'barcode' => ['required', 'string', Rule::unique('products')->ignore($product->barcode, 'barcode')],
 			'type' => 'required|integer',
@@ -257,9 +258,13 @@ class ProductController extends Controller
 			$product->category_id = $p['category_id'];
 			$product->tax_id = $p['tax_id'];
 			$product->brand_id = $p['brand_id'];
-			$product->zone_id = $p['zone_id'];
+			// $product->zone_id = $p['zone_id'];
 			$product->expiration_date = $p['expiration_date'];
 			$product->save();
+
+			// Asociar el producto a múltiples zonas
+			$zones = Zone::find($p['zone_id']);
+			$product->zones()->sync($zones);
 
 			if ($p['type'] == 3) {
 				if (count($request->itemListKit) > 0) {
@@ -394,7 +399,7 @@ class ProductController extends Controller
 			$products = $products
 				->where('category_id', $request->category_id);
 		}
-		
+
 		if ($request->is_order) {
 			$products = $products->where('state', 1)
 				->where('quantity', '>', 0)

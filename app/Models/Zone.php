@@ -13,4 +13,9 @@ class Zone extends Model
         'zone',
         'printer'
     ];
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'product_zones');
+    }
 }

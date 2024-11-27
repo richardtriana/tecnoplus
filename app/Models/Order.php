@@ -95,6 +95,13 @@ class Order extends Model
 
     public function printers()
     {
-        return $this->products()->with('zone')->get()->pluck('zone');
+        return $this->products()
+        ->with('zones') // Cargar las zonas relacionadas
+        ->get()
+        ->pluck('zones') // Obtener las zonas de cada producto
+        ->flatten() // Aplanar el resultado a una sola colección
+        // ->pluck('zone') // Obtener solo los nombres de las zonas
+        ->unique() // Eliminar duplicados
+        ->values(); // Reindexar la colección
     }
 }

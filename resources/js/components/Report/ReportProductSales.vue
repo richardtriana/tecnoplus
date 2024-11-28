@@ -34,6 +34,11 @@
             Buscar <i class="bi bi-search"></i>
           </button>
         </div>
+        <div class="col-md-3  my-4">
+          <button class="btn btn-outline-success  btn-block" @click="getTicket()">
+            Ticket <i class="bi bi-card-text"></i>
+          </button>
+        </div>
         <div class="col my-4 col-3">
           <download-excel class="btn btn-outline-success mr-2 btn-block" :fields="json_fields" :data="List.data"
             name="product-list.xls" type="xls">
@@ -101,29 +106,29 @@ export default {
       categoriesList: [],
       json_fields: {
         'Producto': {
-					field: 'product',
-					callback: (value) => {
-						return value;
-					}
-				},
+          field: 'product',
+          callback: (value) => {
+            return value;
+          }
+        },
         'Código de barras': {
-					field: 'barcode',
-					callback: (value) => {
-						return value;
-					}
-				},
+          field: 'barcode',
+          callback: (value) => {
+            return value;
+          }
+        },
         'Cantidad vendida': {
-					field: 'quantity_of_products',
-					callback: (value) => {
-						return value;
-					}
-				},
+          field: 'quantity_of_products',
+          callback: (value) => {
+            return value;
+          }
+        },
       }
     };
   },
   computed: {
     total_products: function () {
-			if(this.List.data.length == 0) return 0;
+      if (this.List.data.length == 0) return 0;
       return this.List.data.map(item => item.quantity_of_products).reduce((value1, value2) => {
         return value1 + value2;
       });
@@ -147,6 +152,17 @@ export default {
       axios.get('api/categories?paginate=0', this.$root.config).then(response => {
         me.categoriesList = response.data.categories;
       });
+    },
+    getTicket() {
+      axios
+        .post(
+          `api/reports-ticket/product-sales-report`,
+          { data: this.List.data },
+          this.$root.config
+        )
+        .then(function (response) {
+          // me.List = response.data;
+        });
     }
   },
   mounted() {

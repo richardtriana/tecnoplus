@@ -22,6 +22,11 @@
 						Buscar <i class="bi bi-search"></i>
 					</button>
 				</div>
+				<div class="col-md-3  my-4">
+                    <button class="btn btn-outline-success  btn-block" @click="getTicket()">
+                      Ticket <i class="bi bi-card-text"></i>
+                    </button>
+                </div>
 			</div>
 		</div>
 		<div class="page-content">
@@ -145,7 +150,18 @@ export default {
 				.then(function (response) {
 					me.List = response.data;
 				});
-		}
+		},
+		getTicket() {
+            axios
+                .post(
+                    `api/reports-ticket/sales-report`,
+                    { data: this.List },
+                    this.$root.config
+                )
+                .then(function (response) {
+                    // me.List = response.data;
+                });
+        }
 	},
 	mounted() {
 		this.getOrders(1);

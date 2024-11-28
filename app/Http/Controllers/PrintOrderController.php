@@ -249,22 +249,6 @@ class PrintOrderController extends Controller
 		}
 	}
 
-	public function printTicketRecentlyXXX($order_id, $listProducts = null)
-	{
-		$nombreImpresora = "POS-85";
-		$connector = new WindowsPrintConnector($nombreImpresora);
-		$impresora = new Printer($connector);
-		$impresora->setJustification(Printer::JUSTIFY_CENTER);
-		$impresora->setTextSize(2, 2);
-		$impresora->text("Imprimiendo\n");
-		$impresora->text("ticket\n");
-		$impresora->text("desde\n");
-		$impresora->text("Laravel\n");
-		$impresora->setTextSize(1, 1);
-		$impresora->text("https://parzibyte.me");
-		$impresora->feed(5);
-		$impresora->close();
-	}
 
 	public function printTicketRecently($order_id, $listProducts = null)
 	{

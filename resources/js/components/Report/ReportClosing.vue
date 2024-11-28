@@ -36,7 +36,12 @@
                         Buscar <i class="bi bi-search"></i>
                     </button>
                 </div>
-                <div class="col my-4 col-3">
+                <div class="col-md-3  my-4">
+                    <button class="btn btn-outline-success  btn-block" @click="getTicket()">
+                      Ticket <i class="bi bi-card-text"></i>
+                    </button>
+                </div>
+                <div class="col my-4 col-3 offset-md-9">
                     <download-excel class="btn btn-outline-success mr-2 btn-block" :fields="json_fields" :data="List.data"
                         name="product-list.xls" type="xls">
                         <i class="bi bi-file-earmark-arrow-down-fill"></i> Exportar selección
@@ -285,6 +290,17 @@ export default {
                     me.userList = response.data.users;
                 });
         },
+        getTicket() {
+            axios
+                .post(
+                    `api/reports-ticket/closing`,
+                    { data: this.List.data },
+                    this.$root.config
+                )
+                .then(function (response) {
+                    // me.List = response.data;
+                });
+        }
     },
     mounted() {
         this.getOrders(1);

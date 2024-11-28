@@ -19,6 +19,7 @@ use App\Http\Controllers\BoxController;
 use App\Http\Controllers\DetailBillingController;
 use App\Http\Controllers\PrintOrderController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportTicketController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\ZoneController;
 use App\Models\Configuration;
@@ -115,6 +116,14 @@ Route::middleware('auth:api')->group(function () {
 	Route::get('/reports/product-sales-report', [ReportController::class, 'reportProductSales']);
 	Route::get('/reports/total-products-report', [ReportController::class, 'reportTotalProducts']);
 	Route::get('/reports/closing', [ReportController::class, 'reportClosing']);
+
+	
+	Route::get('/reports-ticket/test', [ReportTicketController::class, 'test']);
+	Route::post('/reports-ticket/sales-report', [ReportTicketController::class, 'reportSales']); // ✅
+	Route::post('/reports-ticket/closing', [ReportTicketController::class, 'reportClosing']); // ✅
+	Route::post('/reports-ticket/general-sales-report', [ReportTicketController::class, 'reportGeneralSales']);
+	Route::post('/reports-ticket/product-sales-report', [ReportTicketController::class, 'reportProductSales']); // ✅
+	Route::post('/reports-ticket/total-products-report', [ReportTicketController::class, 'reportTotalProducts']);
 
 	Route::get('/boxes/box-list', [BoxController::class, 'boxList']);
 	Route::get('/boxes/byUser', [BoxController::class, 'getBoxesByUser']);

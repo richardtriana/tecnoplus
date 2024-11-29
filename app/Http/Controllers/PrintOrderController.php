@@ -358,10 +358,10 @@ class PrintOrderController extends Controller
 					$printer->text("\n-----------------------");
 					$printer->feed(2);
 				}
-				$printer->setTextSize(1, 1);
-
+				$printer->feed(2);
+				$printer->setEmphasis(true);
 				if ($order->observations) {
-					$printer->text(sprintf('%-16s %-25s', 'Observaciones:', $order->observations) . "\n");
+					$printer->text('Observaciones: ' . $order->observations . "\n");
 				}
 				$printer->feed(2);
 

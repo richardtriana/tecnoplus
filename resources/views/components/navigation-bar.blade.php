@@ -27,18 +27,18 @@
 		Tecnoplus
 	</div>
 	<li class="nav-item bg-primary">
-		<router-link class="nav-link " active-class="active" to="/"><i
+		<router-link class="nav-link " v-if="validatePermission('order.store')" active-class="active" to="/"><i
 				class="bi bi-receipt"></i><span>Facturar</span>
 		</router-link>
 	</li>
 	<li class="nav-item">
-		<router-link class="nav-link " active-class="active" to="/checker"><i
+		<router-link class="nav-link "  v-if="validatePermission('product.index')" active-class="active" to="/checker"><i
 				class="bi bi-receipt"></i><span>Verificador</span>
 		</router-link>
 	</li>
 
 	<!-- Nav Item - Shop Collapse Menu -->
-	<li class="nav-item">
+	<li class="nav-item"  v-if="validatePermission('product.index') || validatePermission('category.index')">
 		<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseShop" aria-expanded="true"
 			aria-controls="collapseShop">
 			<i class="bi bi-shop"></i>
@@ -66,7 +66,7 @@
 		<router-link class="nav-link " active-class="active" to="/orders"><i class="bi bi-receipt"></i><span>Ordenes</span>
 		</router-link>
 	</li>
-	<li class="nav-item" v-if="validatePermission('billing.index')">
+	<li class="nav-item" v-if="validatePermission('kitchen.index')">
 		<router-link class="nav-link " active-class="active" to="/Kitchen"><i
 				class="bi bi-egg-fried"></i><span>Cocina</span>
 		</router-link>
@@ -88,7 +88,7 @@
 
 
 	<!-- Nav Item - Pages Collapse Menu -->
-	<li class="nav-item">
+	<li class="nav-item " v-if="validatePermission('client.index') || validatePermission('supplier.index')">
 		<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePeople" aria-expanded="true"
 			aria-controls="collapsePeople">
 			<i class="bi bi-people"></i>

@@ -70,8 +70,7 @@ import axios from 'axios';
 
 import CKEditor from '@ckeditor/ckeditor5-vue2';
 import Swal from "sweetalert2";
-import Kitchen from './components/kitchen/Kitchen.vue';
-
+import Kitchen from './components/Kitchen/Kitchen.vue';
 
 Vue.use(VueRouter)
 Vue.use(VueSpinners)
@@ -88,7 +87,8 @@ window.Swal = Swal;
 
 const routes = [
 
-  { path: '', component: CreateEditOrder, props: { order_id: 0 }, name: 'main' },
+  { path: '', component: CreateEditOrder, props: { order_id: 0 }, name: 'main', alias:"order.store" },
+  { path: '/kitchen', component: Kitchen, name: "kitchen", alias: "kitchen.index" , props:{ status:1}},
 
   { path: '/clients', component: Clients, alias: "client.index" },
   { path: '/create-edit-client', component: CreateEditClient },
@@ -109,7 +109,6 @@ const routes = [
   { path: '/brands', component: Brands, alias: "brand.index" },
 
   { path: '/orders', component: Orders, alias: "order.index" , props:{ status:1}},
-  { path: '/Kitchen', component: Kitchen, alias: "order.index" , props:{ status:1}},
   { path: '/orders/:order_id/details-order', component: DetailsOrder, props: true, name: 'details-order', alias: "order.index" },
   { path: '/create-edit-order/:order_id', component: CreateEditOrder, props: true, name: 'create-edit-order', alias: "order.store" },
   { path: '/create-edit-order-mobile/:order_id', component: CreateEditOrderMobile, props: true, name: 'create-edit-order-mobile', alias: "order.store" },
@@ -148,35 +147,39 @@ const router = new VueRouter({
 export default router;
 
 router.beforeEach(async (to, from, next) => {
-  // redirect to login if not authenticated in and trying to access a restricted route
-  const publicRoutes = ["Login"];
-  const authRequired = !publicRoutes.includes(to.name);
-  let isAuthenticated = false;
-  try {
-    isAuthenticated =
-      localStorage.getItem("token") &&
-        localStorage.getItem("user") &&
-        JSON.parse(localStorage.getItem("user"))
-        ? true
-        : false;
-  } catch (e) {
-    isAuthenticated
-  }
-  if (authRequired && !isAuthenticated) {
-    return next({ name: "Login", query: { redirect: to.fullPath } });
-  }
+	const publicRoutes = ["Login"];
+	const authRequired = !publicRoutes.includes(to.name);
+	let isAuthenticated = false;
+	try {
+		isAuthenticated =
+			localStorage.getItem("token") &&
+			localStorage.getItem("user") &&
+			JSON.parse(localStorage.getItem("user"))
+				? true
+				: false;
+	} catch (e) {
+		isAuthenticated;
+	}
+	if (authRequired && !isAuthenticated) {
+		return next({ name: "Login", query: { redirect: to.fullPath }});
+	}
 
-  if (isAuthenticated) {
+	if (isAuthenticated) {
+		const alias = to.matched[0]?.alias || "kitchen.index"; 
+		const hasPermission = alias
+			? global.validatePermission(undefined, alias)
+			: true; // Validar permisos para la ruta
 
-    let alias = to.matched[0].alias;
-    if (alias != "") {
-      if (!global.validatePermission(undefined, alias)) {
-        return next({ name: "NoFound" });
-      }
+		if (!hasPermission) {
+			// Redirigir a la ruta alterna (cocina) si no tiene permiso
+			return next({ name: "kitchen" });
+		}
+
+    if (!global.validatePermission(undefined, alias)) {
+      return next({ name: "NoFound" });
     }
-  }
-  next();
-
+	}
+	next();
 });
 
 Vue.config.keyCodes = {

@@ -2,12 +2,9 @@
 	<div class="w-100">
 		<header class="page-header justify-content-between row px-4">
 			<h3>Cocina</h3>
-			<router-link class="btn btn-primary" :to="{
-				name: 'create-edit-order',
-				params: { order_id: 0 },
-			}" v-if="$root.validatePermission('order.store')">
-				Nueva orden
-			</router-link>
+			<button class="btn btn-primary" @click="getOrders(OrderList.current_page)" v-if="$root.validatePermission('kitchen.index')">
+				Recargar
+			</button>
 		</header>
 		<section>
 			<div class="card-body">
@@ -37,24 +34,28 @@
 							<div class="col mb-3">
 								<div class="card border-success h-100">
 									<div class="card-header">
-										<h5 class="card-title text-center text-primary font-weight-bolder h4"><template
+										<h5 class="card-title text-center text-primary font-weight-bolder h2"><template
 												v-if="o.table">
 												{{ o.table.table }}
 											</template>
 										</h5>
-										<small>{{o.created_at}}</small>
+										<small>{{ o.created_at }}</small>
 									</div>
-									<div class="card-body">
-										<ul class="list-group list-group-flush h5">
-											<li class="list-group-item d-flex justify-content-between align-items-center py-1"
+									<div class="card-body h1">
+										<ul class="list-group list-group-flush">
+											<li class="list-group-item d-flex justify-content-between align-items-center py-1 px-1"
 												v-for="p in o.detail_orders">
-												{{ p.product }}
+												- {{ p.product }}
 												<span class="badge text-bg-primary rounded-pill  font-weight-bolder">{{
 													p.quantity }}</span>
 											</li>
 										</ul>
+
 									</div>
 									<div class="card-footer bg-white">
+										<div class="h3"><b class="text-primary">Observaciones: </b>{{ o.observations ??
+											'Ninguna'}} </div>
+										<hr>
 										<button class="btn btn-success w-100" @click="prepareOrder(o.id)">
 											Preparado</button>
 									</div>
@@ -126,6 +127,22 @@ export default {
 				.get(`api/orders/kitchen`, { params: data, headers: this.$root.config.headers })
 				.then(function (response) {
 					me.OrderList = response.data.orders;
+					Swal.fire({
+						icon: "success",
+						title: "Excelente",
+						text: "Los datos se han cargado correctamente",
+					})
+				})
+				.catch(function (error) {
+					// handle error
+					console.log("error", error);
+					if (error) {
+						Swal.fire({
+							icon: "error",
+							title: "Oops...",
+							text: "Hubo un error al cargar los datos",
+						});
+					}
 				});
 		},
 		prepareOrder(order_id) {

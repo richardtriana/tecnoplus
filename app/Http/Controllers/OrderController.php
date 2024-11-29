@@ -136,7 +136,7 @@ class OrderController extends Controller
 		$order->payment_methods = ($request->payment_methods);
 		$order->box_id = $box->id;
 		$order->bill_number = $bill_number;
-		$order->proccess = $request->proccess;
+		$order->proccess = isset($request->proccess) ? $request->proccess : false;
 
 		if ($request->state == 4) {
 			$order->state = 2;
@@ -197,15 +197,15 @@ class OrderController extends Controller
 			]);
 		}
 
-		if ($request->table_id) {
-			$table = Table::find($request->table_id);
-			if ($request->state == 1) {
-				$table->state = 'occupied';
-			} else {
-				$table->state = 'free';
-			}
-			$table->save();
-		}
+		// if ($request->table_id) {
+		// 	$table = Table::find($request->table_id);
+		// 	if ($request->state == 1) {
+		// 		$table->state = 'occupied';
+		// 	} else {
+		// 		$table->state = 'free';
+		// 	}
+		// 	$table->save();
+		// }
 
 
 		return response()->json($order->id);
@@ -273,7 +273,7 @@ class OrderController extends Controller
 		$order->total_cost_price_tax_inc = $request->total_cost_price_tax_inc;
 		$order->total_discount = $request->total_discount;
 		$order->observations = $request->observations;
-		$order->proccess = $request->proccess;
+		$order->proccess =  isset($request->proccess) ? $request->proccess : false;
 
 		$order->payment_methods = ($request->payment_methods);
 		if ($order->state == 3) {
@@ -345,17 +345,16 @@ class OrderController extends Controller
 			$print->openBox($order->id);
 		}
 
-		if ($order->table_id) {
-			$table = Table::find($order->table_id);
-			if ($request->state == 1) {
-				$table->state = 'occupied';
-			} else {
-				$table->state = 'free';
-			}
-			$table->save();
+		// if ($order->table_id) {
+		// 	$table = Table::find($order->table_id);
+		// 	if ($request->state == 1) {
+		// 		$table->state = 'occupied';
+		// 	} else {
+		// 		$table->state = 'free';
+		// 	}
+		// 	$table->save();
 
-			return $table;
-		}
+		// }
 
 		return response()->json($order);
 

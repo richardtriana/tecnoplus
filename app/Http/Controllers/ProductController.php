@@ -327,7 +327,7 @@ class ProductController extends Controller
 	public function updateStockByBarcode($type, $barcode, $quantity)
 	{
 		$product = Product::select('id', 'barcode', 'quantity')->where('barcode', $barcode)->first();
-		if ($product->stock) {
+		// if ($product->stock) {
 			if ($type == 1) {
 				$product->quantity = $product->quantity - $quantity;
 			}
@@ -335,16 +335,16 @@ class ProductController extends Controller
 				$product->quantity = $product->quantity + $quantity;
 			}
 			$product->save();
-		}
+		// }
 	}
 
 	public function updateStockById(Request $request, $id)
 	{
 		$product = Product::findOrFail($id);
-		if ($product->stock) {
+		// if ($product->stock) {
 			$product->quantity = $product->quantity + $request->quantity;
 			$product->save();
-		}
+		// }
 	}
 
 	/**

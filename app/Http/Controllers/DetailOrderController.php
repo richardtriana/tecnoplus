@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DetailOrder;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class DetailOrderController extends Controller
@@ -101,6 +102,31 @@ class DetailOrderController extends Controller
 	public function destroy($id)
 	{
 		$detailOrder = DetailOrder::find($id);
+		$updateOrder = $detailOrder->replicate();
+		
+		$order = Order::find($detailOrder->order_id);		
+		$array1 = $order->detailOrders()->select('product_id', 'quantity')->get();
+		$updatedProducts = collect([0 => $updateOrder]);		
+		
+		$newProducts = $updatedProducts->map(function ($item) use ($array1) {
+			foreach ($array1 as $op) {
+				if ($op['product_id'] == $item['product_id']) {
+					$item['quantity'] = $op['quantity']*-1;
+				}
+			}
+			return $item;
+		});
+		
+		$print = new PrintOrderController();
+		$print->printTicketRecently($detailOrder->order_id, $newProducts);
+
+		// Realiza la eliminación suave
+		$detailOrder->update([
+			'quantity' => $detailOrder->quantity * -1
+			
+		]);
 		$detailOrder->delete();
+
+		return $detailOrder;
 	}
 }

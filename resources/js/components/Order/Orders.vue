@@ -184,7 +184,7 @@ export default {
 				no_invoice: "",
 				from: "",
 				to: "",
-				user_id: "",
+				user_id: "--Seleccionar--",
 				status: `1`,
 				nro_results: 15
 			},
@@ -213,7 +213,7 @@ export default {
 				no_invoice: me.filter.no_invoice,
 				from: me.filter.from,
 				to: me.filter.to,
-				user_id: me.filter.user_id,
+				user_id: me.filter.user_id == '--Seleccionar--' ? '-1' : me.filter.user_id,
 				status: me.filter.status != undefined ? me.filter.status : me.status.default,
 				nro_results: me.filter.nro_results
 			};

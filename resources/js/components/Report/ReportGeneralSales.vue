@@ -3,6 +3,22 @@
     <div class="page-header">
       <h3>Reporte general de venta</h3>
     </div>
+    <!-- Card de Totalizados -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h5>Total Facturado</h5>
+            <p class="display-4">{{ totalFacturado | currency }}</p>
+          </div>
+          <div class="col-md-6">
+            <h5>Ganancia del Día</h5>
+            <p class="display-4">{{ totalGanancia | currency }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Filtros y botones -->
     <div class="page-search mx-2 my-2 border p-2">
       <div class="form-row">
         <div class="form-group col-md-3">
@@ -30,13 +46,14 @@
             Buscar <i class="bi bi-search"></i>
           </button>
         </div>
-        <div class="col-md-3  my-4">
-          <button class="btn btn-outline-success  btn-block" @click="getTicket()">
+        <div class="col-md-3 my-4">
+          <button class="btn btn-outline-success btn-block" @click="getTicket()">
             Ticket <i class="bi bi-card-text"></i>
           </button>
-      </div>
+        </div>
       </div>
     </div>
+    <!-- Tabla de resultados -->
     <div class="page-content">
       <section class="p-3">
         <table class="table table-sm table-bordered table-hover">
@@ -57,44 +74,22 @@
           </thead>
           <tbody v-if="List.length > 0">
             <tr v-for="(l, index) in List" :key="index">
-              <td>
-                {{  l.number_of_orders  }}
-              </td>
-              <td>
-                {{  l.registered  }}
-              </td>
-              <td>
-                {{  l.suspended  }}
-              </td>
-              <td>
-                {{  l.quoted  }}
-              </td>
-              <td>
-                {{  l.credit  }}
-              </td>
-              <td>
-                {{  l.total_cost_price_tax_inc | currency  }}
-              </td>
-              <td>
-                {{  l.total_iva_exc | currency  }}
-              </td>
-              <td>
-                {{  l.total_iva_inc | currency  }}
-              </td>
-              <td>
-                {{  l.total_discount | currency  }}
-              </td>
-              <td>
-                {{  l.total_paid | currency  }}
-              </td>
-              <td>
-                {{  (l.total_iva_exc - l.total_cost_price_tax_inc) | currency  }}
-              </td>
+              <td>{{ l.number_of_orders }}</td>
+              <td>{{ l.registered }}</td>
+              <td>{{ l.suspended }}</td>
+              <td>{{ l.quoted }}</td>
+              <td>{{ l.credit }}</td>
+              <td>{{ l.total_cost_price_tax_inc | currency }}</td>
+              <td>{{ l.total_iva_exc | currency }}</td>
+              <td>{{ l.total_iva_inc | currency }}</td>
+              <td>{{ l.total_discount | currency }}</td>
+              <td>{{ l.total_paid | currency }}</td>
+              <td>{{ (l.total_iva_exc - l.total_cost_price_tax_inc) | currency }}</td>
             </tr>
           </tbody>
           <tbody v-else>
             <tr>
-              <td colspan="3">No hay resultados</td>
+              <td colspan="11">No hay resultados</td>
             </tr>
           </tbody>
         </table>
@@ -107,7 +102,7 @@
 export default {
   data() {
     return {
-      List: {},
+      List: [],
       boxList: [],
       userList: [],
       filter: {
@@ -122,23 +117,36 @@ export default {
         { id: 1, status: "Pedido" },
         { id: 2, status: "Facturado" },
         { id: 3, status: "Cotizado" },
-        { id: 4, status: "Facturar e imprimir" },
         { id: 5, status: "Credito" },
-        { id: 6, status: "Credito e imprimir" }
       ],
     };
+  },
+  computed: {
+    totalFacturado() {
+      if (!this.List || this.List.length === 0) return 0;
+      // Suma de total_paid de cada registro
+      return this.List.reduce((total, item) => total + Number(item.total_paid), 0);
+    },
+    totalGanancia() {
+      if (!this.List || this.List.length === 0) return 0;
+      // Suma de (total_iva_exc - total_cost_price_tax_inc) de cada registro
+      return this.List.reduce(
+        (total, item) =>
+          total + (Number(item.total_iva_exc) - Number(item.total_cost_price_tax_inc)),
+        0
+      );
+    },
   },
   methods: {
     getOrders(page = 1) {
       let me = this;
-
       let data = {
         page: page,
         from: me.filter.from,
         to: me.filter.to,
         box: me.filter.box_id,
         user_id: me.filter.user_id,
-        status: me.filter.status
+        status: me.filter.status,
       };
 
       axios
@@ -149,7 +157,9 @@ export default {
         .then(function (response) {
           me.List = response.data;
         })
-        .catch((me.List = {}));
+        .catch(() => {
+          me.List = [];
+        });
     },
     listBoxes() {
       let me = this;
@@ -168,16 +178,16 @@ export default {
         });
     },
     getTicket() {
-            axios
-                .post(
-                    `api/reports-ticket/general-sales-report`,
-                    { data: this.List },
-                    this.$root.config
-                )
-                .then(function (response) {
-                    // me.List = response.data;
-                });
-        }
+      axios
+        .post(
+          `api/reports-ticket/general-sales-report`,
+          { data: this.List },
+          this.$root.config
+        )
+        .then(function (response) {
+          // Procesar respuesta si es necesario
+        });
+    },
   },
   mounted() {
     this.getOrders(1);

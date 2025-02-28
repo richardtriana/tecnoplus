@@ -12,75 +12,83 @@ use Mike42\Escpos\Printer;
 class ReportTicketController extends Controller
 {
     public function reportProductSales(Request $request)
-    {
-        $listItems = $request->data;
-        // Información empresarial
-        $configuration = new Configuration();
-        $company =  $configuration->select()->first();
-        $POS_printer = $company->printer;
+{
+    $listItems = $request->data;
 
+    // Información empresarial
+    $configuration = new Configuration();
+    $company =  $configuration->select()->first();
+    $POS_printer = $company->printer;
 
-        if (!$POS_printer || $POS_printer == '') {
-            throw new Exception("Error, no hay impresoras configuradas", 400);
-        }
-
-        // Config de impresora
-        $connector = new WindowsPrintConnector($POS_printer);
-        $printer = new Printer($connector);
-        $printer->initialize();
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        try {
-            $logo = EscposImage::load($company->logo, false);
-            $printer->bitImage($logo);
-        } catch (Exception $e) {
-            /* Images not supported on your PHP, or image file not found */
-            //$printer->text($e->getMessage() . "\n");
-        }
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-
-        $printer->setTextSize(2, 2);
-        $printer->setEmphasis(true);
-        $printer->text("Reporte general de productos vendidos \n");
-        $printer->setEmphasis(false);
-        $printer->setTextSize(1, 1);
-
-        $printer->setJustification(Printer::JUSTIFY_LEFT);
-        $printer->feed(2);
-
-        $printer->text(sprintf('%-28s %-10s %6s', ' | ARTICULO', '| CODIGO', '| CANT |'));
-        $printer->feed(1);
-        $printer->text("----------------------------------------------");
-        $printer->feed(1);
-        $printer->setEmphasis(false);
-        $printer->text("\n");
-
-        foreach ($listItems as $item) {
-            $maxWidthDescription = 28;
-            $wrappedDescription = wordwrap($item['product'], $maxWidthDescription);
-            $descriptionLines = explode("\n", $wrappedDescription);
-
-            $firstLine = true;
-            foreach ($descriptionLines as $line) {
-                if (!$firstLine) {
-                    // Para líneas posteriores, no imprimimos códi22go ni cantidad
-                    $formattedItem = sprintf("%-28s %-12s %+6s", $line, " ", "");
-                } else {
-                    $formattedItem = sprintf("%-28s %-12s %+6s", $line, " " . $item['barcode'], $item['quantity_of_products']);
-                    $firstLine = false;
-                }
-
-                $printer->text($formattedItem);
-                $printer->feed(1);
-            }
-            $printer->text("----------------------------------------------");
-            $printer->feed(1);
-        }
-        $printer->feed(3);
-
-        $printer->cut();
-        $printer->pulse();
-        $printer->close();
+    if (!$POS_printer || $POS_printer == '') {
+        throw new Exception("Error, no hay impresoras configuradas", 400);
     }
+
+    // Configuración de la impresora
+    $connector = new WindowsPrintConnector($POS_printer);
+    $printer = new Printer($connector);
+    $printer->initialize();
+    $printer->setJustification(Printer::JUSTIFY_CENTER);
+
+    // Imprimir el encabezado del reporte
+    try {
+        $logo = EscposImage::load($company->logo, false);
+        $printer->bitImage($logo);
+    } catch (Exception $e) {
+        // Ignorar errores relacionados con imágenes
+    }
+
+    $printer->setTextSize(2, 2);
+    $printer->setEmphasis(true);
+    $printer->text("Reporte de productos\n");
+    $printer->setEmphasis(false);
+    $printer->setTextSize(1, 1);
+
+    // Agrupar los productos por categoría
+    $categories = [];
+    foreach ($listItems as $item) {
+        $categories[$item['category']][] = $item;
+    }
+
+    // Imprimir detalles por categoría
+    $totalGeneral = 0;
+    foreach ($categories as $categoryName => $products) {
+        $printer->setEmphasis(true);
+        $printer->text("\n$categoryName\n"); // Nombre de la categoría
+        $printer->setEmphasis(false);
+        $printer->text("----------------------------------------------\n");
+        $totalCategory = 0;
+
+        foreach ($products as $product) {
+            $printer->text(sprintf(
+                "%-28s %5s %10s\n",
+                $product['product'], // Nombre del producto
+                $product['quantity_of_products'], // Cantidad
+                number_format($product['value'], 0, ',', '.') // Valor formateado
+            ));
+            $totalCategory += $product['value'];
+        }
+
+        $printer->text("----------------------------------------------\n");
+        $printer->setEmphasis(true);
+        $printer->text("Total $categoryName: " . number_format($totalCategory, 0, ',', '.') . "\n");
+        $printer->setEmphasis(false);
+
+        $totalGeneral += $totalCategory;
+    }
+
+    // Imprimir total general
+    $printer->text("\n==============================================\n");
+    $printer->setEmphasis(true);
+    $printer->text("Total General: " . number_format($totalGeneral, 0, ',', '.') . "\n");
+    $printer->setEmphasis(false);
+
+    // Finalizar impresión
+    $printer->feed(3);
+    $printer->cut();
+    $printer->pulse();
+    $printer->close();
+}
 
     public function reportClosing(Request $request)
     {
@@ -465,4 +473,85 @@ class ReportTicketController extends Controller
         $printer->pulse();
         $printer->close();
     }
+
+//reporte productso vendidos 
+public function reportInvoicedProducts(Request $request)
+{
+    $listItems = $request->data;
+
+    // Información empresarial
+    $configuration = new Configuration();
+    $company = $configuration->select()->first();
+    $POS_printer = $company->printer;
+
+    if (!$POS_printer || $POS_printer == '') {
+        throw new Exception("Error, no hay impresoras configuradas", 400);
+    }
+
+    // Configuración de la impresora
+    $connector = new WindowsPrintConnector($POS_printer);
+    $printer = new Printer($connector);
+    $printer->initialize();
+    $printer->setJustification(Printer::JUSTIFY_CENTER);
+
+    // Imprimir encabezado y logo
+    try {
+        $logo = EscposImage::load($company->logo, false);
+        $printer->bitImage($logo);
+    } catch (Exception $e) {
+        // Se ignoran errores en la carga de imagen
+    }
+
+    $printer->setTextSize(2, 2);
+    $printer->setEmphasis(true);
+    $printer->text("Reporte de productos facturados\n");
+    $printer->setEmphasis(false);
+    $printer->setTextSize(1, 1);
+
+    // Agrupar los productos por categoría
+    $categories = [];
+    foreach ($listItems as $item) {
+        $categories[$item['category']][] = $item;
+    }
+
+    $totalGeneral = 0;
+    foreach ($categories as $categoryName => $products) {
+        $printer->setEmphasis(true);
+        $printer->text("\n$categoryName\n"); // Nombre de la categoría
+        $printer->setEmphasis(false);
+        $printer->text("----------------------------------------------\n");
+        $totalCategory = 0;
+
+        foreach ($products as $product) {
+            $printer->text(sprintf(
+                "%-28s %5s %10s\n",
+                $product['product'], // Nombre del producto
+                $product['quantity_of_products'], // Cantidad
+                number_format($product['value'], 0, ',', '.') // Valor formateado
+            ));
+            $totalCategory += $product['value'];
+        }
+
+        $printer->text("----------------------------------------------\n");
+        $printer->setEmphasis(true);
+        $printer->text("Total $categoryName: " . number_format($totalCategory, 0, ',', '.') . "\n");
+        $printer->setEmphasis(false);
+
+        $totalGeneral += $totalCategory;
+    }
+
+    // Imprimir total general
+    $printer->text("\n==============================================\n");
+    $printer->setEmphasis(true);
+    $printer->text("Total General: " . number_format($totalGeneral, 0, ',', '.') . "\n");
+    $printer->setEmphasis(false);
+
+    // Finalizar impresión
+    $printer->feed(3);
+    $printer->cut();
+    $printer->pulse();
+    $printer->close();
+}
+
+
 }

@@ -22,7 +22,8 @@ class DetailOrder extends Model
         'quantity',
         'product',
         'cost_price_tax_inc',
-        'cost_price_tax_inc_total'
+        'cost_price_tax_inc_total',
+        'observaciones', // ← ¡Agrega este campo!
     ];
 
     public function order()
@@ -33,5 +34,5 @@ class DetailOrder extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
-    } 
+    }
 }

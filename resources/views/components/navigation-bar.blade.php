@@ -129,7 +129,9 @@
 					v-if="validatePermission('product.index')">Informe
 					de ventas de productos
 				</router-link>
-
+				<router-link class="collapse-item" to="/reports/invoiced-products" v-if="validatePermission('product.index')">
+					Informe de productos facturados
+				</router-link>
 			</div>
 		</div>
 	</li>

@@ -3,6 +3,22 @@
     <div class="page-header">
       <h3>Reporte general de productos vendidos</h3>
     </div>
+    <!-- Card de Totalizados -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h5>Total Cantidad Vendida</h5>
+            <p class="display-4">{{ total_products }}</p>
+          </div>
+          <div class="col-md-6">
+            <h5>Valor Total</h5>
+            <p class="display-4">{{ total_value | currency }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Filtros y botones -->
     <div class="page-search mx-2 my-2 border p-2">
       <div class="form-row">
         <div class="form-group col-md-3">
@@ -10,10 +26,21 @@
           <input type="text" class="form-control" id="filter_product" v-model="filter.product" />
         </div>
         <div class="form-group col-md-3">
-          <label for="filter_category">Categoria</label>
+          <label for="filter_category">Categoría</label>
           <select id="filter_category" v-model="filter.category" class="form-control">
-            <option value="">Selecciona una categoria</option>
-            <option v-for=" (item, index) in categoriesList" :key="index" :value="item.id">{{ item.name }}</option>
+            <option value="">Selecciona una categoría</option>
+            <option v-for="(item, index) in categoriesList" :key="index" :value="item.id">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <!-- Nuevo filtro para el estado del producto -->
+        <div class="form-group col-md-3">
+          <label for="filter_status">Estado del Producto</label>
+          <select id="filter_status" v-model="filter.product_status" class="form-control">
+            <option value="all">Todos</option>
+            <option value="active">Activos</option>
+            <option value="inactive">Inactivos</option>
           </select>
         </div>
         <div class="form-group col-md-3">
@@ -25,17 +52,17 @@
           <input type="datetime-local" class="form-control" id="to_date" v-model="filter.to" />
         </div>
         <div class="form-group col-3">
-          <label for="nro_results">Mostrar {{ filter.no_rresults }} resultados por página:</label>
+          <label for="nro_results">Mostrar {{ filter.nro_results }} resultados por página:</label>
           <input type="number" step="any" class="form-control" id="nro_results" placeholder="Resultados"
             v-model="filter.nro_results" />
         </div>
-        <div class="col-md-3  my-4">
+        <div class="col-md-3 my-4">
           <button class="btn btn-success btn-block" @click="getOrders(1)">
             Buscar <i class="bi bi-search"></i>
           </button>
         </div>
-        <div class="col-md-3  my-4">
-          <button class="btn btn-outline-success  btn-block" @click="getTicket()">
+        <div class="col-md-3 my-4">
+          <button class="btn btn-outline-success btn-block" @click="getTicket()">
             Ticket <i class="bi bi-card-text"></i>
           </button>
         </div>
@@ -47,38 +74,36 @@
         </div>
       </div>
     </div>
+    <!-- Resultados -->
     <div class="page-content">
       <section class="p-3">
         <table class="table table-sm table-bordered table-hover">
-          <thead class=" thead-dark">
+          <thead class="thead-dark">
             <tr>
               <th>Producto</th>
+              <th>Categoría</th>
               <th>Código de barras</th>
               <th>Cantidad productos vendidos</th>
+              <th>Valor</th>
             </tr>
           </thead>
-          <tbody v-if="List.data">
+          <tbody v-if="List.data && List.data.length">
             <tr v-for="(l, index) in List.data" :key="index">
-              <td>
-                {{ l.product }}
-              </td>
-              <td>
-                <span class="barcode">{{ l.barcode }}</span>
-              </td>
-              <td>
-                {{ l.quantity_of_products }}
-              </td>
+              <td>{{ l.product }}</td>
+              <td>{{ l.category }}</td>
+              <td><span class="barcode">{{ l.barcode }}</span></td>
+              <td>{{ l.quantity_of_products }}</td>
+              <td>{{ l.value | currency }}</td>
             </tr>
             <tr>
-              <th colspan="2">Total:</th>
+              <th colspan="3">Total:</th>
               <th>{{ total_products }}</th>
+              <th>{{ total_value | currency }}</th>
             </tr>
           </tbody>
           <tbody v-else>
             <tr>
-              <td colspan="3">
-                No hay resultados
-              </td>
+              <td colspan="5">No hay resultados</td>
             </tr>
           </tbody>
         </table>
@@ -101,73 +126,60 @@ export default {
         to: "",
         product: "",
         category: "",
+        product_status: "all", // Valores posibles: all, active, inactive
         nro_results: 15
       },
       categoriesList: [],
       json_fields: {
-        'Producto': {
-          field: 'product',
-          callback: (value) => {
-            return value;
-          }
-        },
-        'Código de barras': {
-          field: 'barcode',
-          callback: (value) => {
-            return value;
-          }
-        },
-        'Cantidad vendida': {
-          field: 'quantity_of_products',
-          callback: (value) => {
-            return value;
-          }
-        },
+        Producto: { field: 'product' },
+        Categoría: { field: 'category' },
+        'Código de barras': { field: 'barcode' },
+        'Cantidad vendida': { field: 'quantity_of_products' },
+        Valor: { field: 'value' }
       }
     };
   },
   computed: {
-    total_products: function () {
-      if (this.List.data.length == 0) return 0;
-      return this.List.data.map(item => item.quantity_of_products).reduce((value1, value2) => {
-        return value1 + value2;
-      });
+    total_products() {
+      if (!this.List.data || this.List.data.length === 0) return 0;
+      return this.List.data.reduce((total, item) => total + item.quantity_of_products, 0);
+    },
+    total_value() {
+      if (!this.List.data || this.List.data.length === 0) return 0;
+      return this.List.data.reduce((total, item) => total + item.value, 0);
     }
   },
   methods: {
     getOrders(page = 1) {
-      let me = this;
-      let params = new URLSearchParams(me.filter);
+      // Se convierten todos los filtros en parámetros de consulta
+      const params = new URLSearchParams(this.filter).toString();
       axios
-        .get(
-          `api/reports/product-sales-report?page=${page}&${params.toString()}`,
-          this.$root.config
-        )
-        .then(function (response) {
-          me.List = response.data;
+        .get(`api/reports/product-sales-report?page=${page}&${params}`, this.$root.config)
+        .then(response => {
+          this.List = response.data;
         });
     },
     getCategories() {
-      let me = this;
       axios.get('api/categories?paginate=0', this.$root.config).then(response => {
-        me.categoriesList = response.data.categories;
+        this.categoriesList = response.data.categories;
       });
     },
     getTicket() {
       axios
-        .post(
-          `api/reports-ticket/product-sales-report`,
-          { data: this.List.data },
-          this.$root.config
-        )
-        .then(function (response) {
-          // me.List = response.data;
+        .post(`api/reports-ticket/product-sales-report`, { data: this.List.data }, this.$root.config)
+        .then(() => {
+          console.log('Ticket generado');
         });
     }
   },
   mounted() {
     this.getOrders(1);
     this.getCategories();
+  },
+  filters: {
+    currency(value) {
+      return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(value);
+    }
   }
-}
+};
 </script>

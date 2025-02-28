@@ -48,7 +48,7 @@ Route::middleware('auth:api')->group(function () {
 	Route::post('/register', [UserController::class, 'register']);
 
 	
-
+	Route::post('categories/{id}/activate', [CategoryController::class, 'activate']);
 	Route::post('/zones/{category}/activate',  [CategoryController::class, 'activate']);
 	Route::get('/categories/category-list', [CategoryController::class, 'categoryList']);
 	Route::resource('/categories', CategoryController::class);
@@ -66,6 +66,7 @@ Route::middleware('auth:api')->group(function () {
 	Route::get('/orders/generatePaymentPdf/{order}', [OrderController::class, 'generatePaymentPdf']);
 	Route::get('/orders/kitchen', [OrderController::class, 'ordersForKitchen']);
 	Route::put('/orders/kitchen/{order}', [OrderController::class, 'prepareOrderKitchen']);
+	Route::get('/orders/reprint/{id}', [OrderController::class, 'reprint']);// nueva reimprecion de comanda 
 	Route::resource('/orders',  OrderController::class);
 	Route::resource('/order-details', DetailOrderController::class);
 
@@ -116,6 +117,7 @@ Route::middleware('auth:api')->group(function () {
 	Route::get('/reports/product-sales-report', [ReportController::class, 'reportProductSales']);
 	Route::get('/reports/total-products-report', [ReportController::class, 'reportTotalProducts']);
 	Route::get('/reports/closing', [ReportController::class, 'reportClosing']);
+	Route::get('/reports/invoiced-products', [ReportController::class, 'reportInvoicedProducts']);
 
 	
 	Route::get('/reports-ticket/test', [ReportTicketController::class, 'test']);
@@ -124,6 +126,8 @@ Route::middleware('auth:api')->group(function () {
 	Route::post('/reports-ticket/general-sales-report', [ReportTicketController::class, 'reportGeneralSales']);
 	Route::post('/reports-ticket/product-sales-report', [ReportTicketController::class, 'reportProductSales']); // ✅
 	Route::post('/reports-ticket/total-products-report', [ReportTicketController::class, 'reportTotalProducts']);
+	Route::post('/reports-ticket/invoiced-products', [ReportTicketController::class, 'reportInvoicedProducts']);
+
 
 	Route::get('/boxes/box-list', [BoxController::class, 'boxList']);
 	Route::get('/boxes/byUser', [BoxController::class, 'getBoxesByUser']);
@@ -140,5 +144,6 @@ Route::middleware('auth:api')->group(function () {
 
 	Route::get('/tables/table-list', [TableController::class, 'tableList']);
 	Route::resource('/tables', TableController::class);
+	
 
 });

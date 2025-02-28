@@ -54,6 +54,8 @@ import ReportSale from './components/Report/ReportSale'
 import ReportProductSales from './components/Report/ReportProductSales'
 import ReportGeneralSales from './components/Report/ReportGeneralSales'
 import ReportClosing from './components/Report/ReportClosing'
+import ReportInvoicedProducts from './components/Report/ReportInvoicedProducts'
+
 
 import Boxes from './components/Box/Boxes.vue'
 
@@ -121,6 +123,7 @@ const routes = [
   { path: '/reports/report-general-sales', component: ReportGeneralSales, props: true, name: 'report-general-sales', alias:'report.index' },
   { path: '/reports/report-product-sales', component: ReportProductSales, props: true, name: 'report-product-sales', alias:'report.index' },
   { path: '/reports/closing', component: ReportClosing, props: true, name: 'report-closing', alias:'report.index' },
+  { path: '/reports/invoiced-products', component: ReportInvoicedProducts, props: true,  name: 'report-invoiced-products', alias: 'report.index' },
 
   { path: '/boxes', component: Boxes, alias: 'box.index' },
 

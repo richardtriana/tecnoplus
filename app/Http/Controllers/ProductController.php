@@ -384,30 +384,38 @@ class ProductController extends Controller
 	}
 
 	public function filterProductList(Request $request)
-	{
+{
+    // Crear la consulta base
+    $products = Product::query();
 
-		$products = Product::select();
+    // Filtrar por estado activo
+    $products->where('state', 1);
 
-		if ($request->product) {
-			$products = $products
-				->where('state', 1)
-				->where('barcode', 'LIKE', "%$request->product%")
-				->orWhere('product', 'LIKE', "%$request->product%");
-		}
+    // Filtro por código de barras o nombre del producto
+    if ($request->product) {
+        $products->where(function ($query) use ($request) {
+            $query->where('barcode', 'LIKE', "%{$request->product}%")
+                  ->orWhere('product', 'LIKE', "%{$request->product}%");
+        });
+    }
 
-		if ($request->category_id) {
-			$products = $products
-				->where('category_id', $request->category_id);
-		}
+    // Filtro por categoría
+    if ($request->category_id) {
+        $products->where('category_id', $request->category_id);
+    }
 
-		if ($request->is_order) {
-			$products = $products->where('state', 1)
-				->where('quantity', '>', 0)
-				->limit(5);
-		}
-		$products = $products->get();
-		return $products;
-	}
+    // Filtro adicional para pedidos (is_order)
+    if ($request->is_order) {
+        $products->where('quantity', '>', 0)
+                 ->limit(5);
+    }
+
+    // Obtener los productos
+    $products = $products->get();
+
+    // Retornar los productos como respuesta
+    return $products;
+}
 
 	/*
 	* @param integer $type

@@ -451,10 +451,14 @@ export default {
     },
     searchProduct() {
       let me = this;
-      if (me.filters.product == "") {
+      if (me.filters.product === "") {
         return false;
       }
-      var url = "api/products/search-product?product=" + me.filters.product;
+      // Agregar el filtro de estado activo (state=1) en la URL
+      var url =
+        "api/products/search-product?product=" +
+        me.filters.product +
+        "&state=1";
       axios
         .post(url, null, this.$root.config)
         .then(function (response) {
@@ -473,12 +477,13 @@ export default {
     addProduct(new_product) {
       let me = this;
       let result = false;
+
       // Verifica si el producto existe en la lista
       me.productsOrderList.filter((prod) => {
-        if (new_product.barcode == prod.barcode) {
+        if (new_product.barcode === prod.barcode) {
           result = true;
           if (result) {
-            // Añade cantidad
+            // Añade cantidad al producto existente
             prod.quantity += 1;
             prod.price_tax_inc_total = prod.price_tax_inc * prod.quantity;
             prod.cost_price_tax_inc_total =
@@ -487,8 +492,8 @@ export default {
         }
       });
 
+      // Si el producto no existe en la lista, lo añade como nuevo
       if (!result) {
-        // Sino, lo añade al array
         me.productsOrderList.push({
           product_id: new_product.id,
           barcode: new_product.barcode,
@@ -540,7 +545,12 @@ export default {
     },
 
     createOrUpdateOrder(state_order) {
+      // EVITA QUE SE LLAME DOS VECES SEGUIDAS
+      if (this.disabled) {
+        return;
+      }
       this.disabled = true;
+
       this.order.state = state_order;
       this.order.box_id = this.$root.box;
       this.order.total_cost_price_tax_inc = this.total_cost_price_tax_inc;
@@ -648,7 +658,7 @@ export default {
           Swal.fire({
             icon: "error",
             title: "Debe completar su pago ",
-            text: "Puede añadir varias formas de pago",
+            text: "Calcularemso su cambio",
           }).then(() => {
             me.openModalPayment()
           });
@@ -677,19 +687,70 @@ export default {
     },
 
     openModalPayment() {
-      $('#paymentModal').modal('show')
-      $('#paymentModal').on('shown.bs.modal', function () {
-        $('#cashPayment').trigger('focus')
-      })
-    }
+      // Asigna el total al campo "El cliente paga"
+      this.order.payment_methods.cash = this.total_tax_inc;
+
+      // Muestra el modal
+      $('#paymentModal').modal('show');
+
+      // Enfoca y selecciona el input al abrir el modal
+      $('#paymentModal').on('shown.bs.modal', () => {
+        const cashInput = $('#cashPayment');
+        cashInput.focus(); // Enfoca el input
+        cashInput.select(); // Selecciona su contenido
+      });
+    },
+    commands() {
+      shortcut.add("F1", () => {
+        if (this.paid_value < this.total_tax_inc) {
+          Swal.fire({
+            icon: "error",
+            title: "Debe completar su pago ",
+            text: "Calcularemos su cambio",
+          }).then(() => {
+            this.openModalPayment();
+          });
+        } else {
+          this.createOrUpdateOrder(2);
+        }
+      });
+
+      shortcut.add("F2", () => {
+        if (this.paid_value < this.total_tax_inc) {
+          Swal.fire({
+            icon: "error",
+            title: "Debe completar su pago ",
+            text: "Puede añadir varias formas de pago",
+          }).then(() => {
+            this.openModalPayment();
+          });
+        } else {
+          this.createOrUpdateOrder(4);
+        }
+      });
+
+      shortcut.add("F10", () => {
+        $("#addProductModal").modal("show");
+      });
+    },
+    // Otros métodos (searchProduct, addProduct, etc.) permanecen iguales
   },
   mounted() {
+    // Oculta el toast inicial
     $("#no-results").toast("hide");
-    if (this.order_id != null || this.order_id != 0) {
+
+    // Si existe un pedido, carga sus ítems
+    if (this.order_id != null && this.order_id !== 0) {
       this.listItemsOrder();
     }
-    this.listTables()
+
+    // Lista las mesas disponibles
+    this.listTables();
+
+    // Inicializa los atajos de teclado
     this.commands();
+
+    // Selecciona automáticamente la caja, si aplica
     this.$refs.ModalBox.selectedBox();
   },
 };

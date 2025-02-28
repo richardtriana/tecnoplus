@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use Illuminate\Support\Facades\Validator;
-use Symfony\Component\ErrorHandler\Debug;
 
 class CategoryController extends Controller
+
 {
     public function __construct()
     {
@@ -15,8 +15,9 @@ class CategoryController extends Controller
         $this->middleware('can:category.store')->only('store');
         $this->middleware('can:category.update')->only('update');
         $this->middleware('can:category.delete')->only('destroy');
-        $this->middleware('can:category.active')->only('active');
+        $this->middleware('can:category.active')->only('activate');
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -24,10 +25,9 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        
-        if(!$request->input('paginate', true)){
+        if (!$request->input('paginate', true)) {
             $data = Category::all();
-        }else{
+        } else {
             $data = Category::paginate(20);
         }
 
@@ -194,20 +194,36 @@ class CategoryController extends Controller
      * Activate the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function activate($id)
     {
         $category = Category::find($id);
+
+        if (!$category) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'Categoría no encontrada',
+            ], 404);
+        }
+
         $category->active = !$category->active;
         $category->save();
+
+        return response()->json([
+            'status' => 'success',
+            'code' => 200,
+            'message' => 'Estado actualizado correctamente',
+            'category' => $category,
+        ]);
     }
 
     public function categoryList()
     {
         $categories = Category::where('active', 1)->get();
 
-        if ($categories) {
+        if ($categories->count() > 0) {
             $data = [
                 'status' => 'success',
                 'code' => 200,
@@ -217,7 +233,7 @@ class CategoryController extends Controller
             $data = [
                 'status' => 'error',
                 'code' => 400,
-                'message' => 'Registro no encontrado'
+                'message' => 'No se encontraron categorías activas'
             ];
         }
 

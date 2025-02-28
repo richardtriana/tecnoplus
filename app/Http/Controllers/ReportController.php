@@ -127,36 +127,56 @@ class ReportController extends Controller
 		$product = $request->product;
 		$category = $request->category;
 		$nro_results = $request->nro_results ?: self::NRO_RESULTS;
-
-		$detail_order = DetailOrder::select('product', 'barcode')
-			->selectRaw('SUM(quantity) as quantity_of_products')
-			->groupBy('barcode', 'product')
+		$product_status = $request->product_status ?? 'all'; // all, active, inactive
+	
+		$detail_order = DetailOrder::withTrashed() // Incluye los registros eliminados (inactivos)
+			->select(
+				'detail_orders.product', 
+				'detail_orders.barcode',
+				'categories.name as category', // Nombre de la categoría
+				DB::raw('SUM(detail_orders.quantity) as quantity_of_products'),
+				DB::raw('SUM(detail_orders.quantity * products.sale_price_tax_inc) as value') // Valor total
+			)
+			->join('products', 'products.id', '=', 'detail_orders.product_id') // Relación con productos
+			->join('categories', 'categories.id', '=', 'products.category_id') // Relación con categorías
+			->where(function ($query) use ($product_status) {
+				if ($product_status !== 'all') {
+					if ($product_status == 'active') {
+						$query->whereNull('detail_orders.deleted_at');
+					} elseif ($product_status == 'inactive') {
+						$query->whereNotNull('detail_orders.deleted_at');
+					}
+				}
+			})
 			->whereHas('order', function ($query) use ($from, $to) {
-				if ($from != '' && $from != 'undefined' && $from != null) {
+				if ($from) {
 					$from = Carbon::parse($from)->toDateTimeString();
 					$query->where('created_at', '>=', $from);
 				}
-				if ($to != '' && $to != 'undefined' && $to != null) {
+				if ($to) {
 					$to = Carbon::parse($to)->addSeconds(59)->toDateTimeString();
 					$query->where('created_at', '<=', $to);
 				}
 			})
 			->where(function ($query) use ($product) {
-				if ($product != '' && $product != 'undefined' && $product != null) {
-					$query->where('barcode', 'LIKE', "%$product%")
-						->orWhere('product', 'LIKE', "%$product%");
+				if ($product) {
+					$query->where('detail_orders.barcode', 'LIKE', "%$product%")
+						  ->orWhere('detail_orders.product', 'LIKE', "%$product%");
 				}
 			})
-			->whereHas('product', function ($query) use ($category, $request) {
-				if ($request->filled('category') && $category != 'undefined') {
-					$query->where('category_id', $category);
+			->where(function ($query) use ($category) {
+				if ($category) {
+					$query->where('products.category_id', $category);
 				}
 			})
+			->groupBy('detail_orders.barcode', 'detail_orders.product', 'categories.name')
 			->paginate($nro_results);
-
+	
 		return $detail_order;
 	}
+	
 
+	
 	public function reportTotalProducts(Request $request)
 	{
 		$total_products = Product::selectRaw('count(id) as number_of_products')
@@ -252,4 +272,63 @@ class ReportController extends Controller
 
 		return ['orders'=>$orders, 'totals'=>$totals];
 	}
+// En app/Http/Controllers/ReportController.php
+
+public function reportInvoicedProducts(Request $request)
+{
+    $from = $request->from;
+    $to = $request->to;
+    $product = $request->product;
+    $category = $request->category;
+    // Parámetro para filtrar el estado de la orden: 'active' (no eliminadas), 'deleted' o 'all'
+    $orderDeleteFilter = $request->order_delete ?? 'all';
+    $nro_results = $request->nro_results ?: self::NRO_RESULTS;
+
+    $detail_order = DetailOrder::withTrashed() // incluye registros eliminados en detalle de órdenes
+        ->select(
+            'detail_orders.product',
+            'detail_orders.barcode',
+            'categories.name as category',
+            DB::raw('SUM(detail_orders.quantity) as quantity_of_products'),
+            DB::raw('SUM(detail_orders.quantity * products.sale_price_tax_inc) as value')
+        )
+        ->join('products', 'products.id', '=', 'detail_orders.product_id')
+        ->join('categories', 'categories.id', '=', 'products.category_id')
+        ->whereHas('order', function ($query) use ($from, $to, $orderDeleteFilter) {
+            // Sólo se toman órdenes facturadas (por ejemplo, state = 2)
+            $query->where('state', 2);
+
+            if ($from) {
+                $from = \Carbon\Carbon::parse($from)->toDateTimeString();
+                $query->where('payment_date', '>=', $from);
+            }
+            if ($to) {
+                $to = \Carbon\Carbon::parse($to)->addSeconds(59)->toDateTimeString();
+                $query->where('payment_date', '<=', $to);
+            }
+            // Filtro para órdenes eliminadas o activas según corresponda
+            if ($orderDeleteFilter === 'deleted') {
+                $query->whereNotNull('deleted_at');
+            } elseif ($orderDeleteFilter === 'active') {
+                $query->whereNull('deleted_at');
+            }
+        })
+        ->where(function ($query) use ($product) {
+            if ($product) {
+                $query->where('detail_orders.barcode', 'LIKE', "%$product%")
+                      ->orWhere('detail_orders.product', 'LIKE', "%$product%");
+            }
+        })
+        ->where(function ($query) use ($category) {
+            if ($category) {
+                $query->where('products.category_id', $category);
+            }
+        })
+        ->groupBy('detail_orders.barcode', 'detail_orders.product', 'categories.name')
+        ->paginate($nro_results);
+
+    return $detail_order;
+}
+
+
 }

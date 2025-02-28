@@ -1,4 +1,4 @@
-const api = 'http://192.168.0.55/restaplus/public/api';
+const api = 'http://192.168.100.64/restaplus/public/api';
 
 
 export default {

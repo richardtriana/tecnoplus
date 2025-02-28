@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes; // Agrega esta línea
 
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes; // Incluye SoftDeletes en el trait
 
     protected $fillable = [
         'client_id',
@@ -64,7 +65,6 @@ class Order extends Model
 
     public function consecutiveBox()
     {
-
         $consecutive = str_replace($this->box->prefix, '', $this->bill_number);
         $consecutive = intval($consecutive);
 
@@ -96,12 +96,11 @@ class Order extends Model
     public function printers()
     {
         return $this->products()
-        ->with('zones') // Cargar las zonas relacionadas
-        ->get()
-        ->pluck('zones') // Obtener las zonas de cada producto
-        ->flatten() // Aplanar el resultado a una sola colección
-        // ->pluck('zone') // Obtener solo los nombres de las zonas
-        ->unique() // Eliminar duplicados
-        ->values(); // Reindexar la colección
+            ->with('zones')
+            ->get()
+            ->pluck('zones')
+            ->flatten()
+            ->unique()
+            ->values();
     }
 }

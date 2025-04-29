@@ -1,55 +1,46 @@
 <template>
   <div>
     <section class="page-header">
-      <h4 class="w-100 text-center">Detalles de Factura</h4>
-      <load-pdf :loading="load_pdf"></load-pdf>
+      <h4 class="w-100 text-center">Detalles de Crédito</h4>
+      <load-pdf :loading="load_pdf" />
       <table class="table table-bordered w-100 table-sm">
         <tbody>
           <tr>
             <td>No. Factura</td>
-            <th>
-              {{ creditInformation.no_invoice }}
-            </th>
+            <th>{{ creditInformation.order.bill_number }}</th>
           </tr>
           <tr>
             <td>Fecha</td>
-            <th>
-              {{ creditInformation.updated_at }}
-            </th>
+            <th>{{ creditInformation.created_at | showDate }}</th>
           </tr>
           <tr>
             <th colspan="2" class="text-center">Cliente</th>
           </tr>
           <tr>
             <td>Nombres:</td>
-            <th>
-              {{ creditInformation.client.name }}
-            </th>
+            <th>{{ creditInformation.order.client.name }}</th>
           </tr>
           <tr>
             <td>Documento / Nit:</td>
-            <th>
-              {{ creditInformation.client.document }}
-            </th>
+            <th>{{ creditInformation.order.client.document }}</th>
           </tr>
           <tr>
-            <td>Direccion</td>
-            <td>{{ creditInformation.client.address }}</td>
+            <td>Dirección</td>
+            <td>{{ creditInformation.order.client.address }}</td>
           </tr>
           <tr>
             <td>Email</td>
-            <td>{{ creditInformation.client.email }}</td>
+            <td>{{ creditInformation.order.client.email }}</td>
           </tr>
           <tr>
-            <td>Celular / Télefono</td>
-            <td>{{ creditInformation.client.mobile }}</td>
+            <td>Celular / Teléfono</td>
+            <td>{{ creditInformation.order.client.mobile }}</td>
           </tr>
         </tbody>
       </table>
-      <br>
 
       <div>
-        <h4 class="w-100 text-center">Lista abonos</h4>
+        <h4 class="w-100 text-center">Lista de Abonos</h4>
         <div class="text-right">
           <button class="btn btn-light text-danger" @click="generatePaymentPdf(null)">
             <i class="bi bi-file-earmark-pdf-fill"></i> Descargar PDF
@@ -65,85 +56,68 @@
           <tr>
             <th>Abono</th>
             <th>Fecha</th>
-            <th>Imprimir PDF</th>
-            <th>Imprimir Ticket</th>
+            <th>PDF</th>
+            <th>Ticket</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="paidCredit in creditInformation.payment_credits" :key="paidCredit.id">
-            <td>$ {{ paidCredit.pay }}</td>
-            <td>{{ paidCredit.created_at }}</td>
+          <tr v-for="p in payments" :key="p.id">
+            <td>{{ p.amount | currency }}</td>
+            <td>{{ p.created_at | showDate }}</td>
             <td class="text-right">
-              <button class="btn text-danger" @click="generatePaymentPdf(paidCredit.id)">
-                <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+              <button class="btn text-danger" @click="generatePaymentPdf(p.id)">
+                <i class="bi bi-file-earmark-pdf-fill"></i>
               </button>
             </td>
             <td class="text-right">
-              <button class="btn" @click="generatePaymentTicket(paidCredit.id)">
-                <i class="bi bi-receipt-cutoff"></i> Ticket
+              <button class="btn" @click="generatePaymentTicket(p.id)">
+                <i class="bi bi-receipt-cutoff"></i>
               </button>
             </td>
           </tr>
         </tbody>
       </table>
     </section>
+
     <section class="mt-5">
-      <h5 class="text-center">Detalles</h5>
+      <h5 class="text-center">Detalles de Productos</h5>
       <table class="table table-sm table-bordered">
         <thead>
           <tr>
             <th>#</th>
-            <th>Código de barras</th>
+            <th>Código</th>
             <th>Producto</th>
             <th>Cantidad</th>
             <th>Precio sin IVA</th>
             <th>Precio con IVA</th>
             <th>Descuento %</th>
-            <th>Descuento $</th>
-            <th>Precio Total</th>
+            <th>Total</th>
           </tr>
         </thead>
-        <tbody class="">
-          <tr v-for="(i, index) in ItemList" :key="i.id">
-            <td>{{ index + 1 }}</td>
-            <td>{{ i.barcode }}</td>
-            <td>{{ i.product }}</td>
-            <td>{{ i.quantity }}</td>
-            <td>$ {{ i.price_tax_exc }}</td>
-            <td>$ {{ i.price_tax_inc }}</td>
-            <td>{{ i.discount_percentage }} %</td>
-            <td>$ {{ i.discount_price }}</td>
-            <td class="text-right">$ {{ i.price_tax_inc_total }}</td>
+        <tbody>
+          <tr v-for="(item, idx) in ItemList" :key="item.id">
+            <td>{{ idx + 1 }}</td>
+            <td>{{ item.barcode }}</td>
+            <td>{{ item.product }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.price_tax_exc | currency }}</td>
+            <td>{{ item.price_tax_inc | currency }}</td>
+            <td>{{ item.discount_percentage }}%</td>
+            <td class="text-right">{{ item.price_tax_inc_total | currency }}</td>
           </tr>
         </tbody>
         <tfoot class="table-secondary">
           <tr>
-            <td colspan="8">Subtotal</td>
-            <td class="text-right">$ {{ creditInformation.total_iva_exc }}</td>
+            <td colspan="7">Total Crédito</td>
+            <td class="text-right">{{ creditInformation.total_credit | currency }}</td>
           </tr>
           <tr>
-            <td colspan="8">Descuento</td>
-            <td class="text-right">
-              $ {{ creditInformation.total_discount }}
-            </td>
+            <td colspan="7">Total Abonado</td>
+            <td class="text-right">{{ creditInformation.total_credit - creditInformation.balance | currency }}</td>
           </tr>
           <tr>
-            <td colspan="8">Total</td>
-            <th class="h5 text-right">
-              $ {{ creditInformation.total_iva_inc }}
-            </th>
-          </tr>
-          <tr>
-            <td colspan="8">Abono</td>
-            <th class="h5 text-right">
-              $ {{ creditInformation.paid_payment }}
-            </th>
-          </tr>
-          <tr>
-            <td colspan="8">Saldo</td>
-            <th class="h5 text-right">
-              $ {{ creditInformation.total_iva_inc - creditInformation.paid_payment }}
-            </th>
+            <td colspan="7">Saldo Pendiente</td>
+            <td class="text-right">{{ creditInformation.balance | currency }}</td>
           </tr>
         </tfoot>
       </table>
@@ -155,87 +129,64 @@
 import LoadPdf from '../Order/LoadPdf.vue';
 export default {
   components: { LoadPdf },
-  props: ["order_id"],
-  filters: {
-    showDate(value) {
-      let date = "";
-      let dateText = ""
-      try {
-        date = new Date(value);
-        dateText = value.split('T')[0]
-      } catch (error) {
-
-      }
-
-      return [
-        dateText,
-        `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-      ].join(" ");
-    }
-  },
+  props: ['order_id'],
   data() {
     return {
       load_pdf: false,
       creditInformation: {
-        client: "",
-        payment_credits: []
+        order: { client: {} },
+        payments: [],
+        total_credit: 0,
+        balance: 0,
       },
-      ItemList: {},
+      ItemList: [],
+      payments: [],
     };
+  },
+  filters: {
+    showDate(value) {
+      const [date] = value.split('T');
+      return date;
+    }
   },
   created() {
     this.getDetailsCredit();
   },
   methods: {
     getDetailsCredit() {
-      let me = this;
       axios
-        .get(`api/orders/${this.order_id}`, this.$root.config)
-        .then(function (response) {
-          me.creditInformation = response.data.order_information;
-          me.ItemList = response.data.order_details;
+        .get(`api/order-credits/${this.order_id}`, this.$root.config)
+        .then(({ data }) => {
+          this.creditInformation = data.credit;
+          this.ItemList = data.credit.order.detailOrders;
+          this.payments = data.credit.payments;
         });
     },
     generatePaymentPdf(id = null) {
       this.load_pdf = true;
-
-      let data = {
-        payment_id: id
-      }
       axios
         .get(`api/orders/generatePaymentPdf/${this.order_id}`, {
-          params: data,
+          params: { payment_id: id },
           headers: this.$root.config.headers
         })
-        .then(response => {
-          const pdf = response.data.pdf;
-          var a = document.createElement("a");
-          a.href = "data:application/pdf;base64," + pdf;
+        .then(({ data }) => {
+          const pdf = data.pdf;
+          const a = document.createElement('a');
+          a.href = `data:application/pdf;base64,${pdf}`;
           a.download = `Credit-${this.order_id}.pdf`;
           a.click();
         })
-        .finally(() => {
-          this.load_pdf = false;
-        });
+        .finally(() => (this.load_pdf = false));
     },
     generatePaymentTicket(id = null) {
       this.load_pdf = true;
-
-      let data = {
-        payment_id: id
-      }
       axios
         .get(`api/print-payment-ticket/${this.order_id}`, {
-          params: data,
+          params: { payment_id: id },
           headers: this.$root.config.headers
         })
-        .then(response => {
-          console.log(response);
-        })
-        .finally(() => {
-          this.load_pdf = false;
-        });
-    },
-  },
+        .finally(() => (this.load_pdf = false));
+    }
+  }
 };
 </script>

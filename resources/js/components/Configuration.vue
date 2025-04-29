@@ -35,8 +35,7 @@
             <small
               id="legal_representativeHelp"
               class="form-text text-danger"
-              >{{ formErrors.legal_representative }}</small
-            >
+            >{{ formErrors.legal_representative }}</small>
           </div>
         </div>
         <div class="form-row">
@@ -75,7 +74,7 @@
             <input
               type="email"
               class="form-control"
-              id="address"
+              id="email"
               name="email"
               placeholder="Ingresar email"
               :value="formConfiguration.email"
@@ -98,8 +97,6 @@
               formErrors.tax_regime
             }}</small>
           </div>
-          <!-- </div>
-        <div class="form-row"> -->
           <div class="form-group col-12 col-md-6">
             <label for="telephone">Teléfono</label>
             <input
@@ -128,16 +125,22 @@
               formErrors.mobile
             }}</small>
           </div>
-
           <div class="form-group col-12 col-md-6">
-            <label for="mobile">Condiciones de ticket</label>
-            <textarea class="form-control" name="condition_order" id="condition_order" cols="30" rows="4" :value= "formConfiguration.condition_order"></textarea>
+            <label for="condition_order">Condiciones de ticket</label>
+            <textarea
+              class="form-control"
+              name="condition_order"
+              id="condition_order"
+              cols="30"
+              rows="4"
+              :value="formConfiguration.condition_order"
+            ></textarea>
             <small id="condition_orderHelp" class="form-text text-danger">{{
               formErrors.condition_order
             }}</small>
           </div>
           <div class="form-group col-12 col-md-6">
-            <label for="mobile">Condiciones de cotización</label>
+            <label for="condition_quotation">Condiciones de cotización</label>
             <ckeditor
               :editor="editor"
               :config="editorConfig"
@@ -150,7 +153,6 @@
               formErrors.condition_quotation
             }}</small>
           </div>
-
           <div class="form-group col-12 col-md-6">
             <label for="printer">Impresora POS</label>
             <input
@@ -172,10 +174,7 @@
         <div class="form-group">
           <label for="logo">Logo</label>
           <div class="p-0 border">
-            <div
-              style="height: 230px"
-              class="d-flex justify-content-center my-2"
-            >
+            <div style="height: 230px" class="d-flex justify-content-center my-2">
               <img
                 id="image"
                 class="border"
@@ -192,11 +191,7 @@
                 data-info="image"
                 type="file"
                 style="display: none"
-                @change="
-                  (event) => {
-                    readImage(event.target);
-                  }
-                "
+                @change="(event) => { readImage(event.target); }"
               />
             </label>
           </div>
@@ -209,14 +204,17 @@
     </div>
   </div>
 </template>
+
 <script>
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import "@ckeditor/ckeditor5-build-classic/build/translations/es";
+import Swal from "sweetalert2";
 
 export default {
   data() {
     return {
       formConfiguration: {
+        id: null,
         name: "",
         legal_representative: "",
         nit: "",
@@ -271,7 +269,8 @@ export default {
       axios.get("api/configurations", this.$root.config).then((response) => {
         if (response.data.configuration) {
           this.formConfiguration = response.data.configuration;
-          this.formConfiguration.condition_quotation = this.formConfiguration.condition_quotation ?? "";
+          this.formConfiguration.condition_quotation =
+            this.formConfiguration.condition_quotation ?? "";
         }
       });
     },
@@ -288,6 +287,14 @@ export default {
         .post("api/configurations", form, this.$root.config)
         .then((response) => {
           this.formConfiguration = response.data.configuration;
+          // Mostrar ventana emergente con SweetAlert2
+          Swal.fire({
+            icon: "success",
+            title: "Guardado",
+            text: response.data.message,
+            timer: 2000,
+            showConfirmButton: false
+          });
         })
         .catch((response) => {
           this.assignErrors(response);

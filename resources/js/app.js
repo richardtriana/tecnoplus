@@ -1,7 +1,9 @@
 /**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
+ * resources/js/app.js
+ *
+ * Este archivo carga las dependencias JavaScript, configura Vue, el router,
+ * interceptores de Axios y asigna el usuario autenticado para que esté disponible
+ * globalmente (this.$root.user).
  */
 
 require('./bootstrap');
@@ -40,6 +42,7 @@ import CreateEditSupplier from './components/Supplier/CreateEditSupplier.vue'
 import Orders from './components/Order/Orders.vue'
 import DetailsOrder from './components/Order/DetailsOrder.vue'
 import CreateEditOrder from './components/Order/CreateEditOrder.vue'
+import PosView from './components/Order/PosView.vue';
 import CreateEditOrderMobile from './components/Mobile/CreateEditOrder.vue'
 
 import Billings from './components/Billing/Billings.vue'
@@ -56,7 +59,6 @@ import ReportGeneralSales from './components/Report/ReportGeneralSales'
 import ReportClosing from './components/Report/ReportClosing'
 import ReportInvoicedProducts from './components/Report/ReportInvoicedProducts'
 
-
 import Boxes from './components/Box/Boxes.vue'
 
 import Roles from './components/Rol/Roles.vue';
@@ -66,7 +68,29 @@ import Profile from './components/Profile.vue';
 import Tables from './components/Table/Tables.vue'
 import Zones from './components/Zone/Zones.vue'
 
-//Services
+// Nueva importación del componente Factus
+import Factus from './components/Factus/Factus.vue'
+
+// NUEVAS IMPORTACIONES para el módulo de Porciones:
+import Portions from './components/Portion/Portions.vue';
+import PortionOrders from './components/Portion/PortionOrders.vue';
+
+// NUEVAS IMPORTACIONES para el módulo de Vouchers:
+import Vouchers from './components/Vouchers/Vouchers.vue';
+import CreateEditVoucher from './components/Vouchers/CreateEditVoucher.vue';
+
+import FactusVoucherslist from './components/Order/FactusVoucherslist.vue'
+//notas credito
+import CreateCreditNote from './components/Order/CreateCreditNote.vue';
+import Services from './components/Service/Services.vue'
+import DocumentList from './components/Support_document/DocumentList.vue';
+import CreateEditDocument from './components/Support_document/CreateEditDocument.vue';
+import CreateAdjustmentNote from './components/Support_document/CreateAdjustmentNote.vue';
+
+//recepcion de documentos
+import ReceptionDocuments from './components/Reception_documents/ReceptionDocuments.vue';
+
+
 import global from './services/global.js';
 import axios from 'axios';
 
@@ -87,50 +111,42 @@ Vue.component('v-select', vSelect)
 
 window.Swal = Swal;
 
+// Definición de rutas
 const routes = [
-
   { path: '', component: CreateEditOrder, props: { order_id: 0 }, name: 'main', alias:"order.store" },
-  { path: '/kitchen', component: Kitchen, name: "kitchen", alias: "kitchen.index" , props:{ status:1}},
-
+  { path: '/kitchen', component: Kitchen, name: "kitchen", alias: "kitchen.index", props:{ status:1 } },
   { path: '/clients', component: Clients, alias: "client.index" },
   { path: '/create-edit-client', component: CreateEditClient },
-
   { path: '/products', component: Products, alias: "product.index" },
   { path: '/create-edit-product', component: CreateEditProduct },
   { path: '/stock', component: Stock },
   { path: '/checker', component: Checker },
-
   { path: '/taxes', component: Taxes, alias: "tax.index" },
-
   { path: '/suppliers', component: Suppliers, alias: "supplier.index" },
   { path: '/create-edit-supplier', component: CreateEditSupplier },
-
   { path: '/categories', component: Categories, alias: "category.index" },
   { path: '/create-edit-category', component: CreateEditCategory },
-
   { path: '/brands', component: Brands, alias: "brand.index" },
-
-  { path: '/orders', component: Orders, alias: "order.index" , props:{ status:1}},
+  // Rutas para Inventario de Porciones:
+  { path: '/portions', component: Portions, name: 'Portions' },
+  { path: '/portion-orders', component: PortionOrders, name: 'PortionOrders'},
+  { path: '/orders', component: Orders, alias: "order.index", props:{ status:1 } },
+  { path: '/orders/facturado', component: Orders, name: 'orders.facturado', alias: 'order.facturado', props: { status: 2 }},
   { path: '/orders/:order_id/details-order', component: DetailsOrder, props: true, name: 'details-order', alias: "order.index" },
   { path: '/create-edit-order/:order_id', component: CreateEditOrder, props: true, name: 'create-edit-order', alias: "order.store" },
   { path: '/create-edit-order-mobile/:order_id', component: CreateEditOrderMobile, props: true, name: 'create-edit-order-mobile', alias: "order.store" },
-
   { path: '/billings', component: Billings, alias: "billing.index" },
   { path: '/billings/:billing_id/details-billing', component: DetailsBilling, props: true, name: 'details-billing', alias: "billing.index" },
   { path: '/create-edit-billing/:billing_id', component: CreateEditBilling, props: true, name: 'create-edit-billing', alias: "billing.store" },
-
   { path: '/reports/report-sale', component: ReportSale, props: true, name: 'report-sale', alias:'report.index' },
   { path: '/reports/report-general-sales', component: ReportGeneralSales, props: true, name: 'report-general-sales', alias:'report.index' },
   { path: '/reports/report-product-sales', component: ReportProductSales, props: true, name: 'report-product-sales', alias:'report.index' },
   { path: '/reports/closing', component: ReportClosing, props: true, name: 'report-closing', alias:'report.index' },
-  { path: '/reports/invoiced-products', component: ReportInvoicedProducts, props: true,  name: 'report-invoiced-products', alias: 'report.index' },
-
+  { path: '/reports/invoiced-products', component: ReportInvoicedProducts, props: true, name: 'report-invoiced-products', alias: 'report.index' },
   { path: '/boxes', component: Boxes, alias: 'box.index' },
-
   { path: '/credits', component: Credits, alias: "credit.index" },
   { path: '/credits/:order_id/details-credit', component: DetailsCredit, props: true, name: 'details-credit', alias: "credit.index" },
   { path: '/create-edit-credit/:order_id', component: CreateEditCredit, props: true, name: 'create-edit-credit', alias: "credit.store" },
-
   { path: '/login', name: 'Login', component: Login },
   { path: '/roles', name: 'Roles', component: Roles, alias: "rol.index" },
   { path: '/users', name: 'Users', component: Users, alias: "user.index" },
@@ -138,51 +154,62 @@ const routes = [
   { path: '/profile', name: 'Profile', component: Profile },
   { path: '/zones', component: Zones, name: 'Zone', alias: 'zone.index' },
   { path: '/tables', component: Tables, name: 'Table', alias: 'table.index' },
+  // Componente Factus
+  { path: '/factus', name: 'Factus', component: Factus },
+  { path: '/factus-vouchers', component: FactusVoucherslist, name: 'FactusVoucherslist'},
+  // Rutas para Vouchers
+  { path: '/vouchers',component: Vouchers, name: 'Vouchers',},
+  {path: '/vouchers/create' ,component: CreateEditVoucher,name: 'vouchers.create'},
+  //nota credito
+  { path: '/credit-notes/create', component: CreateCreditNote, name: 'credit_notes.create' },
+  { path: '/services', component: Services, name: 'service' },
+  { path: '/pos', component: PosView,name: 'PosView'},
+  { path: '/support-documents',name: 'DocumentList',component: DocumentList},
+  { path: '/support-document',name: 'CreateEditDocument',component: CreateEditDocument},
+  { path: '/adjustment-note', name: 'CreateAdjustmentNote', component: CreateAdjustmentNote },
 
-  { path: '**', name: 'NoFound', component: NoFound },
-
-]
+  { path: '/reception-documents',name: 'ReceptionDocuments',component: ReceptionDocuments},
+    
+    
+    
+  
+  
+  //no encontrada
+  { path: '*', name: 'NoFound', component: NoFound },
+];
 
 const router = new VueRouter({
-  routes // short for `routes: routes`
-})
-
-export default router;
+  routes
+});
 
 router.beforeEach(async (to, from, next) => {
-	const publicRoutes = ["Login"];
-	const authRequired = !publicRoutes.includes(to.name);
-	let isAuthenticated = false;
-	try {
-		isAuthenticated =
-			localStorage.getItem("token") &&
-			localStorage.getItem("user") &&
-			JSON.parse(localStorage.getItem("user"))
-				? true
-				: false;
-	} catch (e) {
-		isAuthenticated;
-	}
-	if (authRequired && !isAuthenticated) {
-		return next({ name: "Login", query: { redirect: to.fullPath }});
-	}
-
-	if (isAuthenticated) {
-		const alias = to.matched[0]?.alias || "kitchen.index"; 
-		const hasPermission = alias
-			? global.validatePermission(undefined, alias)
-			: true; // Validar permisos para la ruta
-
-		if (!hasPermission) {
-			// Redirigir a la ruta alterna (cocina) si no tiene permiso
-			return next({ name: "kitchen" });
-		}
-
-    if (!global.validatePermission(undefined, alias)) {
+  const publicRoutes = ["Login"];
+  const authRequired = !publicRoutes.includes(to.name);
+  let isAuthenticated = false;
+  try {
+    isAuthenticated =
+      localStorage.getItem("token") &&
+      localStorage.getItem("user") &&
+      JSON.parse(localStorage.getItem("user"))
+        ? true
+        : false;
+  } catch (e) {
+    isAuthenticated = false;
+  }
+  if (authRequired && !isAuthenticated) {
+    return next({ name: "Login", query: { redirect: to.fullPath } });
+  }
+  if (isAuthenticated) {
+    // Recuperamos los permisos del usuario
+    const user = JSON.parse(localStorage.getItem("user"));
+    const permissions = user.permissions;
+    const alias = to.matched[0]?.alias;
+    // Si el alias no es "voucher.index", se realiza la validación de permisos
+    if (alias && alias !== "voucher.index" && !global.validatePermission(permissions, alias)) {
       return next({ name: "NoFound" });
     }
-	}
-	next();
+  }
+  next();
 });
 
 Vue.config.keyCodes = {
@@ -195,11 +222,20 @@ const app = new Vue({
     user: Object,
     token: String,
     permissions: [],
-    config: Object({
+    config: {
       headers: {
         Authorization: "",
-      },
-    }),
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }
+    },
+    factusConfig: {
+      headers: {
+        Authorization: "",
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      }
+    },
     box: '',
     listBoxes: []
   },
@@ -215,30 +251,64 @@ const app = new Vue({
       handler() {
         localStorage.setItem("user", JSON.stringify(this.user));
       }
-
     }
   },
   router,
   created() {
     this.assignDataRequired();
     this.selectedBox();
+
+    axios.interceptors.response.use(
+      response => response,
+      async error => {
+        const originalRequest = error.config;
+        if (error.response && error.response.status === 401 &&
+            originalRequest.headers.Authorization && originalRequest.headers.Authorization.includes("Bearer")) {
+          if (!originalRequest._retry) {
+            originalRequest._retry = true;
+            const factusRefreshToken = localStorage.getItem("factus_refresh_token");
+            if (factusRefreshToken) {
+              try {
+                const refreshResponse = await axios.post("api/refresh-token", { refresh_token: factusRefreshToken }, {
+                  headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json"
+                  }
+                });
+                const newAccessToken = refreshResponse.data.access_token;
+                localStorage.setItem("factus_token", newAccessToken);
+                this.factusConfig.headers.Authorization = "Bearer " + newAccessToken;
+                originalRequest.headers.Authorization = "Bearer " + newAccessToken;
+                return axios(originalRequest);
+              } catch (refreshError) {
+                return Promise.reject(refreshError);
+              }
+            }
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
   },
   methods: {
     assignDataRequired() {
       this.user = JSON.parse(localStorage.getItem("user"));
       this.token = localStorage.getItem("token");
-
       if (this.user) {
         this.permissions = this.user.permissions;
       }
-
       this.config.headers.Authorization = "Bearer " + this.token;
+      console.log("App Token asignado:", this.config.headers.Authorization);
+      const factusToken = localStorage.getItem("factus_token");
+      this.factusConfig.headers.Authorization = "Bearer " + factusToken;
+      console.log("Factus Token asignado:", this.factusConfig.headers.Authorization);
     },
     logout() {
       this.user = {};
       this.token = "";
       this.permissions = [];
       this.config.headers.Authorization = "";
+      this.factusConfig.headers.Authorization = "";
       localStorage.clear();
       this.$router.push('/login');
     },
@@ -255,8 +325,7 @@ const app = new Vue({
         });
     },
     selectedBox() {
-      axios.
-        get('api/boxes/byUser', this.config)
+      axios.get('api/boxes/byUser', this.config)
         .then((response) => {
           this.listBoxes = response.data.boxes;
         })
@@ -266,4 +335,3 @@ const app = new Vue({
     }
   }
 });
-

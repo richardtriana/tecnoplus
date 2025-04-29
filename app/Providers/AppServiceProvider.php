@@ -23,6 +23,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        \Log::debug("AppServiceProvider boot iniciado");
     }
 }

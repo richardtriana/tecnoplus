@@ -26,16 +26,52 @@
 	<div class="sidebar-heading">
 		Tecnoplus
 	</div>
-	<li class="nav-item bg-primary">
-		<router-link class="nav-link " v-if="validatePermission('order.store')" active-class="active" to="/"><i
-				class="bi bi-receipt"></i><span>Facturar</span>
-		</router-link>
+		<li class="nav-item">
+		<a
+			class="nav-link collapsed"
+			href="#"
+			data-toggle="collapse"
+			data-target="#collapseFacturacion"
+			aria-expanded="true"
+			aria-controls="collapseFacturacion"
+		>
+			<i class="bi bi-receipt"></i>
+			<span>Facturación</span>
+		</a>
+		<div
+			id="collapseFacturacion"
+			class="collapse"
+			aria-labelledby="headingFacturacion"
+			data-parent="#accordionSidebar"
+		>
+			<div class="bg-white py-2 collapse-inner rounded">
+			<h6 class="collapse-header">Facturación:</h6>
+			<!-- Opción Facturar -->
+			<router-link
+				class="collapse-item"
+				to="/"
+				v-if="validatePermission('order.store')"
+			>
+				Facturar
+			</router-link>
+			<router-link class="collapse-item" to="/orders"v-if="validatePermission('order.index')">
+				Comprobantes
+			</router-link>
+
+			<router-link class="collapse-item" to="/support-documents">
+				Documento Soporte
+			</router-link>
+
+			<router-link class="collapse-item" to="/factus-vouchers">
+				Comprobantes Dian
+			</router-link>
+			<router-link class="collapse-item" to="/reception-documents">
+				Recepción de Documentos
+			</router-link>
+			</div>
+		</div>
 	</li>
-	<li class="nav-item">
-		<router-link class="nav-link "  v-if="validatePermission('product.index')" active-class="active" to="/checker"><i
-				class="bi bi-receipt"></i><span>Verificador</span>
-		</router-link>
-	</li>
+
 
 	<!-- Nav Item - Shop Collapse Menu -->
 	<li class="nav-item"  v-if="validatePermission('product.index') || validatePermission('category.index')">
@@ -56,16 +92,20 @@
 				<router-link v-if="validatePermission('category.index')" class="collapse-item " to="/categories"
 					v-if="validatePermission('category.index')">Categorias
 				</router-link>
-				<router-link v-if="validatePermission('brand.index')" class="collapse-item " to="/brands">Marcas</router-link>
 				<router-link v-if="validatePermission('tax.index')" class="collapse-item" to="/taxes"
 					v-if="validatePermission('tax.index')">Impuestos</router-link>
+					<router-link class="collapse-item" to="/portions">
+						Inventario de Porciones
+					</router-link>
+					<router-link class="collapse-item" to="/services">
+						Servicios
+					</router-link>
+
+
 			</div>
 		</div>
 	</li>
-	<li class="nav-item" v-if="validatePermission('order.index')">
-		<router-link class="nav-link " active-class="active" to="/orders"><i class="bi bi-receipt"></i><span>Ordenes</span>
-		</router-link>
-	</li>
+
 	<li class="nav-item" v-if="validatePermission('kitchen.index')">
 		<router-link class="nav-link " active-class="active" to="/Kitchen"><i
 				class="bi bi-egg-fried"></i><span>Cocina</span>
@@ -137,26 +177,30 @@
 	</li>
 
 	<li class="nav-item">
-		<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSettings" aria-expanded="true"
-			aria-controls="collapseSettings">
-			<i class="bi bi-sliders"></i>
-			<span>Configuraciones</span>
-		</a>
-		<div id="collapseSettings" class="collapse" aria-labelledby="headingSettings" data-parent="#accordionSidebar">
-			<div class="bg-white py-2 collapse-inner rounded">
-				<h6 class="collapse-header">Sistema:</h6>
-				<router-link class="collapse-item" to="/profile">Perfil</router-link>
-				<router-link v-if="validatePermission('configuration')" class="collapse-item" to="/configuration">Configuración
-					general</router-link>
-				<router-link class="collapse-item" to="/roles" v-if="validatePermission('rol.index')">Roles</router-link>
-				<router-link class="collapse-item" v-if="validatePermission('user.index')" to="/users">Usuarios
-				</router-link>
-				<router-link class="collapse-item" v-if="validatePermission('box.index')" to="/boxes">Cajas</router-link>
-				<router-link class="collapse-item" v-if="validatePermission('zone.index')" to="/zones">Zonas</router-link>
-				<router-link class="collapse-item" v-if="validatePermission('table.index')" to="/tables">Mesas</router-link>
-			</div>
+	<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSettings" aria-expanded="true"
+		aria-controls="collapseSettings">
+		<i class="bi bi-sliders"></i>
+		<span>Configuraciones</span>
+	</a>
+	<div id="collapseSettings" class="collapse" aria-labelledby="headingSettings" data-parent="#accordionSidebar">
+		<div class="bg-white py-2 collapse-inner rounded">
+			<h6 class="collapse-header">Sistema:</h6>
+			<router-link class="collapse-item" to="/profile">Perfil</router-link>
+			<router-link v-if="validatePermission('configuration')" class="collapse-item" to="/configuration">
+				Configuración general
+			</router-link>
+			<router-link class="collapse-item" v-if="validatePermission('rol.index')" to="/roles">Roles</router-link>
+			<router-link class="collapse-item" v-if="validatePermission('user.index')" to="/users">Usuarios</router-link>
+			<router-link class="collapse-item" v-if="validatePermission('box.index')" to="/boxes">Cajas</router-link>
+			<router-link class="collapse-item" v-if="validatePermission('zone.index')" to="/zones">Zonas</router-link>
+			<router-link class="collapse-item" v-if="validatePermission('table.index')" to="/tables">Mesas</router-link>
+			<!-- Rutas sin validación de permisos para Factus y Voucher -->
+			<router-link class="collapse-item" to="/factus">Factus</router-link>
+			<router-link class="collapse-item" to="/vouchers">Comprobantes</router-link>
 		</div>
-	</li>
+	</div>
+</li>
+
 
 	<hr class="sidebar-divider d-none d-md-block">
 

@@ -1,6 +1,6 @@
 <template>
   <div class="col-12">
-    <h3 class="page-header">Taxes</h3>
+    <h3 class="page-header">Impuestos</h3>
     <moon-loader class="m-auto" :loading="isLoading" :color="'#032F6C'" :size="100" />
 
     <section v-if="!isLoading">
@@ -15,7 +15,8 @@
           <thead class="thead-primary">
             <tr>
               <th scope="col">#</th>
-              <th>Impuesto</th>
+              <th>Impuesto (Code)</th>
+              <th>Descripción</th>
               <th scope="col">Porcentaje</th>
               <th v-if="$root.validatePermission('tax.active')">Estado</th>
               <th v-if="$root.validatePermission('tax.update')">Opciones</th>
@@ -24,12 +25,11 @@
           <tbody>
             <tr v-for="(tax, index) in taxListing.data" :key="tax.id">
               <td scope="row">{{ index + 1 }}</td>
-              <td>{{ tax.name }}</td>
+              <td>{{ tax.code }}</td>
+              <td>{{ tax.description }}</td>
               <td>{{ tax.percentage }}</td>
-
               <td v-if="$root.validatePermission('tax.active')">
-                <button class="btn" :class="tax.active == '1' ? ' btn-success' : ' btn-danger'"
-                  @click="changeState(tax.id)">
+                <button class="btn" :class="tax.active == '1' ? 'btn-success' : 'btn-danger'" @click="changeState(tax.id)">
                   <i class="bi bi-check-circle-fill" v-if="tax.active == 1"></i>
                   <i class="bi bi-x-circle" v-if="tax.active == 0"></i>
                 </button>
@@ -48,13 +48,12 @@
         </pagination>
       </div>
     </section>
-    <!-- Modal para creacion y edicion de impuestos -->
-    <div class="modal fade" id="taxModal" tabindex="-1" aria-labelledby="taxModalLabel" aria-hidden="true"
-      data-backdrop="static">
+    <!-- Modal para creación y edición de impuestos -->
+    <div class="modal fade" id="taxModal" tabindex="-1" aria-labelledby="taxModalLabel" aria-hidden="true" data-backdrop="static">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="taxModalLabel">Tax</h5>
+            <h5 class="modal-title" id="taxModalLabel">Impuesto</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -104,29 +103,25 @@ export default {
           me.isLoading = false;
         });
     },
-    SaveTax: function () {
-      let me = this;
+    SaveTax() {
       if (this.edit == false) {
         this.$refs.CreateEditTax.CreateTax();
       } else {
         this.$refs.CreateEditTax.EditTax();
       }
     },
-
-    ShowData: function (tax) {
+    ShowData(tax) {
       this.$refs.CreateEditTax.OpenEditTax(tax);
     },
-    closeModal: function () {
-      let me = this;
+    closeModal() {
       this.$refs.CreateEditTax.ResetData();
-      me.listTaxes(1);
+      this.listTaxes(1);
     },
-    changeState: function (id) {
-      let me = this;
+    changeState(id) {
       axios
-        .post("api/taxes/" + id + "/activate", null, me.$root.config)
-        .then(function () {
-          me.listTaxes(1);
+        .post("api/taxes/" + id + "/activate", null, this.$root.config)
+        .then(() => {
+          this.listTaxes(1);
         });
     },
   },
@@ -135,3 +130,15 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.w-100 {
+  width: 100%;
+}
+.page-header {
+  margin-bottom: 20px;
+}
+.table {
+  margin-top: 20px;
+}
+</style>

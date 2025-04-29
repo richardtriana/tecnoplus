@@ -25,22 +25,17 @@
             </button>
           </div>
           <div class="modal-body">
-            <div class="input-group col-12">
+            <!-- Cliente -->
+            <div class="input-group mb-3">
               <input
                 type="text"
                 class="form-control"
                 :placeholder="paymentCredit.client"
-                aria-label=" with two button addons"
-                aria-describedby="button-addon4"
                 v-model="labelClient"
                 @keypress.enter="searchClient()"
               />
-              <div class="input-group-append" id="button-addon4">
-                <button
-                  class="btn btn-outline-secondary"
-                  type="button"
-                  @click="searchClient()"
-                >
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" @click="searchClient()">
                   Añadir Cliente
                 </button>
                 <button
@@ -53,88 +48,58 @@
                 </button>
               </div>
             </div>
-            <div v-if="listPending.length > 0" class="m-2">
-              <table class="table table-sm table-bordered table-responsive-sm">
+
+            <!-- Lista de créditos pendientes -->
+            <div v-if="listPending.length" class="mb-3">
+              <table class="table table-sm table-bordered">
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th>Total Pago</th>
-                    <th>Abono</th>
+                    <th>Total Crédito</th>
+                    <th>Abonado</th>
                     <th>Saldo</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="pending in listPending" :key="pending.id">
-                    <th scope="row">
-                      {{ pending.id }} - {{ pending.no_invoice }}
-                    </th>
-                    <td>{{ pending.total_paid }}</td>
-                    <td class="bg-success">{{ pending.paid_payment }}</td>
-                    <td
-                      :class="{
-                        'bg-danger':
-                          pending.total_paid - pending.paid_payment > 0,
-                      }"
-                    >
-                      {{ pending.total_paid - pending.paid_payment }}
+                    <th scope="row">{{ pending.id }} - {{ pending.no_invoice }}</th>
+                    <td>{{ pending.total_paid | currency }}</td>
+                    <td>{{ pending.paid_payment | currency }}</td>
+                    <td :class="{ 'bg-danger text-white': pending.total_paid - pending.paid_payment > 0 }">
+                      {{ (pending.total_paid - pending.paid_payment) | currency }}
                     </td>
                   </tr>
                   <tr>
-                    <td colspan="3">Total:</td>
-                    <td
-                      :class="{
-                        'bg-danger': totalBalancePending > 0,
-                      }"
-                    >
-                      {{ totalBalancePending }}
+                    <td colspan="3" class="text-right font-weight-bold">Total:</td>
+                    <td :class="{ 'bg-danger text-white': totalBalancePending > 0 }" class="font-weight-bold">
+                      {{ totalBalancePending | currency }}
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div v-if="totalBalancePending > 0" class="mx-2">
-              <table class="table table-sm table-bordered table-responsive-sm">
-                <tr class="">
-                  <th colspan="7">Efectivo:</th>
-                  <th>
-                    <input
-                      class="form-control form-control-sm"
-                      type="number"
-                      value="0"
-                      step="any"
-                      v-model="cash"
-                      
-                    />
-                  </th>
-                </tr>
-                <tr class="">
-                  <th colspan="7">Abono</th>
-                  <th>
-                    <input
-                      class="form-control form-control-sm"
-                      type="number"
-                      value="0"
-                      step="any"
-                      v-model="paymentCredit.pay_payment"
-                      :max="totalBalancePending"
-                    />
-                  </th>
-                </tr>
-                <tr class="">
-                  <th colspan="7">Cambio:</th>
-                  <th>
-                    <input
-                      class="form-control form-control-sm"
-                      type="text"
-                      :value="paymentReturn"
-                      readonly
-                      disabled
-                    />
-                  </th>
-                </tr>
-              </table>
+
+            <!-- Abono -->
+            <div v-if="totalBalancePending > 0">
+              <div class="form-group">
+                <label for="inputPayment">Monto a abonar</label>
+                <input
+                  id="inputPayment"
+                  type="number"
+                  class="form-control"
+                  v-model.number="paymentCredit.pay_payment"
+                  :max="totalBalancePending"
+                  min="0"
+                  step="any"
+                />
+                <!-- Valor formateado -->
+                <small class="d-block mt-1 text-primary">
+                  {{ formattedPay }}
+                </small>
+              </div>
             </div>
           </div>
+
           <div class="modal-footer">
             <button
               type="button"
@@ -144,16 +109,24 @@
             >
               Cancelar
             </button>
-            <button type="button" class="btn btn-primary" @click="payCredit()">Guardar</button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click="payCredit()"
+              :disabled="!canPay"
+            >
+              Guardar
+            </button>
           </div>
         </div>
       </div>
     </div>
+
     <add-client @add-client="addClient($event)" />
   </div>
 </template>
 
-<script >
+<script>
 import AddClient from "../Order/AddClient.vue";
 
 export default {
@@ -161,7 +134,6 @@ export default {
   data() {
     return {
       labelClient: "",
-      cash: 0,
       paymentCredit: {
         id_client: null,
         client: "Sin cliente",
@@ -170,103 +142,111 @@ export default {
       listPending: [],
     };
   },
-  watch:{
-    
-  },
   computed: {
     totalBalancePending() {
-      let balance = 0;
-
-      if (this.listPending.length > 0) {
-        this.listPending.forEach((item) => {
-          balance += item.total_paid - item.paid_payment;
-        });
-      }
-      return balance;
+      return this.listPending.reduce(
+        (sum, o) => sum + (o.total_paid - o.paid_payment),
+        0
+      );
     },
-    paymentReturn: function () {
-      let value = 0.0;
-      let total_pending = this.totalBalancePending;
-      if (this.cash > 0) {
-        if (this.paymentCredit.pay_payment > total_pending) {
-          this.paymentCredit.pay_payment = total_pending;
-        }
-
-        value = (this.cash - this.paymentCredit.pay_payment).toFixed(0);
-
-        if(value < 0){
-          this.paymentCredit.pay_payment = this.cash;
-          value = 0;
-        }
+    // Formatea el abono con separadores de miles
+    formattedPay() {
+      const v = Number(this.paymentCredit.pay_payment) || 0;
+      return new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+      }).format(v);
+    },
+    // Sólo habilita el botón si hay cliente, monto > 0 y <= saldo
+    canPay() {
+      return (
+        this.paymentCredit.id_client &&
+        this.paymentCredit.pay_payment > 0 &&
+        this.paymentCredit.pay_payment <= this.totalBalancePending
+      );
+    },
+  },
+  filters: {
+    currency(value) {
+      return new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+      }).format(value);
+    },
+  },
+  watch: {
+    // No permitir que el usuario escriba más que el saldo
+    "paymentCredit.pay_payment"(val) {
+      if (val > this.totalBalancePending) {
+        this.paymentCredit.pay_payment = this.totalBalancePending;
       }
-      return value;
+      if (val < 0) {
+        this.paymentCredit.pay_payment = 0;
+      }
     },
   },
   methods: {
+    // Abre el modal y recibe el crédito seleccionado
+    open(credit) {
+      this.paymentCredit.id_client = credit.order.client.id;
+      this.paymentCredit.client =
+        credit.order.client.razon_social || credit.order.client.name;
+      // Cargar detalles pendientes
+      this.listPending = [credit.order]; // suponiendo que siempre trabajas con un solo pedido
+      this.paymentCredit.pay_payment = 0;
+      $("#modalPaymentCredit").modal("show");
+    },
+    resetData() {
+      this.labelClient = "";
+      this.paymentCredit = {
+        id_client: null,
+        client: "Sin cliente",
+        pay_payment: 0,
+      };
+      this.listPending = [];
+    },
     searchClient() {
-      let me = this;
-      if (me.labelClient == "") {
-        return false;
-      }
-      let url = "api/clients/search-client?client=" + me.labelClient;
+      if (!this.labelClient) return;
       axios
-        .post(url, null, me.$root.config)
-        .then(function (response) {
-          var new_client = response.data;
-          if (!new_client) {
-            //$("#no-results").toast("show");
-          } else {
-            me.addClient(new_client);
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
+        .post(
+          `api/clients/search-client?client=${this.labelClient}`,
+          null,
+          this.$root.config
+        )
+        .then(({ data }) => {
+          if (data) this.addClient(data);
         });
     },
     addClient(client) {
-      let me = this;
-      me.paymentCredit.id_client = client.id;
-      me.labelClient = client.name;
-      me.paymentCredit.client = client.name;
-      me.creditPendingByClient(client.id);
-    },
-
-    creditPendingByClient(clientId) {
-      let me = this;
-      let url = "api/orders/byClient/" + clientId;
-      axios
-        .get(url, me.$root.config)
-        .then(function (response) {
-          me.listPending = response.data.orders;
-          console.log(typeof me.listPending);
-          console.log(me.listPending.length);
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-    },
-    resetData() {
-      this.paymentCredit.id_client = null;
-      this.paymentCredit.client = "Sin cliente";
-      this.paymentCredit.pay_payment = 0;
-      this.labelClient = "";
-      this.cash = 0;
+      this.paymentCredit.id_client = client.id;
+      this.paymentCredit.client = client.name;
+      // recarga (si lo necesitas, aquí sólo uno)
       this.listPending = [];
     },
     payCredit() {
-      let me = this;
+      const payload = {
+        id_client: this.paymentCredit.id_client,
+        pay_payment: this.paymentCredit.pay_payment,
+      };
       axios
-        .post('api/orders/payCreditByClient', this.paymentCredit, me.$root.config)
-        .then(function (response) {
-          me.resetData();
-          $('#modalPaymentCredit').modal('hide');
-          me.$emit('get-credits');
+        .post("api/orders/payCreditByClient", payload, this.$root.config)
+        .then(() => {
+          $("#modalPaymentCredit").modal("hide");
+          this.$emit("credited");
+          this.resetData();
         })
-        .catch(function (error) {
-          console.log(error);
+        .catch((err) => {
+          console.error(err);
         });
     },
   },
 };
 </script>
 
+<style scoped>
+/* Resalta el valor formateado */
+.text-primary {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+</style>

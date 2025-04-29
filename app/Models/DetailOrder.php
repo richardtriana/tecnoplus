@@ -23,7 +23,8 @@ class DetailOrder extends Model
         'product',
         'cost_price_tax_inc',
         'cost_price_tax_inc_total',
-        'observaciones', // ← ¡Agrega este campo!
+        'observaciones', // Campo de observaciones
+        'tax_rate'      // Nuevo campo para almacenar el porcentaje de impuesto aplicado
     ];
 
     public function order()

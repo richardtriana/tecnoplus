@@ -10,21 +10,25 @@
     >
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
+          <!-- Encabezado del Modal -->
           <div class="modal-header">
             <h5 class="modal-title" id="boxModalLabel">Caja</h5>
             <button
               type="button"
               class="close"
               data-dismiss="modal"
-              aria-label="Close"
+              aria-label="Cerrar"
+              @click="ResetData"
             >
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
+          <!-- Cuerpo del Modal -->
           <div class="modal-body">
             <form id="formBox">
+              <!-- Nombre o Número -->
               <div class="form-group">
-                <label for="formGroupExampleInput">Nombre o Numero</label>
+                <label for="name">Nombre o Número</label>
                 <input
                   type="text"
                   class="form-control"
@@ -32,106 +36,30 @@
                   placeholder="Ingresar nombre o número"
                   v-model="formBox.name"
                 />
-                <small id="nameHelp" class="form-text text-danger">{{
-                  formErrors.name
-                }}</small>
+                <small class="form-text text-danger">{{ formErrors.name }}</small>
               </div>
+              <!-- Impresora POS -->
               <div class="form-group">
-                <label for="formGroupExampleInput">Prefijo</label>
+                <label for="printer">Impresora POS</label>
                 <input
                   type="text"
                   class="form-control"
-                  id="prefix"
-                  placeholder="Ingresar prefijo"
-                  v-model="formBox.prefix"
-                  :disabled ="formBox.process"
+                  id="printer"
+                  placeholder="Ingresar nombre de la impresora POS"
+                  v-model="formBox.printer"
                 />
-                <small id="nameHelp" class="form-text text-danger">{{
-                  formErrors.prefix
-                }}</small>
-                </div> <div class="form-group">
-                  <label for="printer">Impresora POS</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="printer"
-                    placeholder="Ingresar nombre impresora POS"
-                    v-model="formBox.printer"
-                  />
-                  <small id="printerHelp" class="form-text text-danger">{{
-                    formErrors.printer
-                  }}</small>
+                <small class="form-text text-danger">{{ formErrors.printer }}</small>
               </div>
-              <div class="form-row py-3">
-                <div class="col">
-                  <h5>
-                    Consecutivos
-                  </h5>
-                </div>
-                <div class="col text-right">
-                  <button type="button" class="btn btn-primary" @click="addConsecutive">
-                    Añadir
-                  </button>
-                </div>
-                <table class="table table-sm table-bordered table-responsive-sm mt-3">
-                  <thead>
-                    <th>#</th>
-                    <th>Consecutivo inicial</th>
-                    <th>Consecutivo final</th>
-                    <th>Fecha de inicio</th>
-                    <th>Fecha vencimiento</th>
-                    <th>Opciones</th>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(item, key) in consecutive_box" :key="key">
-                      <td>
-                        {{key + 1}}
-                      </td>
-                      <td>
-                        <input type="number" class="form-control form-control-sm" placeholder="Ingresar consecutivo desde" v-model="item.from_nro" :disabled="item.process">
-                        <small v-if="consecutive_boxErrors['consecutive_box.'+key+'.from_nro']" class="form-text text-danger">
-                          {{ consecutive_boxErrors['consecutive_box.'+key+'.from_nro'][0] }}
-                        </small>
-                      </td>
-                      <td>
-                        
-                        <input type="number" class="form-control form-control-sm" placeholder="Ingresar consecutivo hasta" v-model="item.until_nro" :disabled="item.process ">
-                        <small v-if="consecutive_boxErrors['consecutive_box.'+key+'.until_nro']" class="form-text text-danger">
-                          {{ consecutive_boxErrors['consecutive_box.'+key+'.until_nro'][0] }}
-                        </small>
-                      </td>
-                      <td>
-                        
-                        <input type="date" class="form-control form-control-sm" placeholder="Ingresar fecha desde" v-model="item.from_date" :disabled="item.process ">
-                         <small v-if="consecutive_boxErrors['consecutive_box.'+key+'.from_date']" class="form-text text-danger">
-                          {{ consecutive_boxErrors['consecutive_box.'+key+'.from_date'][0] }}
-                        </small>   
-                      </td>
-                      <td>
-                        <input type="date" class="form-control form-control-sm" placeholder="Ingresar fecha hasta" v-model="item.until_date" :disabled="item.process ">
-                        <small v-if="consecutive_boxErrors['consecutive_box.'+key+'.until_date']" class="form-text text-danger">
-                          {{ consecutive_boxErrors['consecutive_box.'+key+'.until_date'][0] }}
-                        </small>
-                      </td>
-                      <td>
-                        <button v-if="item.process" class="btn" disabled>
-                          <i  class="bi bi-x-circle"></i>
-                        </button>
-                        <button v-else class="btn btn-outline-danger" @click="removeConsecutive(key)">
-                          <i class="bi bi-x-circle"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <!-- Aquí se pueden agregar otros campos si fuera necesario -->
             </form>
           </div>
+          <!-- Pie del Modal -->
           <div class="modal-footer">
             <button
               type="button"
               class="btn btn-secondary"
               data-dismiss="modal"
+              @click="ResetData"
             >
               Cerrar
             </button>
@@ -151,43 +79,23 @@
 
 <script>
 export default {
+  name: "CreateEditBox",
   data() {
     return {
       formBox: {
         name: "",
-        prefix: "",
-        printer:"",
-        process: null,
-        consecutive_box: [],
-        consecutive_load: []
+        printer: ""
       },
-      consecutive_box: [],
-      consecutive_boxErrors: {},
       formErrors: {
         name: "",
-        prefix: "",
-        printer:""
-      },
-      
+        printer: ""
+      }
     };
   },
-  created() {},
   methods: {
-    getConsecutiveAllByBox(box){
-      axios.
-      get("api/boxes/"+box+"/consecutiveAll", this.$root.config)
-      .then(response => {
-        this.formBox.consecutive_load = response.data.consecutive;
-        this.consecutive_box = response.data.consecutive;
-      })
-      .catch(response => {
-        this.consecutive_box = [];
-      });
-    },
     CreateBox() {
       let me = this;
       me.assignErrors(false);
-      me.formBox.consecutive_box = this.consecutive_box;
       axios
         .post("api/boxes", this.formBox, this.$root.config)
         .then(function () {
@@ -202,16 +110,11 @@ export default {
       let me = this;
       me.ResetData();
       $("#boxModal").modal("show");
-      me.formBox = box;
-      me.getConsecutiveAllByBox(me.formBox.id);
-      
+      me.formBox = { ...box };
     },
-
     EditBox() {
       let me = this;
       me.assignErrors(false);
-      me.formBox.consecutive_box = this.consecutive_box;
-
       axios
         .put("api/boxes/" + this.formBox.id, this.formBox, this.$root.config)
         .then(function () {
@@ -222,51 +125,30 @@ export default {
           me.assignErrors(response);
         });
     },
-    addConsecutive(){
-      this.consecutive_box.push({
-        from_nro:'',
-        until_nro:'',
-        from_date:'',
-        until_date:'',
-        process:false 
-      });
-    },
-    removeConsecutive(index){
-      this.consecutive_box.splice(index, 1);
-    },
     ResetData() {
-      let me = this;
       $("#boxModal").modal("hide");
-      me.consecutive_box = [];
-      me.formBox = {
+      this.formBox = {
         name: "",
-        prefix: "",
-        process: null,
-        consecutive_box: [],
-        consecutive_load: []
-      }
-      me.assignErrors(false);
+        printer: ""
+      };
+      this.assignErrors(false);
     },
     assignErrors(response) {
       if (response) {
         var errors = response.response.data.errors;
-        this.consecutive_boxErrors = errors;
-
-        if (errors.name) {
-          this.formErrors.name = errors.name[0];
-        }
-
-        if (errors.prefix) {
-          this.formErrors.prefix = errors.prefix[0];
-        }
+        this.formErrors.name = errors.name ? errors.name[0] : "";
+        this.formErrors.printer = errors.printer ? errors.printer[0] : "";
       } else {
-        this.formErrors.name = "";
-        this.formErrors.prefix = "";
-        this.formErrors.printer = "";
-        this.consecutive_boxErrors = {};      
+        this.formErrors = {
+          name: "",
+          printer: ""
+        };
       }
-    },
-  },
-  mounted() {},
+    }
+  }
 };
 </script>
+
+<style scoped>
+/* Estilos personalizados (ajusta según tu tema) */
+</style>

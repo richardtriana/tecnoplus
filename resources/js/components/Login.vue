@@ -1,7 +1,7 @@
-<template >
+<template>
   <div id="login">
     <div id="logo">
-      <h1> BIENVENIDOS A TECNOPLUS</h1>
+      <h1> RESTAPLUS VER 2.1</h1>
     </div>
     <div class="stark-login">
       <form id="form_login" autocomplete="off" @submit.prevent="login">
@@ -18,9 +18,9 @@
               required
               v-model="formValues.username"
             />
-            <small id="usernameHelp" class="form-text text-danger">{{
-              formErrors.username
-            }}</small>
+            <small id="usernameHelp" class="form-text text-danger">
+              {{ formErrors.username }}
+            </small>
           </div>
           <div class="form-group">
             <label class="w-100 text-left" for="exampleInputPassword1">Contraseña</label>
@@ -34,97 +34,28 @@
               required
               v-model="formValues.password"
             />
-            <small id="passwordHelp" class="form-text text-danger">{{
-              formErrors.password
-            }}</small>
+            <small id="passwordHelp" class="form-text text-danger">
+              {{ formErrors.password }}
+            </small>
           </div>
           <button type="submit" class="btn btn-primary">Acceder</button>
         </div>
       </form>
-      <div class="hexagons">
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <br />
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <br />
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-
-        <br />
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <br />
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-        <span>&#x2B22;</span>
-      </div>
-    </div>
-    <div id="circle1">
-      <div id="inner-cirlce1">
-        <h2></h2>
-      </div>
+      <!-- ... resto del template ... -->
     </div>
   </div>
 </template>
 
 <script>
-//Services
 import global from "./../services/global.js";
-// import "./../../sass/_login.scss";
+import axios from "axios";
 
 export default {
   name: "Login",
   data() {
     return {
       data: "Login",
+      // Suponiendo que global.api = "http://192.168.100.64/restaplus/public"
       api: global.api,
       formValues: {
         username: "",
@@ -136,7 +67,6 @@ export default {
       },
     };
   },
-  created() {},
   methods: {
     login() {
       let config = {
@@ -149,8 +79,10 @@ export default {
       this.formErrors.password = "";
 
       const formLogin = document.getElementById("form_login");
+
+      // Importante: Agregar el "/api" antes de "/login"
       axios
-        .post(this.api + "/login", new FormData(formLogin), config)
+        .post(`${this.api}/api/login`, new FormData(formLogin), config)
         .then((response) => {
           response = response.data;
           if (
@@ -163,23 +95,22 @@ export default {
           }
         })
         .catch((error) => {
-          var errors = error.response.data.errors;
-
-          if (typeof errors != "undefined") {
-            if (typeof errors.username != "undefined") {
-              this.formValues.username = "";
+          // Manejo de errores
+          if (error.response) {
+            var errors = error.response.data.errors;
+            if (typeof errors != "undefined") {
+              if (typeof errors.username != "undefined") {
+                this.formValues.username = "";
+                this.formValues.password = "";
+                this.formErrors.username = errors.username[0];
+              }
               this.formValues.password = "";
-
-              this.formErrors.username = errors.username[0];
+            } else {
+              this.formValues.password = "";
+              this.formErrors.password = error.response.data.message;
             }
-
-            this.formValues.password = "";
-          } else {
-            this.formValues.password = "";
-            this.formErrors.password = error.response.data.message;
+            console.log(error.response);
           }
-
-          console.log(error.response);
         });
     },
   },

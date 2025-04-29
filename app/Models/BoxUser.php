@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class BoxUser extends Model
 {
     use HasFactory;
-    
 
     protected $fillable = [
         'box_id',

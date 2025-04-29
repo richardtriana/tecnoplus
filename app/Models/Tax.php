@@ -11,13 +11,17 @@ class Tax extends Model
 
     protected $table = 'taxes';
 
+    // Actualizamos el array fillable para incluir code, name, porcentaje, active y description
     protected $fillable = [
+        'code',
         'name',
-        'percentage',
-        'active'
+        'porcentaje',
+        'active',
+        'description'
     ];
 
-    public function products() {
+    public function products()
+    {
         return $this->hasMany(Product::class);
     }
 }

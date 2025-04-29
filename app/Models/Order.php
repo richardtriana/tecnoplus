@@ -4,38 +4,60 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes; // Agrega esta línea
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
-    use HasFactory, SoftDeletes; // Incluye SoftDeletes en el trait
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'client_id',
         'user_id',
+        'bill_number',
         'no_invoice',
+        'reference_code',
+        'cufe',
+        'qr',
+        'validated',
+        'qr_image',
+        'numbering_range_id',
+        'document_code',
         'total_paid',
         'total_iva_inc',
         'total_iva_exc',
-        'total_cost_price_tax_inc',
         'total_discount',
-        'payment_date',
+        'total_cost_price_tax_inc',
         'state',
-        'box_id',
+        'payment_date',
         'payment_methods',
-        'proccess'
+        'box_id',
+        'observations',
+        'payment_form_id',
+        'payment_method_id',
+        'factus_response',
+        'factus_bill_id',
+        'factus_status',
+        'factus_bill_number',
+        'factus_validated',
+        'factus_qr',
+        'payment_method_code',
+        'invoiced_by',
+        'table_id',
+        'proccess',
+        'status_dian',
     ];
 
     protected $casts = [
-        'payment_methods' => 'array'
+        'payment_methods' => 'array',
+        'status_dian'     => 'integer',
     ];
 
     protected $appends = [
-        'paid_payment'
+        'paid_payment',
     ];
 
     protected $with = [
-        'client'
+        'client',
     ];
 
     public function detailOrders()
@@ -63,19 +85,29 @@ class Order extends Model
         return $this->belongsTo(Table::class);
     }
 
+    public function numberingRange()
+    {
+        return $this->belongsTo(NumberingRange::class, 'numbering_range_id');
+    }
+
+    public function getNumberingRange()
+    {
+        return $this->numberingRange;
+    }
+
     public function consecutiveBox()
     {
-        $consecutive = str_replace($this->box->prefix, '', $this->bill_number);
-        $consecutive = intval($consecutive);
+        if (! $this->box || ! $this->bill_number) {
+            return null;
+        }
+        $prefix = $this->box->prefix;
+        $consecutive = intval(str_replace($prefix, '', $this->bill_number));
 
-        $consecutiveBox = $this->box->consecutiveBox()->where([
-            ['from_nro', '<=', $consecutive],
-            ['until_nro', '>=', $consecutive]
-        ])
-            ->orderBy('from_nro')
+        return $this->box->numberingRanges()
+            ->where('from', '<=', $consecutive)
+            ->where('to', '>=', $consecutive)
+            ->orderBy('from', 'asc')
             ->first();
-
-        return $consecutiveBox;
     }
 
     public function paymentCredits()
@@ -90,7 +122,14 @@ class Order extends Model
 
     public function products()
     {
-        return $this->hasManyThrough(Product::class, DetailOrder::class, 'order_id', 'id', 'id', 'product_id');
+        return $this->hasManyThrough(
+            Product::class,
+            DetailOrder::class,
+            'order_id',
+            'id',
+            'id',
+            'product_id'
+        );
     }
 
     public function printers()
@@ -102,5 +141,20 @@ class Order extends Model
             ->flatten()
             ->unique()
             ->values();
+    }
+
+    public function invoicedBy()
+    {
+        return $this->belongsTo(User::class, 'invoiced_by');
+    }
+
+    public function paymentForm()
+    {
+        return $this->belongsTo(PaymentForm::class, 'payment_form_id');
+    }
+
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
     }
 }

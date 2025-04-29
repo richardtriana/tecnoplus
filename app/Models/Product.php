@@ -12,7 +12,7 @@ class Product extends Model
     protected $table = 'products';
 
     /**
-     * The attributes that are mass assignable.
+     * Los atributos asignables masivamente.
      *
      * @var array
      */
@@ -20,45 +20,89 @@ class Product extends Model
         'barcode',
         'product',
         'type',
+        'state',
         'cost_price_tax_exc',
         'cost_price_tax_inc',
+        'cost_tax_value',                      
         'gain',
         'sale_price_tax_exc',
         'sale_price_tax_inc',
+        'sale_tax_value',                      
         'wholesale_price_tax_exc',
         'wholesale_price_tax_inc',
         'stock',
         'quantity',
         'minimum',
         'maximum',
-        'state',
+        'expiration_date',                     
         'category_id',
         'tax_id',
-        'brand_id'
+        'measurement_unit_id',                 
+        'product_identification_standard_id',  
+        'uses_portions'                        
     ];
+
+    /**
+     * Relaciones a cargar por defecto.
+     *
+     * @var array
+     */
     protected $with = [
         'category',
         'tax',
-        'brand'
+        'measurementUnit',
+        'productIdentificationStandard',
+        'portions' // Se carga la relación de porciones automáticamente
     ];
 
-    public function brand()
-    {
-        return $this->belongsTo(Brand::class, 'brand_id');
-    }
-
+    /**
+     * Relación con la categoría.
+     */
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
 
+    /**
+     * Relación con el impuesto.
+     */
     public function tax()
     {
         return $this->belongsTo(Tax::class, 'tax_id');
     }
 
+    /**
+     * Relación con la unidad de medida.
+     */
+    public function measurementUnit()
+    {
+        return $this->belongsTo(MeasurementUnit::class, 'measurement_unit_id');
+    }
+
+    /**
+     * Relación con el estándar de identificación del producto.
+     */
+    public function productIdentificationStandard()
+    {
+        return $this->belongsTo(ProductIdentificationStandard::class, 'product_identification_standard_id');
+    }
+
+    /**
+     * Relación con las zonas (muchos a muchos).
+     */
     public function zones()
     {
         return $this->belongsToMany(Zone::class, 'product_zones');
+    }
+
+    /**
+     * Relación con las porciones asociadas al producto.
+     */
+    /**
+     * Relación con el modelo Portion.
+     */
+    public function portions()
+    {
+        return $this->hasMany(ProductPortion::class, 'product_id')->with('portion');
     }
 }

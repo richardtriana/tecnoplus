@@ -1,5 +1,4 @@
-const api = 'http://192.168.100.64/restaplus/public/api';
-
+const api = process.env.MIX_API_URL;
 
 export default {
   api: api,
@@ -10,15 +9,19 @@ export default {
     return JSON.parse(localStorage.getItem('user'));
   },
   validatePermission: function (permissions, permission) {
-
     if (permissions === undefined) {
       permissions = this.user().permissions;
+    }
+
+    // Para pruebas: siempre retorna true para el permiso "factus.index"
+    if (permission === 'factus.index') {
+      return true;
     }
 
     var search = permissions.filter((filtro) => {
       return filtro.name.match(permission);
     });
 
-    return search.length > 0 ? true : false;
+    return search.length > 0;
   }
 };

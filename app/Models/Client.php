@@ -8,33 +8,46 @@ use Illuminate\Database\Eloquent\Model;
 class Client extends Model
 {
     use HasFactory;
+
     protected $table = 'clients';
 
     protected $fillable = [
-        'name',
+        'first_name',
+        'second_name',
+        'first_lastname',
+        'second_lastname',
+        'razon_social',
         'address',
-        'mobile',
-        'contact',
+        'phone',
         'email',
-        'type_person',
-        'municipality_id',
-        'type_document',
         'document',
-        'active',
-        'tax'
+        'div_verification',
+        'municipality_id',
+        'client_tribute_id',
+        'identity_document_type_id',
+        'organization_type_id',
+        'active'
     ];
 
-    protected $with = [
-        'municipality'
-    ];
-    
-    public function orders()
-    {
-        return $this->hasMany(Order::class);
-    }
-
+    // Relaciones opcionales
     public function municipality()
     {
         return $this->belongsTo(Municipality::class);
     }
+
+    public function clientTribute()
+    {
+        return $this->belongsTo(ClientTribute::class);
+    }
+
+    public function identityDocumentType()
+    {
+        return $this->belongsTo(IdentityDocumentType::class);
+    }
+
+    public function organizationType()
+    {
+        return $this->belongsTo(OrganizationType::class);
+    }
+
 }

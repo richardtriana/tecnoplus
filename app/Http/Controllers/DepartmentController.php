@@ -2,26 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Department;
-use App\Models\Municipality;
 use Illuminate\Http\Request;
-use PhpParser\Node\Expr\FuncCall;
+use App\Models\Municipality;
 
 class DepartmentController extends Controller
 {
-    public function index(){
-        return response()->json([
-            'status' => 'success',
-            'code' => 200,
-            'departments' => Department::all(),
-        ]);
+    /**
+     * Retorna la lista de departamentos (valores únicos de la columna "department" en municipalities).
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDistinctDepartments()
+    {
+        // Se obtienen los valores únicos de la columna "department"
+        $departments = Municipality::select('department')
+            ->distinct()
+            ->get();
+        return response()->json(['departments' => $departments], 200);
     }
 
-    public function getMunicipalitiesByDepartment($id){
-        return response()->json([
-            'status' => 'success',
-            'code' => 200,
-            'municipalities' => Municipality::where('department_id', $id)->get(),
-        ]);
+    /**
+     * Retorna la lista de municipios que pertenezcan a un departamento dado.
+     * @param string $department
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMunicipalitiesByDepartment($department)
+    {
+        // Filtra municipios donde la columna "department" sea igual al valor recibido.
+        $municipalities = Municipality::where('department', $department)->get();
+        return response()->json(['municipalities' => $municipalities], 200);
     }
 }

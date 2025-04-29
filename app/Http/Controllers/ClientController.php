@@ -7,161 +7,174 @@ use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
-	public function __construct()
-	{
-		$this->middleware('can:client.index')->only('index', 'show');
-		$this->middleware('can:client.store')->only('store');
-		$this->middleware('can:client.update')->only('update');
-		$this->middleware('can:client.delete')->only('destroy');
-		$this->middleware('can:client.active')->only('activate');
-	}
-	/**
-	 * Display a listing of the resource.
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
-	public function index()
-	{
-		$clients = new Client;
-		$clients = $clients
-			->paginate(15);
+    public function __construct()
+    {
+        $this->middleware('can:client.index')->only('index', 'show');
+        $this->middleware('can:client.store')->only('store');
+        $this->middleware('can:client.update')->only('update');
+        $this->middleware('can:client.delete')->only('destroy');
+        $this->middleware('can:client.active')->only('activate');
+    }
 
-		return response()->json([
-			'status' => 'success',
-			'code' => 200,
-			'clients' => $clients
-		]);
-	}
+    /**
+     * Muestra la información de un cliente en detalle.
+     */
+    public function show($id)
+    {
+        $client = Client::with([
+            'municipality',
+            'clientTribute',
+            'identityDocumentType',
+            'organizationType'
+        ])->findOrFail($id);
 
-	/**
-	 * Show the form for creating a new resource.
-	 *
-	 * @return \Illuminate\Http\Response
-	 */
-	public function create()
-	{
-		//
-	}
+        return response()->json([
+            'status' => 'success',
+            'client' => $client
+        ]);
+    }
 
-	/**
-	 * Store a newly created resource in storage.
-	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @return \Illuminate\Http\Response
-	 */
-	public function store(Request $request)
-	{
-		//
-		$client = $request->all();
-		Client::create($client);
-	}
+    /**
+     * Muestra una lista de clientes, con posibilidad de filtrar
+     * por nombre, razón social o documento.
+     */
+    public function index(Request $request)
+    {
+        // Tomamos el parámetro de búsqueda (opcional)
+        $search = $request->input('search');
 
-	/**
-	 * Display the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-	public function show($id)
-	{
-		//
-	}
+        // Eager load de las relaciones y filtrado por first_name, razon_social o document
+        $clientsQuery = Client::with([
+            'municipality',
+            'clientTribute',
+            'identityDocumentType',
+            'organizationType'
+        ])->when($search, function ($query) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'LIKE', "%{$search}%")
+                  ->orWhere('razon_social', 'LIKE', "%{$search}%")
+                  ->orWhere('document', 'LIKE', "%{$search}%");
+            });
+        });
 
-	/**
-	 * Show the form for editing the specified resource.
-	 *
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-	public function edit($id)
-	{
-		//
-	}
+        // Paginación de 15 registros
+        $clients = $clientsQuery->paginate(15);
 
-	/**
-	 * Update the specified resource in storage.
-	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-	public function update(Request $request, $id)
-	{
-		$client = Client::find($id);
+        return response()->json([
+            'status' => 'success',
+            'code'   => 200,
+            'clients'=> $clients
+        ]);
+    }
 
-		if($client){
-			$client->name = $request->name;
-			$client->address = $request->address;
-			$client->mobile = $request->mobile;
-			$client->contact = $request->contact;
-			$client->email = $request->email;
-			$client->type_person = $request->type_person;
-			$client->municipality_id = $request->municipality_id;
-			$client->type_document = $request->type_document;
-			$client->document = $request->document;
-			$client->tax = $request->tax;
-			$client->update();
-		}
+    /**
+     * Guarda un nuevo cliente en la base de datos.
+     */
+    public function store(Request $request)
+    {
+        $clientData = $request->all();
+        Client::create($clientData);
 
-	}
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Cliente creado exitosamente'
+        ]);
+    }
 
-	/**
-	 * Remove the specified resource from storage.
-	 *
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-	public function destroy($id)
-	{
-		//
-	}
+    /**
+     * Actualiza los datos de un cliente.
+     */
+    public function update(Request $request, $id)
+    {
+        $client = Client::find($id);
 
-	/**
-	 * Activate the specified resource from storage.
-	 *
-	 * @param  int  $id
-	 * @return \Illuminate\Http\Response
-	 */
-	public function activate($id)
-	{
-		//
-		$client = Client::find($id);
-		$client->active = !$client->active;
-		$client->save();
-	}
+        if ($client) {
+            $client->first_name               = $request->first_name;
+            $client->second_name              = $request->second_name;
+            $client->first_lastname           = $request->first_lastname;
+            $client->second_lastname          = $request->second_lastname;
+            $client->razon_social             = $request->razon_social;
+            $client->address                  = $request->address;
+            $client->phone                    = $request->phone;
+            $client->email                    = $request->email;
+            $client->document                 = $request->document;
+            $client->div_verification         = $request->div_verification;
+            $client->municipality_id          = $request->municipality_id;
+            $client->client_tribute_id        = $request->client_tribute_id;
+            $client->identity_document_type_id= $request->identity_document_type_id;
+            $client->organization_type_id     = $request->organization_type_id;
+            $client->active                   = $request->active;
+            $client->save();
 
-	public function searchClient(Request $request)
-	{
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Cliente actualizado exitosamente'
+            ]);
+        }
 
-		$client = Client::select()
-			->where('active', 1)
-			->where('document', 'LIKE', "%$request->client%")
-			->orWhere('name', 'LIKE', "%$request->client%")
-			->first();
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Cliente no encontrado'
+        ], 404);
+    }
 
-		return $client;
-	}
+    /**
+     * Activa/Desactiva un cliente (cambia la columna 'active').
+     */
+    public function activate($id)
+    {
+        $client = Client::find($id);
+        if ($client) {
+            $client->active = !$client->active;
+            $client->save();
 
-	/**
-	 * Find a Client with name or document
-	 * @param  \Illuminate\Http\Request  $request
-	 * @return \Illuminate\Http\Response
-	 */
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Estado del cliente actualizado'
+            ]);
+        }
 
-	public function filterClientList(Request $request)
-	{
-		if (!$request->client || $request->client == '') {
-			$clients = Client::select()
-				->where('active', 1)
-				->get();
-		} else {
-			$clients = Client::select()
-				->where('active', 1)
-				->where('document', 'LIKE', "%$request->client%")
-				->orWhere('name', 'LIKE', "%$request->client%")
-				->get(20);
-		}
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Cliente no encontrado'
+        ], 404);
+    }
 
-		return $clients;
-	}
+    /**
+     * Busca un cliente por documento o nombre (solo los activos).
+     */
+    public function searchClient(Request $request)
+    {
+        $client = Client::select()
+            ->where('active', 1)
+            ->where(function ($q) use ($request) {
+                $q->where('document', 'LIKE', "%{$request->client}%")
+                  ->orWhere('first_name', 'LIKE', "%{$request->client}%");
+            })
+            ->first();
+
+        return response()->json($client);
+    }
+
+    /**
+     * Filtra la lista de clientes (solo los activos),
+     * limitado a 20 resultados.
+     * Se utiliza el método GET para cumplir con los principios REST.
+     */
+    public function filterClientList(Request $request)
+    {
+        if (!$request->client || $request->client == '') {
+            $clients = Client::select()->where('active', 1)->get();
+        } else {
+            $clients = Client::select()
+                ->where('active', 1)
+                ->where(function ($q) use ($request) {
+                    $q->where('document', 'LIKE', "%{$request->client}%")
+                      ->orWhere('first_name', 'LIKE', "%{$request->client}%");
+                })
+                ->limit(20)
+                ->get();
+        }
+        return response()->json($clients);
+    }
 }

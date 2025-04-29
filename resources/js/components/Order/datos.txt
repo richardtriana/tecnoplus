@@ -1,7 +1,0 @@
-Estados de factura
-1) Pedido
-2) Facturar
-3) Cotizar
-4) Facturar e imprimir
-5) Credito
-6) Credito e imprimir

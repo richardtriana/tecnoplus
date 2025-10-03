@@ -30,12 +30,21 @@
         "@ckeditor/ckeditor5-vue": "^2.0.1",
         "@ckeditor/ckeditor5-vue2": "^1.0.5",
         "@saeris/vue-spinners": "^1.0.8",
+        "apexcharts": "^4.7.0",
+        "bootstrap-vue": "^2.23.1",
         "emotion": "^11.0.0",
         "keyboard-shortcut": "^1.2.0",
         "laravel-vue-pagination": "^2.3.1",
         "numeral": "^2.0.6",
+<<<<<<< HEAD
         "shortcut.js": "^2.0.3",
         "sweetalert2": "^11.4.8",
+=======
+        "shortcut": "^0.0.4",
+        "shortcut.js": "^2.0.3",
+        "sweetalert2": "^11.4.8",
+        "vue-apexcharts": "^1.7.0",
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
         "vue-json-excel": "^0.3.0",
         "vue-loading-overlay": "^3.4.3",
         "vue-moment": "^4.1.0",

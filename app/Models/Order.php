@@ -45,11 +45,21 @@ class Order extends Model
         'table_id',
         'proccess',
         'status_dian',
+<<<<<<< HEAD
+=======
+        'is_reservation',
+        'reservation_at',
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
     ];
 
     protected $casts = [
         'payment_methods' => 'array',
         'status_dian'     => 'integer',
+<<<<<<< HEAD
+=======
+        'is_reservation'  => 'boolean',
+        'reservation_at'  => 'datetime',
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
     ];
 
     protected $appends = [

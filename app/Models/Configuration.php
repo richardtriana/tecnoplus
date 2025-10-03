@@ -9,8 +9,8 @@ class Configuration extends Model
 {
     use HasFactory;
 
-    protected $table =  'configurations';
-    
+    protected $table = 'configurations';
+
     protected $fillable = [
         'name',
         'legal_representative',
@@ -23,6 +23,11 @@ class Configuration extends Model
         'logo',
         'printer',
         'condition_order',
-        'condition_quotation'
+        'condition_quotation',
+        'shipments',            // ← Añadido aquí
+    ];
+
+    protected $casts = [
+        'shipments' => 'boolean',  // ← Para que siempre venga como bool
     ];
 }

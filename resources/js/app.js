@@ -16,6 +16,15 @@ import JsonExcel from "vue-json-excel";
 import 'vue-select/dist/vue-select.css';
 import { dollarFilter } from './filters';
 
+// Bootstrap & BootstrapVue
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-vue/dist/bootstrap-vue.css';
+import BootstrapVue from 'bootstrap-vue';
+import IconsPlugin from 'bootstrap-vue/dist/bootstrap-vue-icons';
+
+Vue.use(BootstrapVue);
+Vue.use(IconsPlugin);
+
 import Login from './components/Login.vue'
 import NoFound from './components/NoFound.vue';
 import Clients from './components/Client/Clients.vue'
@@ -59,6 +68,14 @@ import ReportGeneralSales from './components/Report/ReportGeneralSales'
 import ReportClosing from './components/Report/ReportClosing'
 import ReportInvoicedProducts from './components/Report/ReportInvoicedProducts'
 
+<<<<<<< HEAD
+=======
+// Caja
+import CashReconciliation from './components/Cash/CashReconciliation'
+import CashReconciliationHistory from './components/Cash/CashReconciliationHistory.vue'
+
+// Boxes
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 import Boxes from './components/Box/Boxes.vue'
 
 import Roles from './components/Rol/Roles.vue';
@@ -80,17 +97,27 @@ import Vouchers from './components/Vouchers/Vouchers.vue';
 import CreateEditVoucher from './components/Vouchers/CreateEditVoucher.vue';
 
 import FactusVoucherslist from './components/Order/FactusVoucherslist.vue'
+<<<<<<< HEAD
 //notas credito
+=======
+// notas crédito
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 import CreateCreditNote from './components/Order/CreateCreditNote.vue';
 import Services from './components/Service/Services.vue'
 import DocumentList from './components/Support_document/DocumentList.vue';
 import CreateEditDocument from './components/Support_document/CreateEditDocument.vue';
 import CreateAdjustmentNote from './components/Support_document/CreateAdjustmentNote.vue';
 
+<<<<<<< HEAD
 //recepcion de documentos
 import ReceptionDocuments from './components/Reception_documents/ReceptionDocuments.vue';
 
 
+=======
+// recepción de documentos
+import ReceptionDocuments from './components/Reception_documents/ReceptionDocuments.vue';
+
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 import global from './services/global.js';
 import axios from 'axios';
 
@@ -127,7 +154,10 @@ const routes = [
   { path: '/categories', component: Categories, alias: "category.index" },
   { path: '/create-edit-category', component: CreateEditCategory },
   { path: '/brands', component: Brands, alias: "brand.index" },
+<<<<<<< HEAD
   // Rutas para Inventario de Porciones:
+=======
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
   { path: '/portions', component: Portions, name: 'Portions' },
   { path: '/portion-orders', component: PortionOrders, name: 'PortionOrders'},
   { path: '/orders', component: Orders, alias: "order.index", props:{ status:1 } },
@@ -154,6 +184,7 @@ const routes = [
   { path: '/profile', name: 'Profile', component: Profile },
   { path: '/zones', component: Zones, name: 'Zone', alias: 'zone.index' },
   { path: '/tables', component: Tables, name: 'Table', alias: 'table.index' },
+<<<<<<< HEAD
   // Componente Factus
   { path: '/factus', name: 'Factus', component: Factus },
   { path: '/factus-vouchers', component: FactusVoucherslist, name: 'FactusVoucherslist'},
@@ -175,6 +206,21 @@ const routes = [
   
   
   //no encontrada
+=======
+  { path: '/factus', name: 'Factus', component: Factus },
+  { path: '/factus-vouchers', component: FactusVoucherslist, name: 'FactusVoucherslist'},
+  { path: '/vouchers', component: Vouchers, name: 'Vouchers' },
+  { path: '/vouchers/create', component: CreateEditVoucher, name: 'vouchers.create' },
+  { path: '/credit-notes/create', component: CreateCreditNote, name: 'credit_notes.create' },
+  { path: '/services', component: Services, name: 'service' },
+  { path: '/pos', component: PosView, name: 'PosView'},
+  { path: '/support-documents', name: 'DocumentList', component: DocumentList},
+  { path: '/support-document', name: 'CreateEditDocument', component: CreateEditDocument},
+  { path: '/adjustment-note', name: 'CreateAdjustmentNote', component: CreateAdjustmentNote },
+  { path: '/reception-documents', name: 'ReceptionDocuments', component: ReceptionDocuments},
+  { path: '/cash/reconciliation', component: CashReconciliation, props: true, name: 'cash-reconciliation'},
+  { path: '/cash/history', name: 'cash-history', component: CashReconciliationHistory,},
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
   { path: '*', name: 'NoFound', component: NoFound },
 ];
 
@@ -200,11 +246,17 @@ router.beforeEach(async (to, from, next) => {
     return next({ name: "Login", query: { redirect: to.fullPath } });
   }
   if (isAuthenticated) {
+<<<<<<< HEAD
     // Recuperamos los permisos del usuario
     const user = JSON.parse(localStorage.getItem("user"));
     const permissions = user.permissions;
     const alias = to.matched[0]?.alias;
     // Si el alias no es "voucher.index", se realiza la validación de permisos
+=======
+    const user = JSON.parse(localStorage.getItem("user"));
+    const permissions = user.permissions;
+    const alias = to.matched[0]?.alias;
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
     if (alias && alias !== "voucher.index" && !global.validatePermission(permissions, alias)) {
       return next({ name: "NoFound" });
     }
@@ -239,6 +291,7 @@ const app = new Vue({
     box: '',
     listBoxes: []
   },
+  router,
   watch: {
     $route(to, from) {
       this.assignDataRequired();
@@ -253,7 +306,6 @@ const app = new Vue({
       }
     }
   },
-  router,
   created() {
     this.assignDataRequired();
     this.selectedBox();
@@ -270,10 +322,14 @@ const app = new Vue({
             if (factusRefreshToken) {
               try {
                 const refreshResponse = await axios.post("api/refresh-token", { refresh_token: factusRefreshToken }, {
+<<<<<<< HEAD
                   headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json"
                   }
+=======
+                  headers: { "Content-Type": "application/json", Accept: "application/json" }
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
                 });
                 const newAccessToken = refreshResponse.data.access_token;
                 localStorage.setItem("factus_token", newAccessToken);
@@ -294,6 +350,7 @@ const app = new Vue({
     assignDataRequired() {
       this.user = JSON.parse(localStorage.getItem("user"));
       this.token = localStorage.getItem("token");
+<<<<<<< HEAD
       if (this.user) {
         this.permissions = this.user.permissions;
       }
@@ -302,6 +359,12 @@ const app = new Vue({
       const factusToken = localStorage.getItem("factus_token");
       this.factusConfig.headers.Authorization = "Bearer " + factusToken;
       console.log("Factus Token asignado:", this.factusConfig.headers.Authorization);
+=======
+      this.permissions = this.user?.permissions || [];
+      this.config.headers.Authorization = "Bearer " + this.token;
+      const factusToken = localStorage.getItem("factus_token");
+      this.factusConfig.headers.Authorization = "Bearer " + factusToken;
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
     },
     logout() {
       this.user = {};
@@ -317,15 +380,12 @@ const app = new Vue({
     },
     validateToken() {
       axios.get('api/users/' + this.user.sub, this.config)
-        .then(response => {
-          return true;
-        })
-        .catch(response => {
-          this.logout();
-        });
+        .then(() => true)
+        .catch(() => this.logout());
     },
     selectedBox() {
       axios.get('api/boxes/byUser', this.config)
+<<<<<<< HEAD
         .then((response) => {
           this.listBoxes = response.data.boxes;
         })
@@ -333,5 +393,11 @@ const app = new Vue({
           this.listBoxes = [];
         });
     }
+=======
+        .then(({ data }) => { this.listBoxes = data.boxes; })
+        .catch(() => { this.listBoxes = []; });
+    },
+    // Otros métodos...
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
   }
 });

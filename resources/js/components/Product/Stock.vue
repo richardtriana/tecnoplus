@@ -1,7 +1,7 @@
 <template>
   <div class="w-100">
     <div class="page-header text-center mb-2">
-      <h3 class="">Stock</h3>
+      <h3 class="">Inventario</h3>
     </div>
     <moon-loader
       class="m-auto"

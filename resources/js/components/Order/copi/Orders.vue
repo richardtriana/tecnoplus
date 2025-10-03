@@ -13,21 +13,34 @@
 			<i class="bi bi-plus-circle me-1"></i> Nueva orden
 		  </router-link>
   
+<<<<<<< HEAD
 		  <!-- Botón Nota Crédito CON Factura: se habilita solo si hay una orden seleccionada en estado 2 o 5 -->
 		  <router-link
 			v-if="selectedOrder && (selectedOrder.state == 2 || selectedOrder.state == 5)"
 			class="btn btn-lila btn-sm me-2"
+=======
+ 
+		  <!-- Botón Nota Crédito CON Factura: se habilita solo si hay una orden seleccionada en estado 2 o 5 -->
+		  <router-link
+			v-if="selectedOrder && (selectedOrder.state == 2 || selectedOrder.state == 5)"
+			class="btn btn-lila btn-sm"
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 			:to="{ name: 'credit_notes.create', params: { order_id: selectedOrder.factus_bill_id } }"
 		  >
 			<i class="bi bi-file-earmark-minus"></i> Nota Crédito con Factura
 		  </router-link>
 		  <button
 			v-else
+<<<<<<< HEAD
 			class="btn btn-lila btn-sm me-2"
+=======
+			class="btn btn-lila btn-sm"
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 			disabled
 		  >
 			<i class="bi bi-file-earmark-minus"></i> Nota Crédito con Factura
 		  </button>
+<<<<<<< HEAD
 
 		  <!-- Botón Reenvío Automático -->
 		  <button
@@ -36,6 +49,8 @@
 		  >
 			<i class="bi bi-arrow-clockwise"></i> Reenvío automático
 		  </button>
+=======
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 		</div>
 	  </header>
   
@@ -51,6 +66,7 @@
 			  <v-select
 				:options="statusOrders"
 				label="status"
+<<<<<<< HEAD
 				:reduce="s => s.id"
 				v-model="filter.status"
 			  >
@@ -58,6 +74,15 @@
 				  <div style="display: flex; align-items: baseline">
 					<em style="margin-left: 0.5rem">
 					  {{ statusOrders.find(s => s.id === filter.status)?.status }}
+=======
+				:reduce="(s) => s.id"
+				v-model="filter.status"
+			  >
+				<template #selected-option="{}">
+				  <div style="display: flex; align-items: baseline">
+					<em style="margin-left: 0.5rem">
+					  {{ statusOrders[filter.status].status }}
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 					</em>
 				  </div>
 				</template>
@@ -105,12 +130,20 @@
 			  <label for="nro_results" class="form-label">Resultados por página</label>
 			  <input
 				type="number"
+<<<<<<< HEAD
 				step="1"
 				id="nro_results"
 				class="form-control form-control-sm"
 				placeholder="Resultados"
 				v-model.number="filter.nro_results"
 				min="1"
+=======
+				step="any"
+				id="nro_results"
+				class="form-control form-control-sm"
+				placeholder="Resultados"
+				v-model="filter.nro_results"
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 			  />
 			</div>
 			<div class="col-sm-6 col-md-3" v-if="$root.validatePermission('order.update')">
@@ -118,7 +151,11 @@
 			  <v-select
 				:options="userList"
 				label="name"
+<<<<<<< HEAD
 				:reduce="user => user.id"
+=======
+				:reduce="(user) => user.id"
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 				v-model="filter.user_id"
 			  />
 			</div>
@@ -146,7 +183,10 @@
 				  <th>Total Pago</th>
 				  <th>Mesa</th>
 				  <th>Estado</th>
+<<<<<<< HEAD
 				  <th>Estado DIAN</th>
+=======
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 				  <th>Ver</th>
 				  <th>Ticket / Pre-cuenta</th>
 				  <th>Imprimir</th>
@@ -169,15 +209,22 @@
 					<span class="pill-badge">{{ o.bill_number }}</span>
 				  </td>
 				  <td class="text-center">
+<<<<<<< HEAD
 					{{ o.client
 					  ? (o.client.razon_social || (o.client.first_name + ' ' + o.client.first_lastname))
 					  : 'Sin Cliente' }}
 				  </td>
 				  <td class="text-center">{{ o.factus_bill_id || '-' }}</td>
+=======
+					{{ o.client ? (o.client.razon_social || (o.client.first_name + ' ' + o.client.first_lastname)) : 'Sin Cliente' }}
+				  </td>
+				  <td class="text-center">{{ o.factus_bill_id ? o.factus_bill_id : '-' }}</td>
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 				  <td>{{ o.total_paid | currency }}</td>
 				  <td>
 					<span class="pill-badge" v-if="o.table">{{ o.table.table }}</span>
 				  </td>
+<<<<<<< HEAD
 				  <td>{{ statusOrders[o.state]?.status }}</td>
 				  <td>
 					<span
@@ -197,6 +244,9 @@
 					  <i class="bi bi-arrow-clockwise"></i>
 					</button>
 				  </td>
+=======
+				  <td>{{ statusOrders[o.state].status }}</td>
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 				  <td>
 					<button class="btn btn-outline-secondary btn-sm" @click.stop="openModal(o.id)">
 					  <i class="bi bi-eye"></i>
@@ -258,7 +308,11 @@
 				<tr class="fw-bold">
 				  <td colspan="2" class="border-0 text-end">Total:</td>
 				  <td>{{ TotalOrderList.total_paid | currency }}</td>
+<<<<<<< HEAD
 				  <td colspan="12" class="border-0"></td>
+=======
+				  <td colspan="11" class="border-0"></td>
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 				</tr>
 			  </tfoot>
 			</table>
@@ -303,6 +357,7 @@
 		</div>
 	  </div>
 	  <div class="modal-backdrop fade" :class="{ show: showModal }" v-if="showModal"></div>
+<<<<<<< HEAD
 
 	  <!-- MODAL DE CARGA REENVÍO DIAN -->
 	  <div
@@ -323,10 +378,13 @@
 		</div>
 	  </div>
 	  <div class="modal-backdrop fade" :class="{ show: showResendModal }" v-if="showResendModal"></div>
+=======
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 	</div>
 </template>
 
 <script>
+<<<<<<< HEAD
 import axios from 'axios'
 import vSelect from 'vue-select'
 import LoadPdf from './LoadPdf.vue'
@@ -334,12 +392,26 @@ import DetailsOrder from './DetailsOrder.vue'
 
 export default {
 	components: { vSelect, LoadPdf, DetailsOrder },
+=======
+import LoadPdf from "./LoadPdf.vue";
+import DetailsOrder from "./DetailsOrder.vue";
+
+export default {
+	components: { LoadPdf, DetailsOrder },
+	props: {
+	  status: {
+		type: Number,
+		default: 0
+	  }
+	},
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 	data() {
 	  return {
 		load_pdf: false,
 		OrderList: {},
 		TotalOrderList: {},
 		userList: [],
+<<<<<<< HEAD
 		numberingRanges: [],
 		filter: {
 		  client: '',
@@ -375,10 +447,49 @@ export default {
 	  getOrders(page = 1) {
 		const data = {
 		  page,
+=======
+		filter: {
+		  client: "",
+		  no_invoice: "",
+		  from: "",
+		  to: "",
+		  user_id: "--Seleccionar--",
+		  status: "1",
+		  nro_results: 15
+		},
+		statusOrders: [
+		  { id: 0, status: "Desechada" },
+		  { id: 1, status: "Pedido" },
+		  { id: 2, status: "Facturado" },
+		  { id: 3, status: "Cotizado" },
+		  { id: 5, status: "Crédito" }
+		],
+		showModal: false,
+		selectedOrderId: null,
+		selectedOrder: null
+	  };
+	},
+	created() {
+	  this.$root.validateToken();
+	  this.listUsers();
+	  this.getOrders(1);
+	},
+	watch: {
+	  showModal(newVal) {
+		if (newVal) document.body.classList.add("modal-open");
+		else document.body.classList.remove("modal-open");
+	  }
+	},
+	methods: {
+	  getOrders(page = 1) {
+		let data = {
+		  page: page,
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 		  client: this.filter.client,
 		  no_invoice: this.filter.no_invoice,
 		  from: this.filter.from,
 		  to: this.filter.to,
+<<<<<<< HEAD
 		  user_id: this.filter.user_id === '--Seleccionar--' ? '-1' : this.filter.user_id,
 		  status: this.filter.status,
 		  status_dian: this.filter.status_dian,
@@ -465,6 +576,88 @@ export default {
 	  }
 	}
 }
+=======
+		  user_id: this.filter.user_id == "--Seleccionar--" ? "-1" : this.filter.user_id,
+		  status: this.filter.status != undefined ? this.filter.status : "1",
+		  nro_results: this.filter.nro_results
+		};
+  
+		axios
+		  .get(`api/orders`, { params: data, headers: this.$root.config.headers })
+		  .then(response => {
+			this.OrderList = response.data.orders;
+			this.TotalOrderList = response.data.totalOrders;
+			// Reiniciar selección
+			this.selectedOrder = null;
+			this.selectedOrderId = null;
+		  });
+	  },
+	  deleteOrder(order_id) {
+		axios
+		  .delete(`api/orders/${order_id}`, this.$root.config)
+		  .then(() => {
+			this.getOrders(1);
+			Swal.fire({ icon: "success", title: "Excelente", text: "Orden eliminada correctamente" });
+		  })
+		  .catch(() => {
+			Swal.fire({ icon: "error", title: "Oops...", text: "Error al eliminar la orden" });
+		  });
+	  },
+	  generatePdf(id) {
+		this.load_pdf = true;
+		axios
+		  .get("api/orders/generatePdf/" + id, this.$root.config)
+		  .then(response => {
+			const pdf = response.data.pdf;
+			var a = document.createElement("a");
+			a.href = "data:application/pdf;base64," + pdf;
+			a.download = `Order-${id}.pdf`;
+			a.click();
+		  })
+		  .finally(() => {
+			this.load_pdf = false;
+		  });
+	  },
+	  reprintOrder(order_id) {
+		axios
+		  .get(`api/orders/reprint/${order_id}`, this.$root.config)
+		  .then(response => {
+			const pdf = response.data.pdf;
+			var a = document.createElement("a");
+			a.href = "data:application/pdf;base64," + pdf;
+			a.download = `ReprintOrder-${order_id}.pdf`;
+			a.click();
+		  })
+		  .catch(() => {
+			Swal.fire({ icon: "error", title: "Error", text: "No se pudo reimprimir la orden" });
+		  });
+	  },
+	  printTicket(order_id) {
+		axios.get(`api/print-order/${order_id}`, this.$root.config);
+	  },
+	  printPreCuenta(order_id) {
+		axios.get(`api/print-precuenta/${order_id}`, this.$root.config);
+	  },
+	  listUsers() {
+		axios.get(`api/users/user-list`, this.$root.config).then(response => {
+		  this.userList = response.data.users;
+		});
+	  },
+	  openModal(order_id) {
+		this.selectedOrderId = order_id;
+		this.showModal = true;
+	  },
+	  closeModal() {
+		this.showModal = false;
+		this.selectedOrderId = null;
+	  },
+	  selectOrder(order) {
+		this.selectedOrder = order;
+		this.selectedOrderId = order.id;
+	  }
+	}
+};
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 </script>
 
 <style scoped>
@@ -507,7 +700,12 @@ export default {
 .table-active {
 	background-color: #e2e3e5 !important;
 }
+<<<<<<< HEAD
 /* Botón lila */
+=======
+
+/* Botón lila con los colores proporcionados */
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 .btn-lila {
 	background-color: #c95807;
 	color: #fff;

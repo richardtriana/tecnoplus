@@ -1,7 +1,10 @@
 <template>
   <div class="row px-2" id="create-edit-order">
     <!-- Overlay de Loading -->
+<<<<<<< HEAD
     <!-- Lo mantenemos en el template pero ya no lo usamos en el script -->
+=======
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
     <div v-if="loading" class="loading-overlay">
       <div class="spinner-border text-primary" role="status">
         <span class="sr-only">Cargando...</span>
@@ -183,6 +186,21 @@
             Cotizar
           </button>
         </div>
+<<<<<<< HEAD
+=======
+        <!-- Botón Crédito -->
+        <div class="col">
+          <button
+            type="button"
+            class="btn btn-lg btn-outline-aqua w-100"
+            @click="createOrUpdateOrder(5)"
+          >
+            <i class="bi bi-wallet2"></i>
+            <br />
+            Crédito
+          </button>
+        </div>
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
         <!-- Botón Cancelar (solo si order_id != 0) -->
         <div class="col" v-if="order_id != 0">
           <router-link
@@ -309,7 +327,13 @@
                 <th>Cantidad</th>
                 <th>Precio (sin IVA)</th>
                 <th>Porcentaje IVA</th>
+<<<<<<< HEAD
                 <th>Descuento %</th>
+=======
+                <th>Valor IVA</th>
+                <th>Descuento %</th>
+                <th>Descuento $</th>
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
                 <th>Total</th>
               </tr>
             </thead>
@@ -354,6 +378,17 @@
                       : '0%'
                   }}
                 </td>
+<<<<<<< HEAD
+=======
+                <!-- Valor IVA por unidad (con miles) -->
+                <td class="text-right">
+                  {{
+                    p.price_tax_exc > 0
+                      ? (p.price_tax_inc - p.price_tax_exc).toLocaleString('es-CO', { minimumFractionDigits: 2 })
+                      : '0,00'
+                  }}
+                </td>
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
                 <!-- Descuento % -->
                 <td>
                   <input
@@ -365,7 +400,19 @@
                     style="max-width: 60px"
                   />
                 </td>
+<<<<<<< HEAD
                 <!-- Total -->
+=======
+                <!-- Descuento en valor (con miles) -->
+                <td class="text-right">
+                  {{
+                    (
+                      p.quantity * p.price_tax_exc * (p.discount_percentage / 100)
+                    ).toLocaleString('es-CO', { minimumFractionDigits: 2 })
+                  }}
+                </td>
+                <!-- Total (con miles) -->
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
                 <td class="text-right">
                   {{
                     (
@@ -381,7 +428,11 @@
                 :key="'obs-' + p.id"
                 v-if="p.showObservaciones"
               >
+<<<<<<< HEAD
                 <td colspan="8">
+=======
+                <td colspan="10">
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
                   <input
                     type="text"
                     class="form-control"
@@ -394,7 +445,11 @@
             </tbody>
             <tbody v-else>
               <tr>
+<<<<<<< HEAD
                 <td colspan="8">No se han añadido productos</td>
+=======
+                <td colspan="10">No se han añadido productos</td>
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
               </tr>
             </tbody>
           </table>
@@ -506,7 +561,10 @@ import AddClient from "./AddClient.vue";
 import ModalBox from "./../ModalBox.vue";
 import SelectBoxModal from "./SelectBoxModal.vue";
 import axios from "axios";
+<<<<<<< HEAD
 import Swal from "sweetalert2";
+=======
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 
 export default {
   name: "create-edit-order",
@@ -582,6 +640,7 @@ export default {
     },
     // Sumas y cálculos (internos)
     total_tax_exc() {
+<<<<<<< HEAD
       return this.productsOrderList.reduce((sum, p) => sum + p.price_tax_exc * p.quantity, 0);
     },
     total_discount() {
@@ -609,21 +668,87 @@ export default {
         const baseAfterDiscount = lineSubtotal - discountBase;
         const lineTax = baseAfterDiscount * (rate / 100);
         taxes[key] = (taxes[key] || 0) + lineTax;
+=======
+      let total = 0;
+      this.productsOrderList.forEach(p => {
+        total += p.price_tax_exc * p.quantity;
+      });
+      return total;
+    },
+    total_discount() {
+      let total = 0;
+      this.productsOrderList.forEach(p => {
+        total += p.quantity * p.price_tax_exc * (p.discount_percentage / 100);
+      });
+      return total;
+    },
+    total_tax_inc() {
+      let total = 0;
+      this.productsOrderList.forEach(p => {
+        total +=
+          p.price_tax_inc * p.quantity -
+          p.price_tax_exc * p.quantity * (p.discount_percentage / 100);
+      });
+      return total;
+    },
+    total_tax_inc_without_discount() {
+      let total = 0;
+      this.productsOrderList.forEach(p => {
+        total += p.quantity * p.price_tax_inc;
+      });
+      return total;
+    },
+    // Desglose de IVA
+    taxBreakdown() {
+      let taxes = {};
+      this.productsOrderList.forEach(p => {
+        let rate = 0;
+        if (p.price_tax_exc > 0) {
+          rate = ((p.price_tax_inc / p.price_tax_exc) - 1) * 100;
+        }
+        rate = parseFloat(rate.toFixed(2));
+        const rateKey = rate.toFixed(0);
+
+        if (!taxes[rateKey]) {
+          taxes[rateKey] = 0;
+        }
+        let lineSubtotal = p.price_tax_exc * p.quantity;
+        let discountBase = lineSubtotal * (p.discount_percentage / 100);
+        let baseAfterDiscount = lineSubtotal - discountBase;
+        let lineTax = baseAfterDiscount * (rate / 100);
+        taxes[rateKey] += lineTax;
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
       });
       return taxes;
     },
     // Pagos
     paid_value() {
+<<<<<<< HEAD
       const m = this.order.payment_methods;
       return Number(m.cash) + Number(m.card) + Number(m.nequi) + Number(m.others);
+=======
+      let cash = this.order.payment_methods.cash || 0;
+      let card = this.order.payment_methods.card || 0;
+      let nequi = this.order.payment_methods.nequi || 0;
+      let others = this.order.payment_methods.others || 0;
+      return Number(cash) + Number(card) + Number(nequi) + Number(others);
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
     },
     payment_return() {
       return this.paid_value - this.total_tax_inc;
     },
     selectedPaymentForm() {
+<<<<<<< HEAD
       return this.paymentForms.find(f => f.id == this.order.payment_form_id) || null;
     },
     selectedPaymentMethod() {
+=======
+      if (!this.order.payment_form_id) return null;
+      return this.paymentForms.find(f => f.id == this.order.payment_form_id) || null;
+    },
+    selectedPaymentMethod() {
+      if (!this.order.payment_method_id) return null;
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
       return this.paymentMethods.find(m => m.id == this.order.payment_method_id) || null;
     }
   },
@@ -648,6 +773,7 @@ export default {
 
     if (!this.$root.box) {
       this.$nextTick(() => {
+<<<<<<< HEAD
         this.$refs.SelectBoxModal?.openModal();
       });
     } else if (this.order.numbering_range_id) {
@@ -659,6 +785,28 @@ export default {
     if (this.order.state == 1) {
       const pv = this.activeVouchers.find(v => v.document === "Pedido");
       if (pv) this.order.numbering_range_id = pv.id;
+=======
+        if (this.$refs.SelectBoxModal) {
+          this.$refs.SelectBoxModal.openModal();
+        }
+      });
+    } else {
+      if (this.order.numbering_range_id) {
+        this.selectedVoucher = this.order.numbering_range_id;
+      }
+    }
+
+    // Por defecto, forma y método de pago
+    this.order.payment_form_id = 1;
+    this.order.payment_method_id = 1;
+
+    // Si es pedido
+    if (this.order.state == 1) {
+      const pedidoVoucher = this.activeVouchers.find(v => v.document === "Pedido");
+      if (pedidoVoucher) {
+        this.order.numbering_range_id = pedidoVoucher.id;
+      }
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
     }
   },
   methods: {
@@ -674,6 +822,7 @@ export default {
       this.selectedVoucher = voucherId;
     },
     loadPaymentForms() {
+<<<<<<< HEAD
       axios.get("api/payment_forms", this.$root.config)
         .then(res => this.paymentForms = res.data.payment_forms)
         .catch(console.error);
@@ -721,6 +870,75 @@ export default {
           np ? this.addProduct(np) : $("#no-results").toast("show");
         })
         .catch(console.error);
+=======
+      axios
+        .get("api/payment_forms", this.$root.config)
+        .then(res => {
+          this.paymentForms = res.data.payment_forms;
+        })
+        .catch(err => console.error(err));
+    },
+    loadPaymentMethods() {
+      axios
+        .get("api/payment_methods", this.$root.config)
+        .then(res => {
+          this.paymentMethods = res.data.payment_methods;
+        })
+        .catch(err => console.error(err));
+    },
+    onChangePaymentForm() {
+      if (this.selectedPaymentForm && this.selectedPaymentForm.code == "2") {
+        this.order.payment_method_id = null;
+        this.order.payment_reference = "";
+      } else {
+        if (!this.order.payment_method_id) {
+          this.order.payment_method_id = 1;
+        }
+      }
+    },
+    listItemsOrder() {
+      if (this.order_id == 0) return;
+      axios
+        .get(`api/orders/${this.order_id}`, this.$root.config)
+        .then(response => {
+          this.order = response.data.order_information;
+          this.order.id_client = response.data.order_information.client_id;
+          this.order.client =
+            response.data.order_information.client.razon_social ||
+            response.data.order_information.client.name;
+          this.productsOrderList = response.data.order_details;
+          // Forzar comprobante en edición
+          this.order.payment_form_id = 1;
+          this.order.payment_method_id = 1;
+          if (this.order.payment_reference) {
+            this.order.payment_reference = this.order.payment_reference;
+          }
+        })
+        .catch(err => console.error(err));
+    },
+    listTables() {
+      axios
+        .get("api/tables/table-list?page=1", this.$root.config)
+        .then(resp => {
+          this.tableList = resp.data.tables;
+        })
+        .catch(err => console.error(err));
+    },
+    searchProduct() {
+      if (!this.filters.product) return;
+      const url = `api/products/search-product?product=${this.filters.product}&state=1`;
+      axios
+        .post(url, null, this.$root.config)
+        .then(resp => {
+          const new_product = resp.data.products;
+          if (!new_product) {
+            $("#no-results").toast("show");
+          } else {
+            this.addProduct(new_product);
+          }
+        })
+        .catch(err => console.error(err));
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
       this.filters.product = "";
     },
     addProduct(new_product) {
@@ -728,13 +946,21 @@ export default {
       this.productsOrderList.forEach(prod => {
         if (prod.barcode === new_product.barcode) {
           exists = true;
+<<<<<<< HEAD
           prod.quantity++;
+=======
+          prod.quantity += 1;
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
           prod.price_tax_inc_total = prod.price_tax_inc * prod.quantity;
           prod.cost_price_tax_inc_total = prod.cost_price_tax_inc * prod.quantity;
         }
       });
       if (!exists) {
+<<<<<<< HEAD
         const pd = {
+=======
+        let productData = {
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
           product_id: new_product.id,
           barcode: new_product.barcode,
           discount_percentage: 0,
@@ -750,6 +976,7 @@ export default {
           showObservaciones: false,
           observaciones: ""
         };
+<<<<<<< HEAD
         if (new_product.uses_portions) {
           pd.portions = new_product.portions.map(portion => {
             let q = parseFloat(portion.quantity);
@@ -758,11 +985,30 @@ export default {
           });
         }
         this.productsOrderList.push(pd);
+=======
+        // Si el producto usa porciones, asignamos las porciones y, si la cantidad es 0, forzamos a 1.00
+        if (new_product.uses_portions) {
+          let portions = new_product.portions.map(portion => {
+            let baseQty = parseFloat(portion.quantity);
+            if (!baseQty || baseQty <= 0) {
+              baseQty = 1.00;
+            }
+            return { ...portion, quantity: baseQty.toFixed(2) };
+          });
+          productData.portions = portions;
+        }
+        this.productsOrderList.push(productData);
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
       }
     },
     removeProduct(index, detail_id = null) {
       if (detail_id) {
+<<<<<<< HEAD
         axios.delete(`api/orders/${this.order.id}/remove-product/${detail_id}`, this.$root.config)
+=======
+        axios
+          .delete(`api/orders/${this.order.id}/remove-product/${detail_id}`, this.$root.config)
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
           .then(() => {
             this.productsOrderList.splice(index, 1);
             alert("Producto eliminado y comanda de eliminación enviada.");
@@ -779,19 +1025,41 @@ export default {
       this.productsOrderList[index].showObservaciones = !this.productsOrderList[index].showObservaciones;
     },
     updateObservaciones(index) {
+<<<<<<< HEAD
       console.log(`Observaciones para: ${this.productsOrderList[index].product} => ${this.productsOrderList[index].observaciones}`);
+=======
+      console.log(
+        "Observaciones para:",
+        this.productsOrderList[index].product,
+        "=>",
+        this.productsOrderList[index].observaciones
+      );
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
     },
     openAddProductModal() {
       this.filters.product = "";
       $("#addProductModal").modal("show");
     },
+<<<<<<< HEAD
     facturarF1() {
       if (!this.productsOrderList.length) {
         return Swal.fire({ icon: "error", title: "Oops...", text: "Debes añadir productos al carrito" });
+=======
+    // Botón Facturar (F1) => abre el modal, pero primero verifica que haya productos
+    facturarF1() {
+      if (!this.productsOrderList.length) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Debes añadir productos al carrito"
+        });
+        return;
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
       }
       this.openModalPayment();
     },
     openModalPayment() {
+<<<<<<< HEAD
       if (this.selectedPaymentMethod?.code == "10") {
         this.order.payment_methods.cash = this.total_tax_inc;
       }
@@ -801,6 +1069,19 @@ export default {
           const ci = $("#cashPayment");
           ci.focus();
           ci.select();
+=======
+      if (this.selectedPaymentMethod && this.selectedPaymentMethod.code == "10") {
+        // Se asigna el total como valor inicial
+        this.order.payment_methods.cash = this.total_tax_inc;
+      }
+      $("#paymentModal").modal("show");
+      // Al mostrarse el modal, enfocamos y seleccionamos el input
+      $("#paymentModal").on("shown.bs.modal", () => {
+        if (this.selectedPaymentMethod && this.selectedPaymentMethod.code == "10") {
+          const cashInput = $("#cashPayment");
+          cashInput.focus();
+          cashInput.select(); // Selecciona todo el valor para sobrescribir
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
         }
         document.addEventListener("keydown", this.modalKeyHandler);
       });
@@ -809,15 +1090,24 @@ export default {
       document.removeEventListener("keydown", this.modalKeyHandler);
     },
     modalKeyHandler(e) {
+<<<<<<< HEAD
+=======
+      // Facturar => state=2
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
       if (e.key === "F1") {
         e.preventDefault();
         this.createOrUpdateOrder(2);
       }
+<<<<<<< HEAD
+=======
+      // Facturar e Imprimir => state=4
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
       if (e.key === "F2") {
         e.preventDefault();
         this.createOrUpdateOrder(4);
       }
     },
+<<<<<<< HEAD
     async createOrUpdateOrder(state_order) {
   // Verifica que haya productos
   if (!this.productsOrderList.length) {
@@ -918,17 +1208,148 @@ export default {
       shortcut.add("F1", () => {
         if (!this.productsOrderList.length) {
           Swal.fire({ icon: "error", title: "Oops...", text: "Debes añadir productos al carrito" });
+=======
+    createOrUpdateOrder(state_order) {
+      // Verifica que haya productos
+      if (!this.productsOrderList.length) {
+        this.disabled = false;
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Debes añadir productos al carrito"
+        });
+        return;
+      }
+      // Verifica si es efectivo y no alcanza el pago
+      if (
+        state_order == 2 &&
+        this.selectedPaymentMethod &&
+        this.selectedPaymentMethod.code == "10" &&
+        this.paid_value < this.total_tax_inc
+      ) {
+        this.openModalPayment();
+        return;
+      }
+      // Verifica si pasa a crédito sin cliente válido
+      if (this.order.id_client == 1 && state_order == 5) {
+        alert("Debe seleccionar un cliente válido");
+        this.disabled = false;
+        return;
+      }
+      if (this.disabled) return;
+      this.disabled = true;
+
+      // Activar el loading mientras se guarda
+      this.loading = true;
+
+      this.order.state = state_order; // 2 => Facturar, 4 => Facturar e imprimir
+      this.order.box_id = this.$root.box;
+      if (state_order == 1) {
+        // Pedido
+        const pedidoVoucher = this.activeVouchers.find(v => v.document === "Pedido");
+        if (pedidoVoucher) {
+          this.order.numbering_range_id = pedidoVoucher.id;
+        }
+        this.order.proccess = false;
+      } else {
+        this.order.numbering_range_id = this.selectedVoucher;
+      }
+      this.order.total_tax_exc = this.total_tax_exc;
+      this.order.total_tax_inc = this.total_tax_inc;
+      this.order.total_discount = this.total_discount;
+      this.order.total_cost_price_tax_inc = this.total_cost_price_tax_inc;
+      this.order.productsOrder = this.productsOrderList;
+
+      // Si es update o create
+      if (this.order_id != 0 && this.order_id != null) {
+        axios
+          .put(`api/orders/${this.order_id}`, this.order, this.$root.config)
+          .then(() =>
+            Swal.fire({
+              icon: "success",
+              title: "Excelente",
+              text: "Los datos se han guardado correctamente"
+            })
+          )
+          .catch(err => {
+            console.log(err);
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: "Hubo un error al guardar los datos"
+            });
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.$router.push({ name: "create-edit-order", params: { order_id: 0 } });
+              this.$router.go(0);
+              this.disabled = false;
+              this.loading = false;
+            }, 300);
+          });
+      } else {
+        if (this.order.box_id > 0) {
+          axios
+            .post("api/orders", this.order, this.$root.config)
+            .then(() => {
+              Swal.fire({
+                icon: "success",
+                title: "Excelente",
+                text: "Los datos se han guardado correctamente"
+              });
+            })
+            .catch(err => {
+              console.log(err);
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Hubo un error al guardar los datos"
+              });
+            })
+            .finally(() => {
+              setTimeout(() => {
+                this.$router.go(0);
+                this.disabled = false;
+                this.loading = false;
+              }, 300);
+            });
+        } else {
+          alert("Selecciona una caja");
+          this.disabled = false;
+          this.loading = false;
+        }
+      }
+    },
+    commands() {
+      // F1 y F2 abren el modal, pero primero verificamos si hay productos
+      shortcut.add("F1", () => {
+        if (!this.productsOrderList.length) {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Debes añadir productos al carrito"
+          });
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
         } else {
           this.openModalPayment();
         }
       });
       shortcut.add("F2", () => {
         if (!this.productsOrderList.length) {
+<<<<<<< HEAD
           Swal.fire({ icon: "error", title: "Oops...", text: "Debes añadir productos al carrito" });
+=======
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Debes añadir productos al carrito"
+          });
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
         } else {
           this.openModalPayment();
         }
       });
+<<<<<<< HEAD
       shortcut.add("F10", () => this.openAddProductModal());
     },
     searchClient() {
@@ -946,6 +1367,38 @@ export default {
         `${client.first_name} ${client.second_name || ""} ${client.first_lastname} ${client.second_lastname || ""}`.trim();
       this.order.client = cname;
       this.filters.client = cname;
+=======
+      // F10 => añadir producto
+      shortcut.add("F10", () => {
+        this.openAddProductModal();
+      });
+    },
+    searchClient() {
+      if (!this.filters.client) return;
+      const url = `api/clients/search-client?client=${this.filters.client}`;
+      axios
+        .post(url, null, this.$root.config)
+        .then(resp => {
+          const new_client = resp.data;
+          if (!new_client) {
+            $("#no-results").toast("show");
+          } else {
+            this.addClient(new_client);
+          }
+        })
+        .catch(err => console.error(err));
+    },
+    addClient(client) {
+      this.order.id_client = client.id;
+      const clientName =
+        client.razon_social ||
+        client.name ||
+        `${client.first_name} ${client.second_name ? client.second_name : ''} ${client.first_lastname} ${
+          client.second_lastname ? client.second_lastname : ''
+        }`;
+      this.order.client = clientName.trim();
+      this.filters.client = clientName.trim();
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
     }
   }
 };

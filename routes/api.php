@@ -68,6 +68,14 @@ use App\Http\Controllers\SupportDocumentController;
 use App\Http\Controllers\FactusReceptionController;
 use App\Http\Controllers\OrderCreditController;
 
+<<<<<<< HEAD
+=======
+//caja
+use App\Http\Controllers\CashReconciliationController;
+use App\Http\Controllers\ProductObservationController;
+
+
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 
 /*
 |--------------------------------------------------------------------------
@@ -203,12 +211,22 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/print-precuenta/{id}', [PrintOrderController::class, 'printPreCuenta'])->middleware('can:order.index');
     Route::delete('orders/{orderId}/remove-product/{detailId}', [OrderController::class, 'removeProductFromOrder']);
     Route::resource('/orders',  OrderController::class);
+<<<<<<< HEAD
     Route::resource('/order-details', DetailOrderController::class);
     //dividir cuenta
     Route::post('orders/{order}/split', [OrderController::class, 'split']);
 
 
 
+=======
+    Route::post('orders/{order}/split', [OrderController::class, 'split'])->middleware('can:order.update');
+     
+
+
+
+    Route::resource('/order-details', DetailOrderController::class);
+
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
     Route::get('/billings/generatePdf/{billing}', [BillingController::class, 'generatePdf']);
     Route::resource('/billings',  BillingController::class);
     Route::resource('/billing-details', DetailBillingController::class);
@@ -225,6 +243,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('products/{id}/portions', [ProductController::class, 'getPortions']);
 
     Route::resource('kit-products', KitProductController::class)->middleware('can:product.store');
+<<<<<<< HEAD
 
     Route::resource('/suppliers',  SupplierController::class);
     Route::post('/suppliers/{supplier}/activate',  [SupplierController::class, 'activate']);
@@ -377,5 +396,178 @@ Route::middleware('auth:api')->group(function () {
     
     Route::apiResource('support-document', SupportDocumentController::class)->withoutMiddleware('auth:api');
     Route::post('adjustment-notes', [AdjustmentNoteController::class, 'store']);
+=======
+
+    Route::resource('/suppliers',  SupplierController::class);
+    Route::post('/suppliers/{supplier}/activate',  [SupplierController::class, 'activate']);
+    Route::post('/suppliers/search-supplier',  [SupplierController::class, 'searchSupplier']);
+    Route::post('/suppliers/filter-supplier-list',  [SupplierController::class, 'filterSupplierList']);
+
+    Route::get('/clients/filter-client-list', [ClientController::class, 'filterClientList']);
+    Route::post('/clients/search-client', [ClientController::class, 'searchClient']);
+    Route::post('/clients/{client}/activate', [ClientController::class, 'activate']);
+    Route::resource('/clients', ClientController::class)->except(['show']);
+
+
+    Route::get('/roles/getAllRoles', [RoleController::class, 'getAllRoles']);
+    Route::resource('/roles', RoleController::class);
+    Route::get('/permissions', [RoleController::class, 'getPermissions']);
+
+    Route::get('/departments', [DepartmentController::class, 'getDistinctDepartments']);
+    Route::get('/departments/{department}/getMunicipalities', [DepartmentController::class, 'getMunicipalitiesByDepartment']);
+
+    Route::resource('/configurations', ConfigurationController::class)->except(['create', 'edit', 'destroy', 'show'])->middleware('can:configuration');;
+    Route::get('/company-logo', function () {
+        $configuration = new Configuration();
+        $image = $configuration->select('logo')->first();
+        return $image;
+    });
+    Route::get('configurations/shipments-status', [ConfigurationController::class, 'getShipmentsStatus']);
+
+
+
+    Route::post('/import/upload-file-import', [ImportProductController::class, 'uploadFile'])->middleware('can:product.store');
+
+    Route::get('/reports/sales-report', [ReportController::class, 'reportSales']);
+    Route::get('/reports/general-sales-report', [ReportController::class, 'reportGeneralSales']);
+    Route::get('/reports/product-sales-report', [ReportController::class, 'reportProductSales']);
+    Route::get('/reports/total-products-report', [ReportController::class, 'reportTotalProducts']);
+    Route::get('/reports/closing', [ReportController::class, 'reportClosing']);
+    Route::get('/reports/invoiced-products', [ReportController::class, 'reportInvoicedProducts']);
+
+
+    Route::get('/reports-ticket/test', [ReportTicketController::class, 'test']);
+    Route::post('/reports-ticket/sales-report', [ReportTicketController::class, 'reportSales']); // ✅
+    Route::post('/reports-ticket/closing', [ReportTicketController::class, 'reportClosing']); // ✅
+    Route::post('/reports-ticket/general-sales-report', [ReportTicketController::class, 'reportGeneralSales']);
+    Route::get('reports/sales-report/export', [ReportController::class, 'exportSalesReport']);
+    Route::post('orders/{id}/resend-dian', [OrderController::class, 'resendDian']);
+    Route::post('/reports-ticket/product-sales-report', [ReportTicketController::class, 'reportProductSales']); // ✅
+    Route::post('/reports-ticket/total-products-report', [ReportTicketController::class, 'reportTotalProducts']);
+    Route::post('/reports-ticket/invoiced-products', [ReportTicketController::class, 'reportInvoicedProducts']);
+    Route::post('/reports-ticket/history', [ReportTicketController::class, 'reportHistory']);
+
+
+    Route::get('/boxes/box-list', [BoxController::class, 'boxList']);
+    Route::get('/boxes/byUser', [BoxController::class, 'getBoxesByUser']);
+    Route::resource('/boxes', BoxController::class);
+    Route::post('/boxes/{box}/activate', [BoxController::class, 'activate']);
+    Route::post('/boxes/base/{box}', [BoxController::class, 'updateBase']);
+
+    Route::get('/boxes/{box}/consecutiveAll', [BoxController::class, 'consecutiveAllByBox'])->middleware('can:box.index');
+    Route::get('/boxes/{box}/getAssignUserByBox', [BoxController::class, 'getAssignUserByBox'])->middleware('can:box.index');
+    Route::post('/boxes/{box}/toAssignUserByBox', [BoxController::class, 'toAssignUserByBox'])->middleware('can:box.store');
+    Route::post('boxes/{id}/assign-vouchers', [BoxController::class, 'toAssignVouchers']);
+    Route::get('boxes/{id}/assigned-vouchers', [BoxController::class, 'assignedVouchers']);
+
+
+
+    Route::get('/zones/zone-list', [ZoneController::class, 'zoneList']);
+    Route::resource('/zones', ZoneController::class);
+
+    Route::get('/tables/table-list', [TableController::class, 'tableList']);
+    Route::resource('/tables', TableController::class);
+
+    //porciones
+    Route::resource('/porciones',PortionController::class);
+    Route::post('/porciones/{id}/activate', [PortionController::class, 'activate']);
+
+    //porciones de productos
+    Route::get('products/{product}', [ProductController::class, 'show'])
+     ->where('product', '[0-9]+');
+    Route::get('product-portions', [ProductPortionController::class, 'index']);
+    Route::post('product-portions', [ProductPortionController::class, 'store']);
+    Route::get('products/filter', [ProductController::class, 'filter']);
+    Route::put('product-portions/{id}', [ProductPortionController::class, 'update']);
+    Route::delete('product-portions/{id}', [ProductPortionController::class, 'destroy']);
+
+    Route::get('portions', [PortionController::class, 'index']);
+    Route::post('portions', [PortionController::class, 'store']);
+    Route::put('portions/{id}', [PortionController::class, 'update']);
+    Route::post('portions/{id}/changeStatus', [PortionController::class, 'changeStatus']);
+    Route::get('portions/exportExcel', [PortionController::class, 'exportExcel']);
+    Route::get('portions/{id}/histories', [PortionHistoryController::class, 'index']);
+
+    //ordenes de eporciones
+    Route::get('portion_orders', [PortionOrderController::class, 'index']);
+    Route::post('portion_orders', [PortionOrderController::class, 'store']);
+    Route::put('portion_orders/{id}', [PortionOrderController::class, 'update']);
+
+    //tablas de locales de factus 
+    Route::get('/organization-types', [OrganizationTypeController::class, 'index']);
+    Route::get('/client-tributes', [ClientTributeController::class, 'index']);
+    Route::get('/identity-document-types', [IdentityDocumentTypeController::class, 'index']);
+    Route::get('/product-tributes', [ProductTributeController::class, 'index'])
+    ->withoutMiddleware('auth:api');
+    Route::get('measurement-units', [MeasurementUnitController::class, 'index'])
+	->withoutMiddleware('auth:api');
+    Route::get('product-identification-standards', [ProductIdentificationStandardController::class, 'index']);
+    Route::get('/correction-codes', [CorrectionCodeController::class, 'index']);
+    Route::get('/operation-types', [OperationTypeController::class, 'index']);
+    Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
+    Route::get('event-codes', [EventCodeController::class, 'index'])->withoutMiddleware('auth:api');
+
+
+    //// Rutas para los tipos de comprobantes (numbering_range_document_types)
+    // Se utiliza solo GET, ya que se usa para obtener la lista de tipos.
+    Route::get('numbering_range_document_types', [NumberingRangeDocumentTypeController::class, 'index']);
+    Route::get('payment_forms', [PaymentFormController::class, 'index']);
+    Route::get('payment_forms/{id}', [PaymentFormController::class, 'show']); // opcional si deseas ver 1
+
+    //creditos
+    Route::apiResource('order-credits', OrderCreditController::class)->except(['update']);
+    Route::post('order-credits/{credit}/payments', [OrderCreditController::class, 'addPayment']);
+    Route::post('/orders/payCreditByClient', [OrderController::class, 'payCreditByClient']);
+
+    // Rutas para los comprobantes (numbering_ranges)
+    // Permiten listar, crear y actualizar los comprobantes.
+    Route::get('numbering_ranges', [NumberingRangeController::class, 'index']);
+    Route::get('/numbering-ranges/credit-notes', [NumberingRangeController::class, 'creditNotes']);
+    Route::post('numbering_ranges', [NumberingRangeController::class, 'store'])->withoutMiddleware('auth:api');
+    Route::put('numbering_ranges/{id}', [NumberingRangeController::class, 'update'])->withoutMiddleware('auth:api');
+    Route::get('numbering_ranges/{id}', [NumberingRangeController::class, 'show'])->withoutMiddleware('auth:api');
+
+    Route::get('vouchers', [VoucherController::class, 'index']);
+    Route::get('vouchers/{id}', [VoucherController::class, 'show']);
+    Route::post('vouchers', [VoucherController::class, 'store']);
+    Route::put('vouchers/{id}', [VoucherController::class, 'update']);
+    Route::delete('vouchers/{id}', [VoucherController::class, 'destroy']);
+
+    Route::get('adjustment-note-reasons', [AdjustmentNoteReasonController::class, 'index'])->withoutMiddleware('auth:api');
+    Route::get('adjustment-note-reasons/{id}', [AdjustmentNoteReasonController::class, 'show'])->withoutMiddleware('auth:api');
+
+    // Opcional: Si necesitas una ruta para mostrar un comprobante en particular.
+    Route::get('numbering_range_document_types', [NumberingRangeDocumentTypeController::class, 'index'])
+    ->withoutMiddleware('auth:api');
+
+    Route::get('numbering_ranges', [NumberingRangeController::class, 'index'])
+    ->withoutMiddleware('auth:api');
+    Route::post('/factustest', [FactusTestController::class, 'test'])->withoutMiddleware('auth:api');
+    Route::post('/factustest2', [FactusTestController::class, 'testDirect'])->withoutMiddleware('auth:api');
+    //notas credito 
+    Route::post('/credit-notes/validate', [CreditNoteController::class, 'store'])->withoutMiddleware('auth:api');
+    Route::get('credit-notes/numbering-ranges', [CreditNoteController::class, 'getNumberingRanges'])->withoutMiddleware('auth:api');
+    Route::get('credit-notes/adjustment-note-reasons', [CreditNoteController::class, 'getAdjustmentNoteReasons'])->withoutMiddleware('auth:api');
+    Route::get('credit-notes/operation-types', [CreditNoteController::class, 'getOperationTypes'])->withoutMiddleware('auth:api');
+
+    //documento soporte
+    
+    Route::apiResource('support-document', SupportDocumentController::class)->withoutMiddleware('auth:api');
+    Route::post('adjustment-notes', [AdjustmentNoteController::class, 'store']);
+
+    //caja
+    Route::get  ('cash-reconciliations/open',          [CashReconciliationController::class, 'open']);
+    Route::post ('cash-reconciliations',               [CashReconciliationController::class, 'store']);
+    Route::put  ('cash-reconciliations/{id}/close',    [CashReconciliationController::class, 'close']);
+    Route::get  ('cash-reconciliations/closed',        [CashReconciliationController::class, 'closed']);
+    Route::get  ('cash-reconciliations/session-report',[CashReconciliationController::class, 'sessionReport']);
+    Route::get('cash-reconciliations/orders', [CashReconciliationController::class,'orders']);
+
+    // Observaciones de productos
+    Route::get('products/{product}/observations', [\App\Http\Controllers\ProductObservationController::class, 'index']);
+    Route::post('products/{product}/observations', [\App\Http\Controllers\ProductObservationController::class, 'store']);
+    Route::delete('products/observations/{observation}', [\App\Http\Controllers\ProductObservationController::class, 'destroy']);
+
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 
 });

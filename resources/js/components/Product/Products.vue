@@ -176,6 +176,17 @@
                   </button>
                 </td>
                 <td v-if="$root.validatePermission('product.update')">
+<<<<<<< HEAD
+=======
+                  <!-- Botón Observaciones -->
+                  <button
+                    class="btn btn-outline-info mr-1"
+                    @click="$refs.obsModal.open(product.id)"
+                  >
+                    <i class="bi bi-chat-dots"></i>
+                  </button>
+                  <!-- Botón Editar -->
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
                   <button class="btn btn-outline-success" @click="ShowData(product)">
                     <i class="bi bi-pen"></i>
                   </button>
@@ -195,21 +206,36 @@
         </section>
       </div>
     </div>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
     <!-- Modal para creación y edición de productos -->
     <create-edit-product
       ref="CreateEditProduct"
       @list-products="listProducts(1)"
     />
     <import-products @list-products="listProducts(1)" />
+
+    <!-- Modal Observaciones -->
+    <product-observations ref="obsModal" />
   </div>
 </template>
 
 <script>
 import CreateEditProduct from "./CreateEditProduct.vue";
 import ImportProducts from "./ImportProducts.vue";
+<<<<<<< HEAD
+=======
+import ProductObservations from "./ProductObservations.vue";
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 
 export default {
-  components: { CreateEditProduct, ImportProducts },
+  components: {
+    CreateEditProduct,
+    ImportProducts,
+    ProductObservations
+  },
   data() {
     return {
       search_product: "",

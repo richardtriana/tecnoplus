@@ -1,19 +1,30 @@
 <?php
 
 namespace App\Http\Controllers;
+<<<<<<< HEAD
 use App\Models\OrderCredit;
 use App\Models\PaymentCredit;
+=======
+
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 use App\Models\Box;
 use App\Models\Configuration;
 use App\Models\DetailOrder;
 use App\Models\Order;
+<<<<<<< HEAD
+=======
+use App\Models\PaymentCredit;
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 use App\Models\Product;
 use App\Models\Table;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+<<<<<<< HEAD
 use Illuminate\Support\Facades\Log;
+=======
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
@@ -35,7 +46,10 @@ class OrderController extends Controller
         $this->middleware('can:order.update')->only('update');
         $this->middleware('can:order.delete')->only('destroy');
     }
+<<<<<<< HEAD
   
+=======
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 
     /**
      * Display a listing of the resource.
@@ -121,6 +135,7 @@ class OrderController extends Controller
         //
     }
 
+<<<<<<< HEAD
     public function store(Request $request)
     {
         $user_id     = $request->filled('id_waiter') ? $request->id_waiter : Auth::user()->id;
@@ -272,6 +287,329 @@ class OrderController extends Controller
     }
     
 
+=======
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+public function store(Request $request)
+{
+    $user_id = $request->filled('id_waiter') ? $request->id_waiter : Auth::user()->id;
+    $box = Box::find($request->box_id);
+    $bill_number = $this->generateBillNumber($request);
+
+    $order = new Order;
+    $order->client_id = $request->id_client;
+    $order->user_id = $user_id;
+    $order->table_id = $request->table_id ?? null;
+    $order->no_invoice = $bill_number;
+    $order->total_paid = $request->total_tax_inc;
+    $order->total_iva_inc = $request->total_tax_inc;
+    $order->total_iva_exc = $request->total_tax_exc;
+    $order->total_discount = $request->total_discount;
+    $order->total_cost_price_tax_inc = $request->total_cost_price_tax_inc ?? 0.0;
+    $order->observations = $request->observations;
+    $order->payment_methods = $request->payment_methods;
+    $order->box_id = $box->id;
+    $order->bill_number = $bill_number;
+    $order->proccess = isset($request->proccess) ? $request->proccess : false;
+
+    // Nuevos campos para Factus
+    $order->reference_code = $request->reference_code;
+    $order->numbering_range_id = $request->numbering_range_id;
+    $order->document_code = $request->document_code;
+    $order->cufe = $request->cufe;
+    $order->qr = $request->qr;
+    $order->validated = $request->validated;
+    $order->qr_image = $request->qr_image;
+    $order->payment_method_code = $request->payment_method_code;
+    $order->payment_form_id = $request->payment_form_id;
+    $order->payment_method_id = $request->payment_method_id;
+    $order->factus_response = $request->factus_response;
+
+    // Si el estado es 4, se transforma a 2 (facturación)
+    if ($request->state == 4) {
+        $order->state = 2;
+        $order->invoiced_by = $user_id;
+        $order->payment_date = $request->payment_date ? $request->payment_date : date('Y-m-d h:i:s');
+    } elseif ($request->state == 6 || $request->state == 5) {
+        $order->state = 5;
+    } else {
+        $order->state = $request->state;
+        if ($request->state == 2) {
+            $order->invoiced_by = $user_id;
+            $order->payment_date = $request->payment_date ? $request->payment_date : date('Y-m-d h:i:s');
+        }
+    }
+    $order->save();
+
+    if ($order->state == 5 && $request->pay_payment > 0) {
+        PaymentCredit::create([
+            'user_id'  => $user_id,
+            'order_id' => $order->id,
+            'pay'      => $request->pay_payment
+        ]);
+    }
+
+    // Procesar cada producto del pedido
+    foreach ($request->productsOrder as $details_order) {
+        $new_detail = new DetailOrderController;
+        $new_detail = $new_detail->store($details_order, $order->id);
+
+        $product_controller = new ProductController;
+        if ($order->state == 2) {
+            $product = Product::find($details_order['product_id']);
+            if ($product->stock == 1) {
+                if ($product->type == 3) {
+                    $product_controller->searchKitById(1, $details_order['product_id'], $details_order['quantity'], 1);
+                } else {
+                    $product_controller->updateStockByBarcode(1, $details_order['barcode'], $details_order['quantity']);
+                }
+            }
+            if ($product->uses_portions && isset($details_order['portions']) && count($details_order['portions']) > 0) {
+                foreach ($details_order['portions'] as $portion) {
+                    $descQty = floatval($portion['quantity']) * floatval($details_order['quantity']);
+                    $product_controller->updatePortionStock(1, $details_order['product_id'], $portion['portion_id'], $descQty);
+                }
+            }
+        }
+    }
+
+    // Enviar factura a Factus si el estado es 2 o 4 (facturación)
+    if (in_array($request->state, [2, 4])) {
+        try {
+            $factusResponse = $this->factusInvoiceService->sendInvoiceToFactus($order);
+            $order->factus_response = json_encode($factusResponse);
+
+            if (isset($factusResponse['data'])) {
+                $data = $factusResponse['data'];
+                if (isset($data['bill'])) {
+                    $bill = $data['bill'];
+                    $order->factus_bill_id     = $bill['id']     ?? null;
+                    $order->factus_status      = $bill['status'] ?? null;
+                    $order->factus_bill_number = $bill['number'] ?? null;
+                    if (isset($bill['validated'])) {
+                        $order->factus_validated = Carbon::createFromFormat('d-m-Y h:i:s A', $bill['validated']);
+                    }
+                    $order->cufe     = $bill['cufe']     ?? null;
+                    $order->qr       = $bill['qr']       ?? null;
+                    $order->qr_image = $bill['qr_image'] ?? null;
+
+                    // Nuevo: status_dian según el campo numérico 'status' del bill
+                    $order->status_dian = (int) ($bill['status'] ?? 0);
+                }
+            }
+            $order->save();
+        } catch (\Exception $e) {
+            // Se omiten los logs en esta versión
+        }
+    }
+
+    try {
+        $print = new PrintOrderController();
+        if ($request->state == 4 || $request->state == 6) {
+            $print->printTicket($order->id, $request->cash, $request->change);
+        } elseif ($request->state == 1) {
+            $print->printTicketRecently($order->id);
+        } else {
+            $print->openBox($order->id);
+        }
+    } catch (\Throwable $th) {
+        // Se omiten los logs
+    }
+
+    return response()->json($order->id);
+}
+
+
+    public function show(Order $order)
+    {
+        $details = Order::find($order->id);
+        return [
+            'order_information' => $details,
+            'order_details' => $details->detailOrders()->get(),
+            'user' => $details->user()->first()
+        ];
+    }
+
+    public function edit(Order $order)
+    {
+        //
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user_id = Auth::user()->id;
+        $box = Box::find($request->box_id);
+        $bill_number = $this->generateBillNumber($request);
+        $order = Order::find($id);
+        $table = $order->table();
+
+        $array1 = $order->detailOrders()->select('product_id', 'quantity')->get();
+        $updatedProducts = collect($request->productsOrder);
+        $newProducts = $updatedProducts->map(function ($item) use ($array1) {
+            foreach ($array1 as $op) {
+                if ($op['product_id'] == $item['product_id']) {
+                    $item['quantity'] = $item['quantity'] - $op['quantity'];
+                }
+            }
+            return $item;
+        });
+
+        $order->client_id = $request->id_client;
+        $order->table_id = $request->table_id ?? null;
+        $order->total_paid = $request->total_tax_inc;
+        $order->total_iva_inc = $request->total_tax_inc;
+        $order->total_iva_exc = $request->total_tax_exc;
+        $order->total_cost_price_tax_inc = $request->total_cost_price_tax_inc ?? 0.0;
+        $order->total_discount = $request->total_discount;
+        $order->observations = $request->observations;
+        $order->proccess = isset($request->proccess) ? $request->proccess : false;
+        $order->payment_methods = $request->payment_methods;
+
+        // Nuevos campos para Factus
+        $order->reference_code = $request->reference_code;
+        $order->numbering_range_id = $request->numbering_range_id;
+        $order->document_code = $request->document_code;
+        $order->cufe = $request->cufe;
+        $order->qr = $request->qr;
+        $order->validated = $request->validated;
+        $order->qr_image = $request->qr_image;
+        $order->payment_method_code = $request->payment_method_code;
+        $order->payment_form_id = $request->payment_form_id;
+        $order->payment_method_id = $request->payment_method_id;
+        $order->factus_response = $request->factus_response;
+
+        // Si la orden era de tipo "Pedido" (estado 1) y se pasa a "Facturado" (estado 2 o 4),
+        // se actualiza el bill number generando uno nuevo.
+        if ($order->state == 1 && in_array($request->state, [2, 4])) {
+            $order->bill_number = $bill_number;
+        }
+        
+        // Mantenimiento de la lógica existente para otros casos
+        if ($order->state == 3) {
+            $order->bill_number = $bill_number;
+        }
+
+        if ($request->state == 4) {
+            $order->state = 2;
+            $order->invoiced_by = $user_id;
+            $order->payment_date = $request->payment_date ? $request->payment_date : date('Y-m-d h:i:s');
+        } elseif ($request->state == 6 || $request->state == 5) {
+            $order->state = 5;
+        } else {
+            $order->state = $request->state;
+            if ($request->state == 2) {
+                $order->payment_date = $request->payment_date ? $request->payment_date : date('Y-m-d h:i:s');
+            }
+        }
+
+        $order->created_at = date('Y-m-d H:i:s');
+        $order->update();
+
+        if ($order->state == 5 && $request->pay_payment > 0) {
+            $paymentCredit = $order->paymentCredits->first();
+            if ($paymentCredit) {
+                $paymentCredit->pay = $request->pay_payment;
+                $paymentCredit->update();
+            } else {
+                PaymentCredit::create([
+                    'user_id' => $user_id,
+                    'order_id' => $order->id,
+                    'pay' => $request->pay_payment
+                ]);
+            }
+        }
+
+        foreach ($request->productsOrder as $details_order) {
+            DetailOrder::updateOrCreate(
+                [
+                    'order_id' => $id,
+                    'product_id' => $details_order['product_id'],
+                    'barcode' => $details_order['barcode']
+                ],
+                [
+                    'discount_percentage' => $details_order['discount_percentage'],
+                    'discount_price' => $details_order['discount_price'],
+                    'price_tax_exc' => $details_order['price_tax_exc'],
+                    'price_tax_inc' => $details_order['price_tax_inc'],
+                    'price_tax_inc_total' => $details_order['price_tax_inc_total'],
+                    'cost_price_tax_inc' => $details_order['cost_price_tax_inc'],
+                    'cost_price_tax_inc_total' => $details_order['cost_price_tax_inc_total'],
+                    'quantity' => $details_order['quantity'],
+                    'product' => $details_order['product'],
+                    'tax_rate' => $details_order['tax_rate'] ?? null
+                ]
+            );
+        }
+
+        // Si el nuevo estado es 2 (facturación) se procesa el descuento de productos y porciones.
+        if ($order->state == 2) {
+            foreach ($request->productsOrder as $details_order) {
+                $product_controller = new ProductController;
+                $product = Product::find($details_order['product_id']);
+
+                // Descontar stock del producto principal solo si "stock" es 1
+                if ($product->stock == 1) {
+                    if ($product->type == 3) {
+                        $product_controller->searchKitById(1, $details_order['product_id'], $details_order['quantity'], 1);
+                    } else {
+                        $product_controller->updateStockByBarcode(1, $details_order['barcode'], $details_order['quantity']);
+                    }
+                }
+
+                // Descontar stock de las porciones si el producto usa porciones,
+                // sin importar el valor de "stock" en el producto principal.
+                if ($product->uses_portions && isset($details_order['portions']) && count($details_order['portions']) > 0) {
+                    foreach ($details_order['portions'] as $portion) {
+                        $descQty = floatval($portion['quantity']) * floatval($details_order['quantity']);
+                        $product_controller->updatePortionStock(1, $details_order['product_id'], $portion['portion_id'], $descQty);
+
+                    }
+                }
+            }
+        }
+
+        // Enviar la factura a Factus si el estado es 2 o 4.
+        if (in_array($request->state, [2, 4])) {
+            try {
+                $factusResponse = $this->factusInvoiceService->sendInvoiceToFactus($order);
+                $order->factus_response = json_encode($factusResponse);
+                if (isset($factusResponse['data'])) {
+                    $data = $factusResponse['data'];
+                    if (isset($data['bill'])) {
+                        $bill = $data['bill'];
+                        $order->factus_bill_id = $bill['id'] ?? null;
+                        $order->factus_status = $bill['status'] ?? null;
+                        $order->factus_bill_number = $bill['number'] ?? null;
+                        if (isset($bill['validated'])) {
+                            $order->factus_validated = Carbon::createFromFormat('d-m-Y h:i:s A', $bill['validated']);
+                        }
+                        $order->cufe = $bill['cufe'] ?? null;
+                        $order->qr = $bill['qr'] ?? null;
+                        $order->qr_image = $bill['qr_image'] ?? null;
+                    }
+                }
+                $order->save();
+            } catch (\Exception $e) {
+                // Sin logs
+            }
+        }
+
+        $print = new PrintOrderController();
+        if ($request->state == 4 || $request->state == 6) {
+            $print->printTicket($order->id, $request->cash, $request->change);
+        } elseif ($request->state == 1) {
+            $print->printTicketRecently($order->id, $newProducts);
+        } else {
+            $print->openBox($order->id);
+        }
+
+        return response()->json($order);
+    }
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 
     public function destroy(Order $order)
     {
@@ -572,6 +910,7 @@ class OrderController extends Controller
         ]);
     }
 
+<<<<<<< HEAD
 
 
     public function show(Order $order)
@@ -674,6 +1013,86 @@ class OrderController extends Controller
             'code'    => 200,
             'message' => 'Abonos registrados correctamente.',
         ], 200);
+=======
+    public function payCreditByClient(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'id_client' => 'required|integer|exists:clients,id',
+            'pay_payment' => 'required|numeric|min:1'
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'Validación de datos incorrecta',
+                'errors' => $validate->errors(),
+            ]);
+        }
+        $orders = DB::table('orders as o')
+            ->leftJoin('payment_credits as pc', 'pc.order_id', '=', 'o.id')
+            ->select('o.id', 'o.total_paid', 'o.payment_methods', DB::raw('SUM(pc.pay) as paid_payment'))
+            ->where('o.client_id', $request->id_client)
+            ->where('o.state', 5)
+            ->groupByRaw('id, total_paid')
+            ->orderBy('o.created_at')
+            ->get();
+
+        if ($request->pay_payment > $orders->sum('total_paid')) {
+            return response()->json([
+                'status' => 'error',
+                'code' => 400,
+                'message' => 'Validación de pago incorrecta',
+            ]);
+        }
+
+        $user_id = Auth::user()->id;
+
+        foreach ($orders as $order) {
+            if ($request->pay_payment > 0) {
+
+                $payment_methods = (object)['pay_payment' => 0, 'cash' => 0];
+                $order->payment_methods = $order->payment_methods ? json_decode($order->payment_methods) : $payment_methods;
+                $pending = $order->total_paid - $order->paid_payment;
+
+                if ($pending > $request->pay_payment) {
+                    PaymentCredit::create([
+                        'user_id' => $user_id,
+                        'order_id' => $order->id,
+                        'pay' => $request->pay_payment
+                    ]);
+
+                    Order::where('id', $order->id)->update([
+                        'payment_methods->pay_payment' => $order->payment_methods->pay_payment += $request->pay_payment,
+                        'payment_methods->cash' => $order->payment_methods->cash += $request->pay_payment
+                    ]);
+                    echo $order->id . " ";
+                    echo 'pago total';
+                    $request->pay_payment = 0;
+                } else {
+                    PaymentCredit::create([
+                        'user_id' => $user_id,
+                        'order_id' => $order->id,
+                        'pay' => $pending
+                    ]);
+                    echo 'abono';
+                    Order::where('id', $order->id)->update([
+                        'state' => 2,
+                        'payment_methods->pay_payment' => $order->payment_methods->pay_payment += $pending,
+                        'payment_methods->cash' => $order->payment_methods->cash += $pending
+                    ]);
+
+                    $request->pay_payment = $request->pay_payment - $pending;
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'code' => 200,
+            'message' => 'Abonos realizados correctamente',
+        ]);
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
     }
 
     public function ordersForKitchen(Request $request)
@@ -780,6 +1199,7 @@ class OrderController extends Controller
             'order_details' => $order->detailOrders
         ]);
     }
+<<<<<<< HEAD
 
 /**
  * Reenvía la factura a DIAN (Factus) creando una nueva.
@@ -1044,4 +1464,6 @@ public function resendDian($id)
 
         return response()->json($result);
     }
+=======
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 }

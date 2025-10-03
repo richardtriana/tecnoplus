@@ -105,4 +105,12 @@ class Product extends Model
     {
         return $this->hasMany(ProductPortion::class, 'product_id')->with('portion');
     }
+<<<<<<< HEAD
+=======
+
+    public function observations()
+    {
+        return $this->hasMany(\App\Models\ProductObservation::class, 'product_id');
+    }
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 }

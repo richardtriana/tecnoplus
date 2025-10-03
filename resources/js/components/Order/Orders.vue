@@ -12,7 +12,11 @@
 		  >
 			<i class="bi bi-plus-circle me-1"></i> Nueva orden
 		  </router-link>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 		  <!-- Botón Nota Crédito CON Factura: se habilita solo si hay una orden seleccionada en estado 2 o 5 -->
 		  <router-link
 			v-if="selectedOrder && (selectedOrder.state == 2 || selectedOrder.state == 5)"
@@ -38,7 +42,11 @@
 		  </button>
 		</div>
 	  </header>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 	  <!-- SECCIÓN DE FILTROS -->
 	  <section class="card shadow-sm mb-4">
 		<div class="card-body">
@@ -130,7 +138,11 @@
 		  </div>
 		</div>
 	  </section>
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 	  <!-- TABLA DE ÓRDENES -->
 	  <section class="card shadow-sm">
 		<div class="card-body p-0">
@@ -166,7 +178,15 @@
 				>
 				  <td class="text-center">{{ o.id }}</td>
 				  <td class="text-center">
+<<<<<<< HEAD
 					<span class="pill-badge">{{ o.bill_number }}</span>
+=======
+					<span
+					  :class="o.is_reservation ? 'pill-badge-reserva' : 'pill-badge'"
+					>
+					  {{ o.bill_number }}
+					</span>
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 				  </td>
 				  <td class="text-center">
 					{{ o.client
@@ -238,16 +258,25 @@
 					  <b>Facturación:</b> {{ o.payment_date | moment("DD-MM-YYYY h:mm:ss a") }}
 					</span>
 				  </td>
+<<<<<<< HEAD
 				  <td v-if="$root.validatePermission('order.update')">
 					<router-link
 					  v-if="o.state != 2 && o.state != 0"
+=======
+				  <td v-if="$root.validatePermission('order.update') && o.status_dian === 0">
+					<router-link
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 					  class="btn btn-info btn-sm"
 					  :to="{ name: 'create-edit-order', params: { order_id: o.id } }"
 					>
 					  <i class="bi bi-pencil-square me-1"></i> pagar - editar
 					</router-link>
 				  </td>
+<<<<<<< HEAD
 				  <td v-if="$root.validatePermission('order.delete')">
+=======
+				  <td v-if="$root.validatePermission('order.delete') && o.status_dian === 0">
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 					<button class="btn btn-danger btn-sm" @click.stop="deleteOrder(o.id)">
 					  <i class="bi bi-trash"></i>
 					</button>
@@ -276,8 +305,13 @@
 		  </pagination>
 		</div>
 	  </section>
+<<<<<<< HEAD
   
 	  <!-- MODAL PARA DETALLES DE ORDEN -->
+=======
+
+	  <!-- MODAL PARA DETALLES DE ORDEN / RESERVA -->
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 	  <div
 		class="modal fade"
 		:class="{ show: showModal }"
@@ -287,6 +321,7 @@
 		aria-hidden="true"
 		v-if="showModal"
 	  >
+<<<<<<< HEAD
 		<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
 		  <div class="modal-content">
 			<div class="modal-header">
@@ -294,6 +329,25 @@
 			  <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @click="closeModal"></button>
 			</div>
 			<div class="modal-body">
+=======
+		<div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" role="document">
+		  <div class="modal-content">
+			<div class="modal-header">
+			  <h5 class="modal-title">
+				{{ selectedOrder && selectedOrder.is_reservation ? 'Detalle de la Reserva' : 'Detalle de la Orden' }}
+				<span v-if="!selectedOrder.is_reservation"> {{ selectedOrderId }}</span>
+			  </h5>
+			  <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" @click="closeModal"></button>
+			</div>
+			<div class="modal-body">
+			  <template v-if="selectedOrder && selectedOrder.is_reservation">
+				<div class="reservation-info text-center mb-4">
+				  <h4 class="mb-2">RESERVA</h4>
+				  <p class="mb-1"><strong>Fecha:</strong> {{ selectedOrder.reservation_at | moment("DD-MM-YYYY") }}</p>
+				  <p class="mb-0"><strong>Hora:</strong> {{ selectedOrder.reservation_at | moment("HH:mm") }}</p>
+				</div>
+			  </template>
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 			  <DetailsOrder :order_id="selectedOrderId" />
 			</div>
 			<div class="modal-footer">
@@ -347,7 +401,11 @@ export default {
 		  from: '',
 		  to: '',
 		  user_id: '--Seleccionar--',
+<<<<<<< HEAD
 		  status: 1,              // default "Pedido"
+=======
+		  status: 1,
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 		  status_dian: '',
 		  nro_results: 15
 		},
@@ -453,11 +511,19 @@ export default {
 	  },
 	  openModal(id) {
 		this.selectedOrderId = id
+<<<<<<< HEAD
+=======
+		this.selectedOrder = this.OrderList.data.find(o => o.id === id)
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 		this.showModal = true
 	  },
 	  closeModal() {
 		this.showModal = false
 		this.selectedOrderId = null
+<<<<<<< HEAD
+=======
+		this.selectedOrder = null
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 	  },
 	  selectOrder(o) {
 		this.selectedOrder = o
@@ -481,6 +547,17 @@ export default {
 	color: #fff;
 	font-weight: 600;
 }
+<<<<<<< HEAD
+=======
+.pill-badge-reserva {
+	display: inline-block;
+	padding: 0.25rem 0.75rem;
+	border-radius: 50px;
+	background-color: #6f42c1; /* morado */
+	color: #fff;
+	font-weight: 600;
+}
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 .my-custom-table tbody tr:hover {
 	background-color: #f8f9fa;
 }
@@ -517,4 +594,16 @@ export default {
 	background-color: #863d09;
 	border-color: #863d09;
 }
+<<<<<<< HEAD
+=======
+/* Info de reserva en modal */
+.reservation-info h4 {
+	font-size: 2rem;
+	font-weight: bold;
+}
+.reservation-info p {
+	font-size: 1.2rem;
+	margin: 0.25rem 0;
+}
+>>>>>>> 0ed4468 (factuara electronica + reserva + caja)
 </style>
